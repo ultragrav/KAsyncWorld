@@ -22,6 +22,14 @@ class SimpleBlockPalette(private val globalPalette: BlockPalette? = null) : Bloc
         return idToBlockDataMap[id] ?: throw IllegalArgumentException("No BlockData found for ID: $id")
     }
 
+    override fun isMapped(block: BlockData): Boolean {
+        return blockDataToIdMap.containsKey(block)
+    }
+
+    override fun isMapped(id: Int): Boolean {
+        return idToBlockDataMap.containsKey(id)
+    }
+
     override fun globalPalette(): BlockPalette = globalPalette ?: this
 
     override fun localToGlobal(): Map<Int, Int> {

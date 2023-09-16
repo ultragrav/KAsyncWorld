@@ -6,6 +6,8 @@ interface BlockPalette {
     val size: Int
     fun getId(block: BlockData): Int
     fun getState(id: Int): BlockData
+    fun isMapped(block: BlockData): Boolean
+    fun isMapped(id: Int): Boolean
     fun globalPalette(): BlockPalette
     fun localToGlobal(): Map<Int, Int>
 }
