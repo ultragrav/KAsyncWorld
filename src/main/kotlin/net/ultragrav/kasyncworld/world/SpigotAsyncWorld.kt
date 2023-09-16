@@ -9,7 +9,7 @@ class SpigotAsyncWorld internal constructor(val world: World) {
         world.setBlockData(0, 0, 0, Material.ACACIA_STAIRS.createBlockData())
     }
 
-    val chunkMap = mutableMapOf<Long, ChunkSnap>()
+    val chunkMap = mutableMapOf<Long, AsyncChunk>()
 
     fun getChunk(x: Int, z: Int) {
     }
