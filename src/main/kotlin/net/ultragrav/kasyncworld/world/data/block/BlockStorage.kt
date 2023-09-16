@@ -1,6 +1,5 @@
 package net.ultragrav.kasyncworld.world.data.block
 
-import org.bukkit.block.BlockState
 import org.bukkit.block.data.BlockData
 
 class BlockStorage(
