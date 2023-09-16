@@ -1,4 +1,4 @@
-package net.ultragrav.kasyncworld.world.data.bit
+package net.ultragrav.kasyncworld.world.block.bit
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test

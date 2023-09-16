@@ -1,4 +1,4 @@
-package net.ultragrav.kasyncworld.world.data.palette
+package net.ultragrav.kasyncworld.world.block.palette
 
 import org.bukkit.block.data.BlockData
 

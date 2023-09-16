@@ -1,7 +1,8 @@
-package net.ultragrav.kasyncworld.world.data.block
+package net.ultragrav.kasyncworld.world.block.storage
 
-import net.ultragrav.kasyncworld.world.data.bit.NumberStorage
-import net.ultragrav.kasyncworld.world.data.palette.BlockPalette
+import net.ultragrav.kasyncworld.world.block.bit.NumberStorage
+import net.ultragrav.kasyncworld.world.block.iteration.IterationStrategy
+import net.ultragrav.kasyncworld.world.block.palette.BlockPalette
 import org.bukkit.block.data.BlockData
 
 interface BlockStorageConfig {

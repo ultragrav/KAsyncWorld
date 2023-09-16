@@ -1,7 +1,4 @@
-package net.ultragrav.kasyncworld.world.data.block.iteration
-
-import net.ultragrav.kasyncworld.world.data.bit.NumberStorage
-import net.ultragrav.kasyncworld.world.data.block.IterationStrategy
+package net.ultragrav.kasyncworld.world.block.iteration
 
 class NormalIterationStrategy(override val size: Int) : IterationStrategy {
 

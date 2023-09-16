@@ -1,4 +1,4 @@
-package net.ultragrav.kasyncworld.world.data.block
+package net.ultragrav.kasyncworld.world.block.block
 
 import org.bukkit.Location
 import org.bukkit.Material

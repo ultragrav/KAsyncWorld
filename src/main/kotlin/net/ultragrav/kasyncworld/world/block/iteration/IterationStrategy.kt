@@ -1,6 +1,4 @@
-package net.ultragrav.kasyncworld.world.data.block
-
-import net.ultragrav.kasyncworld.world.data.bit.NumberStorage
+package net.ultragrav.kasyncworld.world.block.iteration
 
 interface IterationStrategy : Iterable<Int> {
 
