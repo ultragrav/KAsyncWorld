@@ -5,7 +5,7 @@ plugins {
     id("io.papermc.paperweight.userdev") version "1.5.0"
 }
 
-group = "net.ultragrav.kasyncworld"
+group = "net.ultragrav"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -15,9 +15,12 @@ repositories {
 }
 
 dependencies {
+    testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
     paperweightDevelopmentBundle("io.papermc.paper:dev-bundle:1.20.1-R0.1-SNAPSHOT")
 
     testImplementation(kotlin("test"))
+    api("net.ultragrav:McNBT:1.0.0")
+    implementation("net.ultragrav:KSerializer:1.1.0")
 }
 
 tasks.test {
