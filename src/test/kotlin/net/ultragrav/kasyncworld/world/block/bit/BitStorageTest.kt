@@ -1,5 +1,6 @@
 package net.ultragrav.kasyncworld.world.block.bit
 
+import net.ultragrav.kasyncworld.world.chunk.block.bit.BitStorage
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 

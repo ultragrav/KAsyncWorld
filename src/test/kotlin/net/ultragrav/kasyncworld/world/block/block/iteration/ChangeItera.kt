@@ -1,7 +1,7 @@
 package net.ultragrav.kasyncworld.world.block.block.iteration
 
-import net.ultragrav.kasyncworld.world.block.bit.BitStorage
-import net.ultragrav.kasyncworld.world.block.iteration.ChangeIterationStrategy
+import net.ultragrav.kasyncworld.world.chunk.block.bit.BitStorage
+import net.ultragrav.kasyncworld.world.chunk.block.iteration.ChangeIterationStrategy
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 

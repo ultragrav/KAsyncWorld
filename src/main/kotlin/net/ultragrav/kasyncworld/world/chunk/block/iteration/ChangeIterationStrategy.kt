@@ -1,7 +1,7 @@
-package net.ultragrav.kasyncworld.world.block.iteration
+package net.ultragrav.kasyncworld.world.chunk.block.iteration
 
 import net.ultragrav.kasyncworld.ceilLog2
-import net.ultragrav.kasyncworld.world.block.bit.BitStorage
+import net.ultragrav.kasyncworld.world.chunk.block.bit.BitStorage
 
 class ChangeIterationStrategy(override  val size: Int) : IterationStrategy {
 

@@ -1,4 +1,4 @@
-package net.ultragrav.kasyncworld.world.block.bit
+package net.ultragrav.kasyncworld.world.chunk.block.bit
 
 interface NumberStorage {
 

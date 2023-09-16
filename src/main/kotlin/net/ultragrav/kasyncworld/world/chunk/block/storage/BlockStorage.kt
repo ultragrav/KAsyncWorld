@@ -1,4 +1,4 @@
-package net.ultragrav.kasyncworld.world.block.storage
+package net.ultragrav.kasyncworld.world.chunk.block.storage
 
 import org.bukkit.block.data.BlockData
 

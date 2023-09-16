@@ -1,13 +1,13 @@
 package net.ultragrav.kasyncworld.world.block.block
 
-import net.ultragrav.kasyncworld.world.block.storage.BlockStorage
-import net.ultragrav.kasyncworld.world.block.storage.BlockStorageConfig
-import net.ultragrav.kasyncworld.world.block.iteration.IterationStrategy
-import net.ultragrav.kasyncworld.world.block.bit.BitStorage
-import net.ultragrav.kasyncworld.world.block.bit.NumberStorage
-import net.ultragrav.kasyncworld.world.block.iteration.ChangeIterationStrategy
-import net.ultragrav.kasyncworld.world.block.palette.BlockPalette
-import net.ultragrav.kasyncworld.world.block.palette.SimpleBlockPalette
+import net.ultragrav.kasyncworld.world.chunk.block.storage.BlockStorage
+import net.ultragrav.kasyncworld.world.chunk.block.storage.BlockStorageConfig
+import net.ultragrav.kasyncworld.world.chunk.block.iteration.IterationStrategy
+import net.ultragrav.kasyncworld.world.chunk.block.bit.BitStorage
+import net.ultragrav.kasyncworld.world.chunk.block.bit.NumberStorage
+import net.ultragrav.kasyncworld.world.chunk.block.iteration.ChangeIterationStrategy
+import net.ultragrav.kasyncworld.world.chunk.block.palette.BlockPalette
+import net.ultragrav.kasyncworld.world.chunk.block.palette.SimpleBlockPalette
 import org.bukkit.Material
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals

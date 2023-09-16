@@ -1,4 +1,4 @@
-package net.ultragrav.kasyncworld.world.block.iteration
+package net.ultragrav.kasyncworld.world.chunk.block.iteration
 
 interface IterationStrategy : Iterable<Int> {
 

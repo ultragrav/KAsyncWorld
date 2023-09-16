@@ -1,4 +1,4 @@
-package net.ultragrav.kasyncworld.world.block.bit
+package net.ultragrav.kasyncworld.world.chunk.block.bit
 
 class BitStorage(override val bits: Int, override val size: Int) : NumberStorage {
 

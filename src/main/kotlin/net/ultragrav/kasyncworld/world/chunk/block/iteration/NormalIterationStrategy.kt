@@ -1,4 +1,4 @@
-package net.ultragrav.kasyncworld.world.block.iteration
+package net.ultragrav.kasyncworld.world.chunk.block.iteration
 
 class NormalIterationStrategy(override val size: Int) : IterationStrategy {
 

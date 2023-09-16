@@ -1,6 +1,6 @@
 package net.ultragrav.kasyncworld
 
-import net.ultragrav.kasyncworld.world.ChunkSnap
+import net.ultragrav.kasyncworld.world.AsyncChunk
 
-class ChunkMap<T : ChunkSnap> {
+class ChunkMap<T : AsyncChunk> {
 }
