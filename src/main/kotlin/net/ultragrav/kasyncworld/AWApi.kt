@@ -1,16 +1,17 @@
 package net.ultragrav.kasyncworld
 
+import net.ultragrav.kasyncworld.world.SpigotAsyncWorld
 import org.bukkit.World
 import org.bukkit.plugin.Plugin
 
 object AWApi {
-    private val worlds = mutableMapOf<String, AsyncWorld>()
+    private val worlds = mutableMapOf<String, SpigotAsyncWorld>()
 
     fun initialize(plugin: Plugin) {
 
     }
 
-    fun getWorld(world: World): AsyncWorld {
-        return worlds[world.name] ?: AsyncWorld(world).also { worlds[world.name] = it }
+    fun getWorld(world: World): SpigotAsyncWorld {
+        return worlds[world.name] ?: SpigotAsyncWorld(world).also { worlds[world.name] = it }
     }
 }
