@@ -2,7 +2,7 @@ package net.ultragrav.kasyncworld.world.chunk.block.palette
 
 import org.bukkit.block.data.BlockData
 
-class SimpleBlockPalette(private val globalPalette: BlockPalette? = null) : BlockPalette {
+class SimplePalette(private val globalPalette: Palette? = null) : Palette {
     private val blockDataToIdMap = mutableMapOf<BlockData, Int>()
     private val idToBlockDataMap = mutableMapOf<Int, BlockData>()
     private var currentId = 0
@@ -30,7 +30,7 @@ class SimpleBlockPalette(private val globalPalette: BlockPalette? = null) : Bloc
         return idToBlockDataMap.containsKey(id)
     }
 
-    override fun globalPalette(): BlockPalette = globalPalette ?: this
+    override fun globalPalette(): Palette = globalPalette ?: this
 
     override fun localToGlobal(): Map<Int, Int> {
         return idToBlockDataMap.mapValues { (_, blockData) -> globalPalette().getId(blockData) }

@@ -2,7 +2,7 @@ package net.ultragrav.kasyncworld.world.chunk.block.storage
 
 import org.bukkit.block.data.BlockData
 
-data class IndexedBlockState(
+data class Indexed<T>(
     val index: Int,
-    val block: BlockData
+    val subject: T
 )

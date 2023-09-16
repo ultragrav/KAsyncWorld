@@ -1,26 +1,26 @@
 package net.ultragrav.kasyncworld.world.block.block
 
-import net.ultragrav.kasyncworld.world.chunk.block.storage.BlockStorage
-import net.ultragrav.kasyncworld.world.chunk.block.storage.BlockStorageConfig
+import net.ultragrav.kasyncworld.world.chunk.block.storage.PalettedStorage
+import net.ultragrav.kasyncworld.world.chunk.block.storage.PalettedStorageConfig
 import net.ultragrav.kasyncworld.world.chunk.block.iteration.IterationStrategy
 import net.ultragrav.kasyncworld.world.chunk.block.bit.BitStorage
 import net.ultragrav.kasyncworld.world.chunk.block.bit.NumberStorage
 import net.ultragrav.kasyncworld.world.chunk.block.count.IntCounts
 import net.ultragrav.kasyncworld.world.chunk.block.count.TypeCounts
 import net.ultragrav.kasyncworld.world.chunk.block.iteration.ChangeIterationStrategy
-import net.ultragrav.kasyncworld.world.chunk.block.palette.BlockPalette
-import net.ultragrav.kasyncworld.world.chunk.block.palette.SimpleBlockPalette
+import net.ultragrav.kasyncworld.world.chunk.block.palette.Palette
+import net.ultragrav.kasyncworld.world.chunk.block.palette.SimplePalette
 import org.bukkit.Material
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
-class BlockStorageTest {
+class PalettedStorageTest {
 
     val AIR = EmptyBlockData(Material.AIR)
     val STONE = EmptyBlockData(Material.STONE)
 
-    private fun createStorage(): BlockStorage {
-        val config = object : BlockStorageConfig {
+    private fun createStorage(): PalettedStorage {
+        val config = object : PalettedStorageConfig {
             override val size = 4096
             override val defaultState = AIR
 
@@ -31,8 +31,8 @@ class BlockStorageTest {
                 return IntCounts(bits, size)
             }
 
-            override fun createPalette(localToGlobal: Map<Int, Int>): BlockPalette {
-                val palette = SimpleBlockPalette()
+            override fun createPalette(localToGlobal: Map<Int, Int>): Palette {
+                val palette = SimplePalette()
                 palette.getId(defaultState)
                 return palette
             }
@@ -42,7 +42,7 @@ class BlockStorageTest {
 
         }
 
-        return BlockStorage(config, 1)
+        return PalettedStorage(config, 1)
     }
 
     @Test

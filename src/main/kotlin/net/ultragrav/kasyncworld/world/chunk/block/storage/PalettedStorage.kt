@@ -1,11 +1,9 @@
 package net.ultragrav.kasyncworld.world.chunk.block.storage
 
-import org.bukkit.block.data.BlockData
-
-class BlockStorage(
-    private val config: BlockStorageConfig,
+class PalettedStorage<T>(
+    private val config: PalettedStorageConfig<T>,
     initialBits: Int = 4
-) : Iterable<IndexedBlockState> {
+) : Iterable<Indexed<T>> {
 
     var storage = config.createStorage(initialBits)
         private set
@@ -13,33 +11,33 @@ class BlockStorage(
     private var counts = config.createCounter(initialBits)
     private val iterationStrategy = config.createIterationStrategy()
 
-    fun count(type: BlockData): Int {
+    fun count(type: T): Int {
         return synchronized(this) {
             if (!palette.isMapped(type)) return 0
             counts.get(palette.getId(type))
         }
     }
 
-    fun types(): Set<BlockData> {
+    fun types(): Set<T> {
         return synchronized(this) {
             counts.types().map { palette.getState(it) }.toSet()
         }
     }
 
-    operator fun contains(type: BlockData): Boolean {
+    operator fun contains(type: T): Boolean {
         return synchronized(this) {
             count(type) > 0
         }
     }
 
-    fun getBlock(index: Int): BlockData {
+    fun get(index: Int): T {
         return synchronized(this) {
             val num = storage.get(index)
             palette.getState(num)
         }
     }
 
-    fun setBlock(index: Int, block: BlockData) {
+    fun set(index: Int, block: T) {
         synchronized(this) {
             val num = palette.getId(block)
             while (storage.isTooBig(num)) {
@@ -56,20 +54,20 @@ class BlockStorage(
         }
     }
 
-    fun unsetBlock(index: Int) {
+    fun unset(index: Int) {
         synchronized(this) {
-            setBlock(index, config.defaultState)
+            set(index, config.defaultState)
             iterationStrategy.unset(index)
         }
     }
 
-    fun copyDataFrom(other: BlockStorage) {
+    fun copyDataFrom(other: PalettedStorage<T>) {
         require(other.config.size == config.size) { "Cannot copy data from storage with different size" }
         synchronized(this) {
             val otherBits = other.storage.bits
             if (otherBits > storage.bits) upsize(otherBits)
             for (i in 0 until other.storage.size) {
-                setBlock(i, other.getBlock(i))
+                set(i, other.get(i))
             }
         }
     }
@@ -88,18 +86,18 @@ class BlockStorage(
         counts = newCounts
     }
 
-    override fun iterator(): Iterator<IndexedBlockState> {
+    override fun iterator(): Iterator<Indexed<T>> {
         val numIterator = synchronized(this) { iterationStrategy.iterator() }
 
-        return object : Iterator<IndexedBlockState> {
+        return object : Iterator<Indexed<T>> {
             override fun hasNext(): Boolean {
                 return numIterator.hasNext()
             }
 
-            override fun next(): IndexedBlockState {
+            override fun next(): Indexed<T> {
                 val index = numIterator.next()
-                val data = synchronized(this@BlockStorage) { storage.get(index) }
-                return IndexedBlockState(index, palette.getState(data))
+                val data = synchronized(this@PalettedStorage) { storage.get(index) }
+                return Indexed(index, palette.getState(data))
             }
         }
     }
