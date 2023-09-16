@@ -1,4 +1,113 @@
 package net.ultragrav.kasyncworld.world.chunk.heightmap
 
-class AWHeightMap {
+import net.minecraft.world.level.block.LeavesBlock
+import net.ultragrav.kasyncworld.ceilLog2
+import net.ultragrav.kasyncworld.getChunkKey
+import net.ultragrav.kasyncworld.world.AsyncChunk
+import net.ultragrav.kasyncworld.world.chunk.block.bit.BitStorage
+import net.ultragrav.kasyncworld.world.chunk.block.bit.NumberStorage
+import org.bukkit.Fluid
+import org.bukkit.Material
+import org.bukkit.block.data.BlockData
+import org.bukkit.block.data.Waterlogged
+import org.bukkit.block.data.type.Leaves
+import java.util.function.Predicate
+
+class AWHeightMap(val type: Type, val chunk: AsyncChunk) {
+
+    private var data: NumberStorage = BitStorage(ceilLog2(chunk.maxBuildHeight + 1), 256)
+
+    fun setHeight(x: Int, z: Int, height: Int) {
+        data.set(x shl 4 or (z and 0xF), height - chunk.minBuildHeight)
+    }
+
+    fun getHeight(x: Int, z: Int): Int {
+        return data.get(x shl 4 or (z and 0xF)) + chunk.minBuildHeight
+    }
+
+    fun clone(): AWHeightMap {
+        val map = AWHeightMap(type, chunk)
+        map.data = data.clone()
+        return map
+    }
+
+    fun recompute() {
+        val maxHeight = chunk.maxBuildHeight
+        val minHeight = chunk.minBuildHeight
+
+        for (y in (maxHeight - 1) downTo minHeight) {
+            for (x in 0..15) {
+                for (z in 0..15) {
+                    val block = chunk.getBlock(x, y, z)
+                    if (type.isOpaque.test(block)) {
+                        setHeight(x, z, y + 1)
+                        break
+                    }
+                }
+            }
+        }
+
+    }
+
+    fun update(x: Int, y: Int, z: Int, blockData: BlockData): Boolean {
+        val currentHeight = getHeight(x, z)
+
+        // If the new block is below the current topmost block minus 1, no update is required.
+        if (y < currentHeight - 1) return false
+
+        // If the blockData is opaque:
+        if (type.isOpaque.test(blockData)) {
+            // If the height of the new block is greater than or equal to the current height:
+            if (y >= currentHeight) {
+                setHeight(x, z, y + 1)
+                return true
+            }
+        } else if (currentHeight - 1 == y) {
+            // If the block data is not opaque and is right below the current height in the heightmap:
+
+            for (j in (y - 1) downTo chunk.minBuildHeight) {
+                val belowBlock = chunk.getBlock(x, j, z)
+
+                // If we found an opaque block below:
+                if (type.isOpaque.test(belowBlock)) {
+                    setHeight(x, z, j + 1)
+                    return true
+                }
+            }
+
+            // If we didn't find any opaque blocks all the way down, set to minBuildHeight:
+            setHeight(x, z, chunk.minBuildHeight)
+            return true
+        }
+
+        return false
+    }
+
+
+    companion object {
+        private val BLOCKS_MOTION = Predicate<BlockData> {
+            it.material.isSolid &&
+                    it.material != Material.COBWEB &&
+                    it.material != Material.BAMBOO_SAPLING
+        }
+    }
+
+    enum class Usage {
+        WORLD_GEN,
+        LIVE_WORLD,
+        CLIENT
+    }
+
+    enum class Type(val usage: Usage, val isOpaque: Predicate<BlockData>) {
+        WORLD_SURFACE_WG(Usage.WORLD_GEN, Predicate { it.material != Material.AIR }),
+        WORLD_SURFACE(Usage.CLIENT, Predicate { it.material != Material.AIR }),
+        OCEAN_FLOOR_WG(Usage.WORLD_GEN, BLOCKS_MOTION),
+        OCEAN_FLOOR(Usage.LIVE_WORLD, BLOCKS_MOTION),
+        MOTION_BLOCKING(Usage.CLIENT, Predicate {
+            BLOCKS_MOTION.test(it) || (it is Waterlogged && it.isWaterlogged)
+        }),
+        MOTION_BLOCKING_NO_LEAVES(Usage.LIVE_WORLD, Predicate {
+            MOTION_BLOCKING.isOpaque.test(it) && it !is Leaves
+        }),
+    }
 }
