@@ -7,9 +7,30 @@ class BlockStorage(
     initialBits: Int = 4
 ) : Iterable<IndexedBlockState> {
 
-    private var storage = config.createStorage(initialBits)
-    private var palette = config.createPalette()
+    var storage = config.createStorage(initialBits)
+        private set
+    val palette = config.createPalette()
+    private var counts = config.createCounter(initialBits)
     private val iterationStrategy = config.createIterationStrategy()
+
+    fun count(type: BlockData): Int {
+        return synchronized(this) {
+            if (!palette.isMapped(type)) return 0
+            counts.get(palette.getId(type))
+        }
+    }
+
+    fun types(): Set<BlockData> {
+        return synchronized(this) {
+            counts.types().map { palette.getState(it) }.toSet()
+        }
+    }
+
+    operator fun contains(type: BlockData): Boolean {
+        return synchronized(this) {
+            count(type) > 0
+        }
+    }
 
     fun getBlock(index: Int): BlockData {
         return synchronized(this) {
@@ -24,7 +45,13 @@ class BlockStorage(
             while (storage.isTooBig(num)) {
                 upsize()
             }
+
+            val existing = storage.get(index)
+            counts.decrement(existing)
+
             storage.set(index, num)
+            counts.increment(num)
+
             iterationStrategy.set(index)
         }
     }
@@ -53,6 +80,12 @@ class BlockStorage(
             newStorage.set(i, storage.get(i))
         }
         storage = newStorage
+
+        val newCounts = config.createCounter(newSize)
+        for (i in counts.types()) {
+            newCounts.set(i, counts.get(i))
+        }
+        counts = newCounts
     }
 
     override fun iterator(): Iterator<IndexedBlockState> {
