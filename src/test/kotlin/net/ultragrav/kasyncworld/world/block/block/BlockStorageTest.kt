@@ -5,6 +5,8 @@ import net.ultragrav.kasyncworld.world.chunk.block.storage.BlockStorageConfig
 import net.ultragrav.kasyncworld.world.chunk.block.iteration.IterationStrategy
 import net.ultragrav.kasyncworld.world.chunk.block.bit.BitStorage
 import net.ultragrav.kasyncworld.world.chunk.block.bit.NumberStorage
+import net.ultragrav.kasyncworld.world.chunk.block.count.IntCounts
+import net.ultragrav.kasyncworld.world.chunk.block.count.TypeCounts
 import net.ultragrav.kasyncworld.world.chunk.block.iteration.ChangeIterationStrategy
 import net.ultragrav.kasyncworld.world.chunk.block.palette.BlockPalette
 import net.ultragrav.kasyncworld.world.chunk.block.palette.SimpleBlockPalette
@@ -24,6 +26,10 @@ class BlockStorageTest {
 
             override fun createStorage(bits: Int): NumberStorage =
                 BitStorage(bits, size)
+
+            override fun createCounter(bits: Int): TypeCounts {
+                return IntCounts(bits, size)
+            }
 
             override fun createPalette(localToGlobal: Map<Int, Int>): BlockPalette {
                 val palette = SimpleBlockPalette()

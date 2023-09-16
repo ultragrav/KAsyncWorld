@@ -21,4 +21,6 @@ interface NumberStorage {
     fun isTooBig(num: Int): Boolean {
         return num >= (1 shl bits)
     }
+
+    fun clone(): NumberStorage
 }

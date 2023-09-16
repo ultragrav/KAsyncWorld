@@ -18,7 +18,6 @@ class BitStorage(override val bits: Int, override val size: Int) : NumberStorage
     }
 
     override fun set(index: Int, value: Int) {
-
         val longIndex = index / elementsPerLong
         val bitIndex = index % elementsPerLong
         val shift = bitIndex * bits
@@ -28,5 +27,11 @@ class BitStorage(override val bits: Int, override val size: Int) : NumberStorage
 
     override fun raw(): LongArray {
         return data
+    }
+
+    override fun clone(): NumberStorage {
+        val storage = BitStorage(bits, size)
+        System.arraycopy(data, 0, storage.data, 0, data.size)
+        return storage
     }
 }
