@@ -6,7 +6,7 @@ import org.bukkit.block.BlockState
 import org.bukkit.block.data.BlockData
 import org.bukkit.metadata.Metadatable
 
-interface AsyncWorld {
+interface AsyncWorld : AsyncChunkFactory {
     /**
      * Set the block at the given coordinates. If the block data provided is
      * a state that requires a tile entity, the tile entity will be set as well.

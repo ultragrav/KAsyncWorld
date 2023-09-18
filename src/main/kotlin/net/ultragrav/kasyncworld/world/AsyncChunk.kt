@@ -8,7 +8,7 @@ import net.ultragrav.nbt.wrapper.TagCompound
 import org.bukkit.HeightMap
 import org.bukkit.block.data.BlockData
 
-interface AsyncChunk {
+interface AsyncChunk : AsyncChunkSectionFactory {
 
     val numSections: Int
     val minSectionY: Int
@@ -23,6 +23,4 @@ interface AsyncChunk {
     fun setBlock(x: Int, y: Int, z: Int, block: BlockData)
     fun getBlock(x: Int, y: Int, z: Int): BlockData
     fun getHeightMap(type: HeightMap)
-
-    fun createSection(index: Int): AsyncChunkSection
 }
