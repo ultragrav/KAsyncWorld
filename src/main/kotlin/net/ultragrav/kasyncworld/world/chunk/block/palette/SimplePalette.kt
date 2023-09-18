@@ -1,36 +1,34 @@
 package net.ultragrav.kasyncworld.world.chunk.block.palette
 
-import org.bukkit.block.data.BlockData
-
-class SimplePalette(private val globalPalette: Palette? = null) : Palette {
-    private val blockDataToIdMap = mutableMapOf<BlockData, Int>()
-    private val idToBlockDataMap = mutableMapOf<Int, BlockData>()
+class SimplePalette<T>(private val globalPalette: Palette<T>? = null) : Palette<T> {
+    private val blockDataToIdMap = mutableMapOf<T, Int>()
+    private val idToBlockDataMap = mutableMapOf<Int, T>()
     private var currentId = 0
 
     override val size: Int
         get() = blockDataToIdMap.size
 
-    override fun getId(block: BlockData): Int {
-        return blockDataToIdMap.getOrPut(block) {
+    override fun getId(subject: T): Int {
+        return blockDataToIdMap.getOrPut(subject) {
             val newId = currentId++
-            idToBlockDataMap[newId] = block
+            idToBlockDataMap[newId] = subject
             newId
         }
     }
 
-    override fun getState(id: Int): BlockData {
+    override fun getState(id: Int): T {
         return idToBlockDataMap[id] ?: throw IllegalArgumentException("No BlockData found for ID: $id")
     }
 
-    override fun isMapped(block: BlockData): Boolean {
-        return blockDataToIdMap.containsKey(block)
+    override fun isMapped(subject: T): Boolean {
+        return blockDataToIdMap.containsKey(subject)
     }
 
     override fun isMapped(id: Int): Boolean {
         return idToBlockDataMap.containsKey(id)
     }
 
-    override fun globalPalette(): Palette = globalPalette ?: this
+    override fun globalPalette(): Palette<T> = globalPalette ?: this
 
     override fun localToGlobal(): Map<Int, Int> {
         return idToBlockDataMap.mapValues { (_, blockData) -> globalPalette().getId(blockData) }
