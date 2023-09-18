@@ -30,4 +30,9 @@ interface AsyncWorld {
      * Unset the tile entity at the given coordinates.
      */
     fun unsetTileEntity(x: Int, y: Int, z: Int)
+
+    /**
+     * Replace the chunk at the given chunk-coordinates with the given chunk.
+     */
+    fun setChunk(cx: Int, cz: Int, chunk: AsyncChunk)
 }

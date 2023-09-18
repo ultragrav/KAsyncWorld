@@ -10,5 +10,4 @@ class SpigotAsyncWorld internal constructor(val world: World) {
     }
 
     val chunkMap = mutableMapOf<Long, AsyncChunk>()
-
 }
