@@ -16,6 +16,10 @@ class SpigotAsyncChunk(
         TODO("Not yet implemented")
     }
 
+    override fun unsetBlock(x: Int, y: Int, z: Int) {
+        TODO("Not yet implemented")
+    }
+
     override fun getBlock(x: Int, y: Int, z: Int): BlockData {
         TODO("Not yet implemented")
     }
@@ -40,7 +44,11 @@ class SpigotAsyncChunk(
         TODO("Not yet implemented")
     }
 
-    override fun setTileEntity(x: Int, y: Int, z: Int, tag: TagCompound?) {
+    override fun setTileEntity(x: Int, y: Int, z: Int, tag: TagCompound) {
+        TODO("Not yet implemented")
+    }
+
+    override fun removeTileEntity(x: Int, y: Int, z: Int) {
         TODO("Not yet implemented")
     }
 
