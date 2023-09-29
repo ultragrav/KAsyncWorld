@@ -1,10 +1,10 @@
 package net.ultragrav.kasyncworld.world.contract
 
+import net.minecraft.nbt.CompoundTag
 import net.ultragrav.kasyncworld.world.chunk.block.position.AWBlockPosition
 import net.ultragrav.kasyncworld.world.chunk.heightmap.AWHeightMap
 import net.ultragrav.kasyncworld.world.contract.section.AsyncChunkSection
 import net.ultragrav.kasyncworld.world.contract.section.AsyncChunkSectionFactory
-import net.ultragrav.nbt.wrapper.TagCompound
 import org.bukkit.HeightMap
 import org.bukkit.block.data.BlockData
 
@@ -28,10 +28,10 @@ interface AsyncChunk : AsyncChunkSectionFactory {
     fun setHeightMap(type: HeightMap, heightMap: AWHeightMap)
     fun clearHeightMaps()
 
-    fun getTileEntity(x: Int, y: Int, z: Int): TagCompound?
-    fun setTileEntity(x: Int, y: Int, z: Int, tag: TagCompound)
+    fun getTileEntity(x: Int, y: Int, z: Int): CompoundTag?
+    fun setTileEntity(x: Int, y: Int, z: Int, tag: CompoundTag)
     fun removeTileEntity(x: Int, y: Int, z: Int)
-    fun getTileEntities(): Map<AWBlockPosition, TagCompound>
+    fun getTileEntities(): Map<AWBlockPosition, CompoundTag>
     fun clearTileEntities()
 
     fun setSection(sectionIndex: Int, section: AsyncChunkSection)
@@ -46,9 +46,9 @@ interface AsyncChunk : AsyncChunkSectionFactory {
 
     fun clearSections()
 
-    fun getEntities(): List<TagCompound>
-    fun addEntity(tag: TagCompound)
-    fun removeEntity(tag: TagCompound)
+    fun getEntities(): List<CompoundTag>
+    fun addEntity(tag: CompoundTag)
+    fun removeEntity(tag: CompoundTag)
     fun clearEntities()
 
     fun clone(): AsyncChunk

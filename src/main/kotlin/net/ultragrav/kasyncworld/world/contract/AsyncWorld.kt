@@ -1,8 +1,6 @@
 package net.ultragrav.kasyncworld.world.contract
 
-import net.ultragrav.kasyncworld.world.contract.AsyncChunk
-import net.ultragrav.kasyncworld.world.contract.AsyncChunkFactory
-import net.ultragrav.nbt.wrapper.TagCompound
+import net.minecraft.nbt.CompoundTag
 import org.bukkit.block.data.BlockData
 import java.util.concurrent.CompletableFuture
 
@@ -18,7 +16,7 @@ interface AsyncWorld : AsyncChunkFactory {
      * coordinates is not a tile entity, this method will throw an exception.
      * @throws IllegalStateException if the block at the given coordinates is not a tile entity
      */
-    fun setTileEntity(x: Int, y: Int, z: Int, tile: TagCompound)
+    fun setTileEntity(x: Int, y: Int, z: Int, tile: CompoundTag)
 
     /**
      * Unset the block at the given coordinates. If the block at the given

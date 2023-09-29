@@ -1,5 +1,6 @@
 package net.ultragrav.kasyncworld.world.impl
 
+import net.minecraft.nbt.CompoundTag
 import net.ultragrav.kasyncworld.AW
 import net.ultragrav.kasyncworld.getChunkKey
 import net.ultragrav.kasyncworld.getChunkX
@@ -7,10 +8,9 @@ import net.ultragrav.kasyncworld.getChunkZ
 import net.ultragrav.kasyncworld.world.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.contract.AsyncWorld
 import net.ultragrav.kasyncworld.world.versionio.ChunkWriteOptions
-import net.ultragrav.nbt.wrapper.TagCompound
-import org.bukkit.Material
 import org.bukkit.World
 import org.bukkit.block.data.BlockData
+import java.lang.RuntimeException
 import java.util.concurrent.CompletableFuture
 
 internal class SpigotAsyncWorld internal constructor(val world: World) : AsyncWorld {
@@ -24,7 +24,7 @@ internal class SpigotAsyncWorld internal constructor(val world: World) : AsyncWo
         chunk.setBlock(x and 15, y, z and 15, block)
     }
 
-    override fun setTileEntity(x: Int, y: Int, z: Int, tile: TagCompound) {
+    override fun setTileEntity(x: Int, y: Int, z: Int, tile: CompoundTag) {
         val chunkX = x shr 4
         val chunkZ = z shr 4
         val chunk = getChunk(chunkX, chunkZ)

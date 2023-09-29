@@ -1,10 +1,10 @@
 package net.ultragrav.kasyncworld.world.impl
 
+import net.minecraft.nbt.CompoundTag
 import net.ultragrav.kasyncworld.world.chunk.block.position.AWBlockPosition
 import net.ultragrav.kasyncworld.world.chunk.heightmap.AWHeightMap
 import net.ultragrav.kasyncworld.world.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.contract.section.AsyncChunkSection
-import net.ultragrav.nbt.wrapper.TagCompound
 import org.bukkit.HeightMap
 import org.bukkit.block.data.BlockData
 
@@ -40,11 +40,11 @@ class SpigotAsyncChunk(
         TODO("Not yet implemented")
     }
 
-    override fun getTileEntity(x: Int, y: Int, z: Int): TagCompound? {
+    override fun getTileEntity(x: Int, y: Int, z: Int): CompoundTag? {
         TODO("Not yet implemented")
     }
 
-    override fun setTileEntity(x: Int, y: Int, z: Int, tag: TagCompound) {
+    override fun setTileEntity(x: Int, y: Int, z: Int, tag: CompoundTag) {
         TODO("Not yet implemented")
     }
 
@@ -52,7 +52,7 @@ class SpigotAsyncChunk(
         TODO("Not yet implemented")
     }
 
-    override fun getTileEntities(): Map<AWBlockPosition, TagCompound> {
+    override fun getTileEntities(): Map<AWBlockPosition, CompoundTag> {
         TODO("Not yet implemented")
     }
 
@@ -76,15 +76,15 @@ class SpigotAsyncChunk(
         TODO("Not yet implemented")
     }
 
-    override fun getEntities(): List<TagCompound> {
+    override fun getEntities(): List<CompoundTag> {
         TODO("Not yet implemented")
     }
 
-    override fun addEntity(tag: TagCompound) {
+    override fun addEntity(tag: CompoundTag) {
         TODO("Not yet implemented")
     }
 
-    override fun removeEntity(tag: TagCompound) {
+    override fun removeEntity(tag: CompoundTag) {
         TODO("Not yet implemented")
     }
 

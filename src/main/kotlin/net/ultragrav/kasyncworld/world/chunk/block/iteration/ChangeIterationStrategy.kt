@@ -3,7 +3,7 @@ package net.ultragrav.kasyncworld.world.chunk.block.iteration
 import net.ultragrav.kasyncworld.ceilLog2
 import net.ultragrav.kasyncworld.world.chunk.block.bit.BitStorage
 
-class ChangeIterationStrategy(override  val size: Int) : IterationStrategy {
+class ChangeIterationStrategy(override val size: Int) : IterationStrategy {
 
     private var numChanges = 0
     private var current = 0
