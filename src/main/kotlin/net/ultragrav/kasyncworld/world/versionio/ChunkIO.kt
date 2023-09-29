@@ -1,11 +1,10 @@
 package net.ultragrav.kasyncworld.world.versionio
 
-import net.ultragrav.kasyncworld.world.AsyncChunk
-import net.ultragrav.kasyncworld.world.AsyncChunkFactory
+import net.ultragrav.kasyncworld.world.contract.AsyncChunk
+import net.ultragrav.kasyncworld.world.contract.AsyncChunkFactory
 import org.bukkit.Chunk
-import org.bukkit.World
 
-interface VersionChunkOperator {
+interface ChunkIO {
     fun writeChunk(bukkitChunk: Chunk, chunk: AsyncChunk, options: ChunkWriteOptions)
     fun readChunk(bukkitChunk: Chunk, factory: AsyncChunkFactory): AsyncChunk
 }

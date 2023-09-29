@@ -1,10 +1,10 @@
-package net.ultragrav.kasyncworld.world
+package net.ultragrav.kasyncworld.world.contract
 
+import net.ultragrav.kasyncworld.world.contract.AsyncChunk
+import net.ultragrav.kasyncworld.world.contract.AsyncChunkFactory
 import net.ultragrav.nbt.wrapper.TagCompound
-import org.bukkit.Material
-import org.bukkit.block.BlockState
 import org.bukkit.block.data.BlockData
-import org.bukkit.metadata.Metadatable
+import java.util.concurrent.CompletableFuture
 
 interface AsyncWorld : AsyncChunkFactory {
     /**
@@ -35,4 +35,23 @@ interface AsyncWorld : AsyncChunkFactory {
      * Replace the chunk at the given chunk-coordinates with the given chunk.
      */
     fun setChunk(cx: Int, cz: Int, chunk: AsyncChunk)
+
+    /**
+     * Get the chunk at the given chunk-coordinates. If the chunk does not exist then
+     * it will be created. The returned chunks are associated with this async world
+     * and should not be used or modified after either [flush] or [syncFlush] is called.
+     */
+    fun getChunk(cx: Int, cz: Int): AsyncChunk
+
+    /**
+     * Pushes all changes to the world. This method returns a future that completes
+     * when all current changes have been pushed to the world.
+     */
+    fun flush(): CompletableFuture<Void>
+
+    /**
+     * Immediately pushes all changes to the world. This method is not safe to
+     * use on any thread other than the main thread.
+     */
+    fun syncFlush()
 }

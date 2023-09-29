@@ -1,12 +1,9 @@
 package net.ultragrav.kasyncworld.world.chunk.heightmap
 
-import net.minecraft.world.level.block.LeavesBlock
 import net.ultragrav.kasyncworld.ceilLog2
-import net.ultragrav.kasyncworld.getChunkKey
-import net.ultragrav.kasyncworld.world.AsyncChunk
+import net.ultragrav.kasyncworld.world.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.chunk.block.bit.BitStorage
 import net.ultragrav.kasyncworld.world.chunk.block.bit.NumberStorage
-import org.bukkit.Fluid
 import org.bukkit.Material
 import org.bukkit.block.data.BlockData
 import org.bukkit.block.data.Waterlogged

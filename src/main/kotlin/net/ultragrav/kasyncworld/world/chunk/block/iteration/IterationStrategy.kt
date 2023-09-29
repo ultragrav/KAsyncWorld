@@ -7,4 +7,6 @@ interface IterationStrategy : Iterable<Int> {
     fun set(index: Int)
     fun unset(index: Int)
 
+    fun clone(): IterationStrategy
+
 }

@@ -42,6 +42,15 @@ class ChangeIterationStrategy(override  val size: Int) : IterationStrategy {
         numChanges--
     }
 
+    override fun clone(): IterationStrategy {
+        val strategy = ChangeIterationStrategy(size)
+        strategy.numChanges = numChanges
+        strategy.current = current
+        System.arraycopy(forwards.raw(), 0, strategy.forwards.raw(), 0, forwards.raw().size)
+        System.arraycopy(backwards.raw(), 0, strategy.backwards.raw(), 0, backwards.raw().size)
+        return strategy
+    }
+
     override fun iterator(): Iterator<Int> {
 
         val order = IntArray(numChanges)

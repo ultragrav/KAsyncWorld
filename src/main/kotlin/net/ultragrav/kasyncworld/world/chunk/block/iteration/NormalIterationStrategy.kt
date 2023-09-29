@@ -9,4 +9,6 @@ class NormalIterationStrategy(override val size: Int) : IterationStrategy {
         return (0 until size).iterator()
     }
 
+    override fun clone() = NormalIterationStrategy(size)
+
 }
