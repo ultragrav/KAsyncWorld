@@ -1,4 +1,4 @@
-package net.ultragrav.kasyncworld.world.inmemory.task
+package net.ultragrav.kasyncworld.world.inmemory.impl.task
 
 import ca.spottedleaf.concurrentutil.executor.standard.PrioritisedExecutor
 import io.papermc.paper.chunk.system.scheduling.ChunkProgressionTask
@@ -12,6 +12,8 @@ import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.chunk.*
 import net.minecraft.world.level.material.Fluid
 import net.minecraft.world.ticks.ProtoChunkTicks
+import net.ultragrav.kasyncworld.world.chunk.block.storage.wrapped.MinecraftPalettedStorage
+import net.ultragrav.kasyncworld.world.chunk.block.storage.wrapped.WrappedPalettedContainer
 import net.ultragrav.kasyncworld.world.inmemory.AsyncChunkProvider
 
 class AWChunkLoadTask(
@@ -53,10 +55,21 @@ class AWChunkLoadTask(
         val chunkSections = chunk.sections
             .map {
                 if (it == null) return@map null
-                val statesContainer = PalettedContainer(Block.BLOCK_STATE_REGISTRY, Blocks.AIR.defaultBlockState(), PalettedContainer.Strategy.SECTION_STATES, null)
-                val biomesContainer = PalettedContainer(biomesRegistry.asHolderIdMap(), biomesRegistry.getHolderOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES, null)
-                TODO("Copy data from things")
-                LevelChunkSection(statesContainer, biomesContainer)
+                val blocks = it.blocks
+                val biomes = it.biomes
+                val nmsBlocks = if (blocks is MinecraftPalettedStorage) blocks.wrapped else {
+                    val container = PalettedContainer(Block.BLOCK_STATE_REGISTRY, Blocks.AIR.defaultBlockState(), PalettedContainer.Strategy.SECTION_STATES, null)
+                    val wrapper = WrappedPalettedContainer(container)
+                    wrapper.copyFrom(blocks)
+                    wrapper.wrapped
+                }
+                val nmsBiomes = if (biomes is MinecraftPalettedStorage) biomes.wrapped else {
+                    val container = PalettedContainer(biomesRegistry.asHolderIdMap(), biomesRegistry.getHolderOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES, null)
+                    val wrapper = WrappedPalettedContainer(container)
+                    wrapper.copyFrom(biomes)
+                    wrapper.wrapped
+                }
+                LevelChunkSection(nmsBlocks, nmsBiomes)
             }
             .toTypedArray()
 

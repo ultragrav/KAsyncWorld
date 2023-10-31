@@ -1,4 +1,4 @@
-package net.ultragrav.kasyncworld.world.inmemory.task
+package net.ultragrav.kasyncworld.world.inmemory.impl.task
 
 import ca.spottedleaf.concurrentutil.executor.standard.PrioritisedExecutor
 import ca.spottedleaf.concurrentutil.executor.standard.PrioritisedThreadPool

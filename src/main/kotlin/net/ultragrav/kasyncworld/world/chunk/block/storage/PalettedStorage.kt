@@ -14,4 +14,10 @@ interface PalettedStorage<T> : Iterable<Indexed<T>> {
     fun clone(): PalettedStorage<T>
     fun indexIterator(): Iterator<Int>
     operator fun contains(type: T): Boolean
+
+    fun copyFrom(other: PalettedStorage<T>) {
+        for (i in indexIterator()) {
+            set(i, other.get(i))
+        }
+    }
 }

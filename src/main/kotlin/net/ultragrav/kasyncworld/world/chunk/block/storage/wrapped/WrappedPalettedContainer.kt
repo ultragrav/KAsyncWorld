@@ -5,6 +5,7 @@ import net.ultragrav.kasyncworld.world.chunk.block.bit.NumberStorage
 import net.ultragrav.kasyncworld.world.chunk.block.palette.Palette
 import net.ultragrav.kasyncworld.world.chunk.block.storage.Indexed
 import net.ultragrav.kasyncworld.world.chunk.block.storage.PalettedStorage
+import java.util.concurrent.atomic.AtomicInteger
 
 class WrappedPalettedContainer<T>(
     override val wrapped: PalettedContainer<T>
@@ -12,43 +13,51 @@ class WrappedPalettedContainer<T>(
 
     override val storage: NumberStorage
         get() = WrappedBitStorage(wrapped.data.storage)
+
     override val palette: Palette<T>
-        get() =
+        get() = WrappedPalette(wrapped.registry, wrapped.data.palette)
 
     override fun types(): Set<T> {
-
+        return (0 until wrapped.data.palette.size)
+            .map { wrapped.data.palette.valueFor(it) }
+            .toSet()
     }
 
     override fun get(index: Int): T {
-        TODO("Not yet implemented")
+        return wrapped[index]
     }
 
     override fun unset(index: Int) {
-        TODO("Not yet implemented")
+        wrapped.data.storage[index] = 0
     }
 
     override fun clone(): PalettedStorage<T> {
-        TODO("Not yet implemented")
+        return WrappedPalettedContainer(wrapped.copy())
     }
 
     override fun indexIterator(): Iterator<Int> {
-        TODO("Not yet implemented")
+        return (0 until wrapped.data.storage.size).iterator()
     }
 
     override fun contains(type: T): Boolean {
-        TODO("Not yet implemented")
+        return wrapped.data.palette.maybeHas { it == type }
     }
 
     override fun set(index: Int, type: T) {
-        TODO("Not yet implemented")
+        val id = wrapped.data.palette.idFor(type)
+        wrapped.data.storage[index] = id
     }
 
     override fun count(type: T): Int {
-        TODO("Not yet implemented")
+        val id = wrapped.data.palette.idFor(type)
+        return (0 until wrapped.data.storage.size)
+            .count { wrapped.data.storage[it] == id }
     }
 
     override fun iterator(): Iterator<Indexed<T>> {
-        TODO("Not yet implemented")
+        return indexIterator().asSequence()
+            .map { Indexed(it, get(it)) }
+            .iterator()
     }
 
 }
