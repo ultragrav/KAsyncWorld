@@ -8,20 +8,20 @@ class SimplePalette<T>(private val globalPalette: Palette<T>? = null) : Palette<
     override val size: Int
         get() = blockDataToIdMap.size
 
-    override fun getId(subject: T): Int {
-        return blockDataToIdMap.getOrPut(subject) {
+    override fun getId(type: T): Int {
+        return blockDataToIdMap.getOrPut(type) {
             val newId = currentId++
-            idToBlockDataMap[newId] = subject
+            idToBlockDataMap[newId] = type
             newId
         }
     }
 
     override fun getState(id: Int): T {
-        return idToBlockDataMap[id] ?: throw IllegalArgumentException("No BlockData found for ID: $id")
+        return idToBlockDataMap[id] ?: throw IllegalArgumentException("No Type found for ID: $id")
     }
 
-    override fun isMapped(subject: T): Boolean {
-        return blockDataToIdMap.containsKey(subject)
+    override fun isMapped(type: T): Boolean {
+        return blockDataToIdMap.containsKey(type)
     }
 
     override fun isMapped(id: Int): Boolean {
@@ -29,10 +29,6 @@ class SimplePalette<T>(private val globalPalette: Palette<T>? = null) : Palette<
     }
 
     override fun globalPalette(): Palette<T> = globalPalette ?: this
-
-    override fun localToGlobal(): Map<Int, Int> {
-        return idToBlockDataMap.mapValues { (_, blockData) -> globalPalette().getId(blockData) }
-    }
 
     override fun clone(): Palette<T> {
         val newPalette = SimplePalette(globalPalette)
