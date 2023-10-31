@@ -13,10 +13,10 @@ class WrappedPalettedContainer<T>(
     override val storage: NumberStorage
         get() = WrappedBitStorage(wrapped.data.storage)
     override val palette: Palette<T>
-        get() = TODO("Not yet implemented")
+        get() =
 
     override fun types(): Set<T> {
-        TODO("Not yet implemented")
+
     }
 
     override fun get(index: Int): T {
