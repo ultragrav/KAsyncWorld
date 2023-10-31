@@ -34,6 +34,14 @@ class SimplePalette<T>(private val globalPalette: Palette<T>? = null) : Palette<
         return idToBlockDataMap.mapValues { (_, blockData) -> globalPalette().getId(blockData) }
     }
 
+    override fun clone(): Palette<T> {
+        val newPalette = SimplePalette(globalPalette)
+        newPalette.blockDataToIdMap.putAll(blockDataToIdMap)
+        newPalette.idToBlockDataMap.putAll(idToBlockDataMap)
+        newPalette.currentId = currentId
+        return newPalette
+    }
+
     fun load(localToGlobal: Map<Int, Int>) {
         require(globalPalette() != this) { "Cannot load palette from self. Global palette must be configured." }
         localToGlobal.forEach { (localId, globalId) ->

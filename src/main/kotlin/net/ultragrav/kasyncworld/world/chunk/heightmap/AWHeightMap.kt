@@ -1,36 +1,43 @@
 package net.ultragrav.kasyncworld.world.chunk.heightmap
 
+import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.level.levelgen.Heightmap
 import net.ultragrav.kasyncworld.ceilLog2
+import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
 import net.ultragrav.kasyncworld.world.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.chunk.block.bit.BitStorage
 import net.ultragrav.kasyncworld.world.chunk.block.bit.NumberStorage
+import org.bukkit.HeightMap
 import org.bukkit.Material
 import org.bukkit.block.data.BlockData
 import org.bukkit.block.data.Waterlogged
 import org.bukkit.block.data.type.Leaves
 import java.util.function.Predicate
 
-class AWHeightMap(val type: Type, val chunk: AsyncChunk) {
+class AWHeightMap(val type: Heightmap.Types, val chunk: AsyncChunk) {
 
-    private var data: NumberStorage = BitStorage(ceilLog2(chunk.maxBuildHeight + 1), 256)
+    val heightOptions = chunk.heightOptions
+
+    private var data: NumberStorage = BitStorage(ceilLog2(heightOptions.maxBuildHeight + 1), 256)
 
     fun setHeight(x: Int, z: Int, height: Int) {
-        data.set(x shl 4 or (z and 0xF), height - chunk.minBuildHeight)
+        data.set(x shl 4 or (z and 0xF), height - heightOptions.minBuildHeight)
     }
 
     fun getHeight(x: Int, z: Int): Int {
-        return data.get(x shl 4 or (z and 0xF)) + chunk.minBuildHeight
+        return data.get(x shl 4 or (z and 0xF)) + heightOptions.minBuildHeight
     }
 
-    fun clone(): AWHeightMap {
+    fun clone(chunk: AsyncChunk = this.chunk): AWHeightMap {
         val map = AWHeightMap(type, chunk)
         map.data = data.clone()
         return map
     }
 
     fun recompute() {
-        val maxHeight = chunk.maxBuildHeight
-        val minHeight = chunk.minBuildHeight
+
+        val maxHeight = heightOptions.maxBuildHeight
+        val minHeight = heightOptions.minBuildHeight
 
         for (y in (maxHeight - 1) downTo minHeight) {
             for (x in 0..15) {
@@ -46,7 +53,7 @@ class AWHeightMap(val type: Type, val chunk: AsyncChunk) {
 
     }
 
-    fun update(x: Int, y: Int, z: Int, blockData: BlockData): Boolean {
+    fun update(x: Int, y: Int, z: Int, blockData: BlockState): Boolean {
         val currentHeight = getHeight(x, z)
 
         // If the new block is below the current topmost block minus 1, no update is required.
@@ -62,7 +69,7 @@ class AWHeightMap(val type: Type, val chunk: AsyncChunk) {
         } else if (currentHeight - 1 == y) {
             // If the block data is not opaque and is right below the current height in the heightmap:
 
-            for (j in (y - 1) downTo chunk.minBuildHeight) {
+            for (j in (y - 1) downTo heightOptions.minBuildHeight) {
                 val belowBlock = chunk.getBlock(x, j, z)
 
                 // If we found an opaque block below:
@@ -73,38 +80,11 @@ class AWHeightMap(val type: Type, val chunk: AsyncChunk) {
             }
 
             // If we didn't find any opaque blocks all the way down, set to minBuildHeight:
-            setHeight(x, z, chunk.minBuildHeight)
+            setHeight(x, z, heightOptions.minBuildHeight)
             return true
         }
 
         return false
     }
 
-
-    companion object {
-        private val BLOCKS_MOTION = Predicate<BlockData> {
-            it.material.isSolid &&
-                    it.material != Material.COBWEB &&
-                    it.material != Material.BAMBOO_SAPLING
-        }
-    }
-
-    enum class Usage {
-        WORLD_GEN,
-        LIVE_WORLD,
-        CLIENT
-    }
-
-    enum class Type(val usage: Usage, val isOpaque: Predicate<BlockData>) {
-        WORLD_SURFACE_WG(Usage.WORLD_GEN, Predicate { it.material != Material.AIR }),
-        WORLD_SURFACE(Usage.CLIENT, Predicate { it.material != Material.AIR }),
-        OCEAN_FLOOR_WG(Usage.WORLD_GEN, BLOCKS_MOTION),
-        OCEAN_FLOOR(Usage.LIVE_WORLD, BLOCKS_MOTION),
-        MOTION_BLOCKING(Usage.CLIENT, Predicate {
-            BLOCKS_MOTION.test(it) || (it is Waterlogged && it.isWaterlogged)
-        }),
-        MOTION_BLOCKING_NO_LEAVES(Usage.LIVE_WORLD, Predicate {
-            MOTION_BLOCKING.isOpaque.test(it) && it !is Leaves
-        }),
-    }
 }

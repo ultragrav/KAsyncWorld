@@ -1,99 +1,119 @@
 package net.ultragrav.kasyncworld.world.impl
 
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.world.level.block.Block
+import net.minecraft.world.level.block.Blocks
+import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.level.levelgen.Heightmap
+import net.minecraft.world.level.material.Fluid
+import net.minecraft.world.ticks.SavedTick
+import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
 import net.ultragrav.kasyncworld.world.chunk.block.position.AWBlockPosition
 import net.ultragrav.kasyncworld.world.chunk.heightmap.AWHeightMap
 import net.ultragrav.kasyncworld.world.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.contract.section.AsyncChunkSection
-import org.bukkit.HeightMap
-import org.bukkit.block.data.BlockData
 
 class SpigotAsyncChunk(
-    override val numSections: Int,
-    override val minSectionY: Int
+    override val heightOptions: ChunkHeightOptions
 ) : AsyncChunk {
-    override fun setBlock(x: Int, y: Int, z: Int, block: BlockData) {
-        TODO("Not yet implemented")
+
+    override val sections: Array<AsyncChunkSection?> = arrayOfNulls(heightOptions.numSections)
+    override val heightMaps: MutableMap<Heightmap.Types, AWHeightMap> = mutableMapOf()
+    override val blockEntities: MutableMap<AWBlockPosition, CompoundTag> = mutableMapOf()
+    override val entities: MutableList<CompoundTag> = mutableListOf()
+
+    override var blockTicks: MutableList<SavedTick<Block>> = mutableListOf()
+    override var fluidTicks: MutableList<SavedTick<Fluid>> = mutableListOf()
+
+    override var persistentData: CompoundTag = CompoundTag()
+
+    override fun setBlock(x: Int, y: Int, z: Int, block: BlockState) {
+        val section = getOrMakeSection(y shr 4)
+        section.setBlock(x, y and 15, z, block)
+
     }
 
     override fun unsetBlock(x: Int, y: Int, z: Int) {
-        TODO("Not yet implemented")
+        val section = getOrMakeSection(y shr 4)
+        section.unsetBlock(x, y and 15, z)
     }
 
-    override fun getBlock(x: Int, y: Int, z: Int): BlockData {
-        TODO("Not yet implemented")
+    override fun getBlock(x: Int, y: Int, z: Int): BlockState {
+        val section = getSection((y shr 4))
+            ?: return Blocks.AIR.defaultBlockState()
+        return section.getBlock(x, y and 15, z)
     }
 
-    override fun getHeightMap(type: HeightMap): AWHeightMap {
-        TODO("Not yet implemented")
+    override fun getHeightMap(type: Heightmap.Types): AWHeightMap {
+        return heightMaps.getOrPut(type) { AWHeightMap(type, this) }
     }
 
-    override fun getHeightMaps(): Map<AWHeightMap.Type, AWHeightMap> {
-        TODO("Not yet implemented")
-    }
+    override fun setHeightMap(type: Heightmap.Types, heightMap: AWHeightMap) {
+        if (heightMap.heightOptions != this.heightOptions) {
+            throw IllegalArgumentException("Height map has different height options")
+        }
 
-    override fun setHeightMap(type: HeightMap, heightMap: AWHeightMap) {
-        TODO("Not yet implemented")
+        heightMaps[type] = heightMap.clone(chunk = this)
     }
 
     override fun clearHeightMaps() {
-        TODO("Not yet implemented")
+        heightMaps.clear()
     }
 
-    override fun getTileEntity(x: Int, y: Int, z: Int): CompoundTag? {
-        TODO("Not yet implemented")
+    override fun getBlockEntity(x: Int, y: Int, z: Int): CompoundTag? {
+        return blockEntities[AWBlockPosition(x, y, z)]
     }
 
-    override fun setTileEntity(x: Int, y: Int, z: Int, tag: CompoundTag) {
-        TODO("Not yet implemented")
+    override fun setBlockEntity(x: Int, y: Int, z: Int, tag: CompoundTag) {
+        blockEntities[AWBlockPosition(x, y, z)] = tag
     }
 
-    override fun removeTileEntity(x: Int, y: Int, z: Int) {
-        TODO("Not yet implemented")
+    override fun removeBlockEntity(x: Int, y: Int, z: Int) {
+        blockEntities.remove(AWBlockPosition(x, y, z))
     }
 
-    override fun getTileEntities(): Map<AWBlockPosition, CompoundTag> {
-        TODO("Not yet implemented")
+    override fun clearBlockEntities() {
+        blockEntities.clear()
     }
 
-    override fun clearTileEntities() {
-        TODO("Not yet implemented")
+    override fun setSection(sectionIndex: Int, section: AsyncChunkSection?) {
+        sections[sectionIndex - heightOptions.minSection] = section
     }
 
-    override fun setSection(sectionIndex: Int, section: AsyncChunkSection) {
-        TODO("Not yet implemented")
+    override fun getSection(sectionIndex: Int): AsyncChunkSection? {
+        return sections[sectionIndex - heightOptions.minSection]
     }
 
-    override fun getSection(sectionIndex: Int): AsyncChunkSection {
-        TODO("Not yet implemented")
-    }
-
-    override fun getSections(): Array<AsyncChunkSection> {
-        TODO("Not yet implemented")
+    private fun getOrMakeSection(sectionY: Int): AsyncChunkSection {
+        val shifted = sectionY - heightOptions.minSection
+        return sections[shifted] ?: createSection().also { sections[shifted] = it }
     }
 
     override fun clearSections() {
-        TODO("Not yet implemented")
-    }
-
-    override fun getEntities(): List<CompoundTag> {
-        TODO("Not yet implemented")
+        sections.fill(null)
     }
 
     override fun addEntity(tag: CompoundTag) {
-        TODO("Not yet implemented")
+        entities.add(tag)
     }
 
     override fun removeEntity(tag: CompoundTag) {
-        TODO("Not yet implemented")
+        entities.remove(tag)
     }
 
     override fun clearEntities() {
-        TODO("Not yet implemented")
+        entities.clear()
     }
 
     override fun clone(): AsyncChunk {
-        TODO("Not yet implemented")
+        val copy = SpigotAsyncChunk(heightOptions)
+        copy.entities.addAll(entities)
+        copy.blockEntities.putAll(blockEntities)
+        copy.heightMaps.putAll(heightMaps)
+        copy.sections.forEachIndexed { index, section ->
+            copy.sections[index] = section?.clone()
+        }
+        return copy
     }
 
     override fun createSection(): AsyncChunkSection {

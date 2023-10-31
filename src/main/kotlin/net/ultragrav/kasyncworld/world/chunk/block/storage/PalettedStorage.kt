@@ -7,69 +7,56 @@ class PalettedStorage<T>(
 
     var storage = config.createStorage(initialBits)
         private set
-    val palette = config.createPalette()
+    var palette = config.createPalette()
+        private set
     private var counts = config.createCounter(initialBits)
-    private val iterationStrategy = config.createIterationStrategy()
+    private var iterationStrategy = config.createIterationStrategy()
 
     fun count(type: T): Int {
-        return synchronized(this) {
-            if (!palette.isMapped(type)) return 0
-            counts.get(palette.getId(type))
-        }
+        if (!palette.isMapped(type)) return 0
+        return counts.get(palette.getId(type))
     }
 
     fun types(): Set<T> {
-        return synchronized(this) {
-            counts.types().map { palette.getState(it) }.toSet()
-        }
+        return counts.types().map { palette.getState(it) }.toSet()
     }
 
     operator fun contains(type: T): Boolean {
-        return synchronized(this) {
-            count(type) > 0
-        }
+        return count(type) > 0
     }
 
     fun get(index: Int): T {
-        return synchronized(this) {
-            val num = storage.get(index)
-            palette.getState(num)
-        }
+        val num = storage.get(index)
+        return palette.getState(num)
     }
 
     fun set(index: Int, block: T) {
-        synchronized(this) {
-            val num = palette.getId(block)
-            while (storage.isTooBig(num)) {
-                upsize()
-            }
-
-            val existing = storage.get(index)
-            counts.decrement(existing)
-
-            storage.set(index, num)
-            counts.increment(num)
-
-            iterationStrategy.set(index)
+        val num = palette.getId(block)
+        while (storage.isTooBig(num)) {
+            upsize()
         }
+
+        val existing = storage.get(index)
+        counts.decrement(existing)
+
+        storage.set(index, num)
+        counts.increment(num)
+
+        iterationStrategy.set(index)
     }
 
     fun unset(index: Int) {
-        synchronized(this) {
-            set(index, config.defaultState)
-            iterationStrategy.unset(index)
-        }
+        set(index, config.defaultState)
+        iterationStrategy.unset(index)
     }
 
-    fun copyDataFrom(other: PalettedStorage<T>) {
-        require(other.config.size == config.size) { "Cannot copy data from storage with different size" }
-        synchronized(this) {
-            val otherBits = other.storage.bits
-            if (otherBits > storage.bits) upsize(otherBits)
-            for (i in 0 until other.storage.size) {
-                set(i, other.get(i))
-            }
-        }
+    fun clone(): PalettedStorage<T> {
+        val clone = PalettedStorage(config)
+        clone.iterationStrategy = iterationStrategy.clone()
+        clone.palette = palette.clone()
+        clone.storage = storage.clone()
+        clone.counts = counts.clone()
+        return clone
     }
 
     private fun upsize(newSize: Int = storage.bits + 1) {
@@ -87,18 +74,9 @@ class PalettedStorage<T>(
     }
 
     override fun iterator(): Iterator<Indexed<T>> {
-        val numIterator = synchronized(this) { iterationStrategy.iterator() }
-
-        return object : Iterator<Indexed<T>> {
-            override fun hasNext(): Boolean {
-                return numIterator.hasNext()
-            }
-
-            override fun next(): Indexed<T> {
-                val index = numIterator.next()
-                val data = synchronized(this@PalettedStorage) { storage.get(index) }
-                return Indexed(index, palette.getState(data))
-            }
-        }
+        return iterationStrategy.iterator()
+            .asSequence()
+            .map { Indexed(it, get(it)) }
+            .iterator()
     }
 }

@@ -28,4 +28,11 @@ class IntCounts(bits: Int, maxCount: Int) : TypeCounts {
     override fun types(): Set<Int> {
         return types
     }
+
+    override fun clone(): TypeCounts {
+        val counts = IntCounts(data.bits, data.size)
+        System.arraycopy(data.raw(), 0, counts.data.raw(), 0, data.raw().size)
+        counts.types.addAll(types)
+        return counts
+    }
 }

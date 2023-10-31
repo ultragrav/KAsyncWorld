@@ -10,4 +10,5 @@ interface Palette<T> {
     fun isMapped(id: Int): Boolean
     fun globalPalette(): Palette<T>
     fun localToGlobal(): Map<Int, Int>
+    fun clone(): Palette<T>
 }

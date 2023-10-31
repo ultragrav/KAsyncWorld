@@ -1,34 +1,34 @@
 package net.ultragrav.kasyncworld.world.impl
 
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.world.level.block.state.BlockState
 import net.ultragrav.kasyncworld.AW
 import net.ultragrav.kasyncworld.getChunkKey
 import net.ultragrav.kasyncworld.getChunkX
 import net.ultragrav.kasyncworld.getChunkZ
+import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
 import net.ultragrav.kasyncworld.world.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.contract.AsyncWorld
 import net.ultragrav.kasyncworld.world.versionio.ChunkWriteOptions
 import org.bukkit.World
-import org.bukkit.block.data.BlockData
-import java.lang.RuntimeException
 import java.util.concurrent.CompletableFuture
 
 internal class SpigotAsyncWorld internal constructor(val world: World) : AsyncWorld {
 
     private val chunkMap = mutableMapOf<Long, AsyncChunk>()
 
-    override fun setBlock(x: Int, y: Int, z: Int, block: BlockData) {
+    override fun setBlock(x: Int, y: Int, z: Int, block: BlockState) {
         val chunkX = x shr 4
         val chunkZ = z shr 4
         val chunk = getChunk(chunkX, chunkZ)
         chunk.setBlock(x and 15, y, z and 15, block)
     }
 
-    override fun setTileEntity(x: Int, y: Int, z: Int, tile: CompoundTag) {
+    override fun setBlockEntity(x: Int, y: Int, z: Int, tile: CompoundTag) {
         val chunkX = x shr 4
         val chunkZ = z shr 4
         val chunk = getChunk(chunkX, chunkZ)
-        chunk.setTileEntity(x and 15, y, z and 15, tile)
+        chunk.setBlockEntity(x and 15, y, z and 15, tile)
     }
 
     override fun unsetBlock(x: Int, y: Int, z: Int) {
@@ -38,11 +38,11 @@ internal class SpigotAsyncWorld internal constructor(val world: World) : AsyncWo
         chunk.unsetBlock(x and 15, y, z and 15)
     }
 
-    override fun unsetTileEntity(x: Int, y: Int, z: Int) {
+    override fun unsetBlockEntity(x: Int, y: Int, z: Int) {
         val chunkX = x shr 4
         val chunkZ = z shr 4
         val chunk = getChunk(chunkX, chunkZ)
-        chunk.removeTileEntity(x and 15, y, z and 15)
+        chunk.removeBlockEntity(x and 15, y, z and 15)
     }
 
     override fun setChunk(cx: Int, cz: Int, chunk: AsyncChunk) {
@@ -58,8 +58,10 @@ internal class SpigotAsyncWorld internal constructor(val world: World) : AsyncWo
             check(worldHeight and 0xF == 0) { "World height must be a multiple of 16" }
             chunkMap.getOrPut(key) {
                 val chunk = createChunk(
-                    worldHeight shr 4,
-                    world.minHeight shr 4
+                    ChunkHeightOptions(
+                        numSections = worldHeight shr 4,
+                        minSection = world.minHeight shr 4
+                    )
                 )
                 chunkMap[key] = chunk
                 chunk
@@ -94,7 +96,7 @@ internal class SpigotAsyncWorld internal constructor(val world: World) : AsyncWo
         }
     }
 
-    override fun createChunk(numSections: Int, minSectionY: Int): AsyncChunk {
-        return SpigotAsyncChunk(numSections, minSectionY)
+    override fun createChunk(heightOptions: ChunkHeightOptions): AsyncChunk {
+        return SpigotAsyncChunk(heightOptions)
     }
 }
