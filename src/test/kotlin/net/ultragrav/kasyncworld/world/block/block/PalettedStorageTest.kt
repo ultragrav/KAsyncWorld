@@ -1,7 +1,7 @@
 package net.ultragrav.kasyncworld.world.block.block
 
-import net.ultragrav.kasyncworld.world.chunk.block.storage.PalettedStorage
-import net.ultragrav.kasyncworld.world.chunk.block.storage.PalettedStorageConfig
+import net.ultragrav.kasyncworld.world.chunk.block.storage.PalettedStorageImpl
+import net.ultragrav.kasyncworld.world.chunk.block.storage.PalettedStorageImplConfig
 import net.ultragrav.kasyncworld.world.chunk.block.iteration.IterationStrategy
 import net.ultragrav.kasyncworld.world.chunk.block.bit.BitStorage
 import net.ultragrav.kasyncworld.world.chunk.block.bit.NumberStorage
@@ -20,8 +20,8 @@ class PalettedStorageTest {
     val AIR = EmptyBlockData(Material.AIR)
     val STONE = EmptyBlockData(Material.STONE)
 
-    private fun createStorage(): PalettedStorage<BlockData> {
-        val config = object : PalettedStorageConfig<BlockData> {
+    private fun createStorage(): PalettedStorageImpl<BlockData> {
+        val config = object : PalettedStorageImplConfig<BlockData> {
             override val size = 4096
             override val defaultState = AIR
 
@@ -43,7 +43,7 @@ class PalettedStorageTest {
 
         }
 
-        return PalettedStorage(config, 1)
+        return PalettedStorageImpl(config, 1)
     }
 
     @Test

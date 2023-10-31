@@ -5,7 +5,7 @@ import net.ultragrav.kasyncworld.world.chunk.block.count.TypeCounts
 import net.ultragrav.kasyncworld.world.chunk.block.iteration.IterationStrategy
 import net.ultragrav.kasyncworld.world.chunk.block.palette.Palette
 
-interface PalettedStorageConfig<T> {
+interface PalettedStorageImplConfig<T> {
     val size: Int
     val defaultState: T
     fun createStorage(bits: Int): NumberStorage
