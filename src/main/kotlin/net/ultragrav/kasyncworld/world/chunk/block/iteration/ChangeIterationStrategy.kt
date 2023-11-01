@@ -7,27 +7,34 @@ class ChangeIterationStrategy(override val size: Int) : IterationStrategy {
 
     private var numChanges = 0
     private var current = 0
+
+    // Index 0 is where the initial index is stored. All other indexes are shifted
+    // by +1.
     private val forwards = BitStorage(ceilLog2(size + 1), size + 1)
+
+    // Index 0 unused.
     private val backwards = BitStorage(ceilLog2(size + 1), size + 1)
 
     override fun set(index: Int) {
         val realIndex = index + 1
         val old = forwards.get(realIndex)
-        if (old == 0) {
-            forwards.set(current, realIndex)
-            backwards.set(realIndex, current)
-            current = realIndex
-            numChanges++
-        }
+        if (old != 0) return
+
+        forwards.set(current, realIndex)
+        backwards.set(realIndex, current)
+        current = realIndex
+        numChanges++
     }
 
     override fun unset(index: Int) {
         val realIndex = index + 1
+
         val prev = backwards.get(realIndex)
         val prevNext = forwards.get(prev)
         val next = forwards.get(realIndex)
 
         // Is it even in the chain?
+        // Note that realIndex != 0
         if (prevNext != realIndex) return
 
         if (next != 0) {

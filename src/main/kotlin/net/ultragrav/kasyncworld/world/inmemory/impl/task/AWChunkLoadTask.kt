@@ -60,13 +60,13 @@ class AWChunkLoadTask(
                 val nmsBlocks = if (blocks is MinecraftPalettedStorage) blocks.wrapped else {
                     val container = PalettedContainer(Block.BLOCK_STATE_REGISTRY, Blocks.AIR.defaultBlockState(), PalettedContainer.Strategy.SECTION_STATES, null)
                     val wrapper = WrappedPalettedContainer(container)
-                    wrapper.copyFrom(blocks)
+                    blocks.applyTo(wrapper)
                     wrapper.wrapped
                 }
                 val nmsBiomes = if (biomes is MinecraftPalettedStorage) biomes.wrapped else {
                     val container = PalettedContainer(biomesRegistry.asHolderIdMap(), biomesRegistry.getHolderOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES, null)
                     val wrapper = WrappedPalettedContainer(container)
-                    wrapper.copyFrom(biomes)
+                    biomes.applyTo(wrapper)
                     wrapper.wrapped
                 }
                 LevelChunkSection(nmsBlocks, nmsBiomes)

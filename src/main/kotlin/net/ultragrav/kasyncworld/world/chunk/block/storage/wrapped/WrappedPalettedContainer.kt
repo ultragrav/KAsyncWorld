@@ -2,13 +2,16 @@ package net.ultragrav.kasyncworld.world.chunk.block.storage.wrapped
 
 import net.minecraft.world.level.chunk.PalettedContainer
 import net.ultragrav.kasyncworld.world.chunk.block.bit.NumberStorage
+import net.ultragrav.kasyncworld.world.chunk.block.iteration.IterationStrategy
+import net.ultragrav.kasyncworld.world.chunk.block.iteration.NormalIterationStrategy
 import net.ultragrav.kasyncworld.world.chunk.block.palette.Palette
 import net.ultragrav.kasyncworld.world.chunk.block.storage.Indexed
 import net.ultragrav.kasyncworld.world.chunk.block.storage.PalettedStorage
-import java.util.concurrent.atomic.AtomicInteger
 
 class WrappedPalettedContainer<T>(
-    override val wrapped: PalettedContainer<T>
+    override val wrapped: PalettedContainer<T>,
+    override val iterationStrategy: IterationStrategy =
+        NormalIterationStrategy(wrapped.data.storage.size)
 ) : MinecraftPalettedStorage<T> {
 
     override val storage: NumberStorage
@@ -29,6 +32,7 @@ class WrappedPalettedContainer<T>(
 
     override fun unset(index: Int) {
         wrapped.data.storage[index] = 0
+        iterationStrategy.unset(index)
     }
 
     override fun clone(): PalettedStorage<T> {
@@ -36,7 +40,7 @@ class WrappedPalettedContainer<T>(
     }
 
     override fun indexIterator(): Iterator<Int> {
-        return (0 until wrapped.data.storage.size).iterator()
+        return iterationStrategy.iterator()
     }
 
     override fun contains(type: T): Boolean {
@@ -46,6 +50,7 @@ class WrappedPalettedContainer<T>(
     override fun set(index: Int, type: T) {
         val id = wrapped.data.palette.idFor(type)
         wrapped.data.storage[index] = id
+        iterationStrategy.set(index)
     }
 
     override fun count(type: T): Int {

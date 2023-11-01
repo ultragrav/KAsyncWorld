@@ -1,11 +1,13 @@
 package net.ultragrav.kasyncworld.world.chunk.block.storage
 
 import net.ultragrav.kasyncworld.world.chunk.block.bit.NumberStorage
+import net.ultragrav.kasyncworld.world.chunk.block.iteration.IterationStrategy
 import net.ultragrav.kasyncworld.world.chunk.block.palette.Palette
 
 interface PalettedStorage<T> : Iterable<Indexed<T>> {
     val storage: NumberStorage
     val palette: Palette<T>
+    val iterationStrategy: IterationStrategy
     fun count(type: T): Int
     fun types(): Set<T>
     fun get(index: Int): T
@@ -15,9 +17,9 @@ interface PalettedStorage<T> : Iterable<Indexed<T>> {
     fun indexIterator(): Iterator<Int>
     operator fun contains(type: T): Boolean
 
-    fun copyFrom(other: PalettedStorage<T>) {
+    fun applyTo(other: PalettedStorage<T>) {
         for (i in indexIterator()) {
-            set(i, other.get(i))
+            other.set(i, get(i))
         }
     }
 }

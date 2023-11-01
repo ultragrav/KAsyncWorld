@@ -9,8 +9,9 @@ class PalettedStorageImpl<T>(
         private set
     override var palette = config.createPalette()
         private set
+    override var iterationStrategy = config.createIterationStrategy()
+        private set
     private var counts = config.createCounter(initialBits)
-    private var iterationStrategy = config.createIterationStrategy()
 
     override fun count(type: T): Int {
         if (!palette.isMapped(type)) return 0
