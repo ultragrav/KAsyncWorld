@@ -21,7 +21,7 @@ class AWChunkLoadTask(
     world: ServerLevel,
     chunkX: Int,
     chunkZ: Int,
-    val chunkProvider: AsyncChunkProvider
+    private val chunkProvider: AsyncChunkProvider
 ) : ChunkProgressionTask(scheduler, world,
     chunkX,
     chunkZ

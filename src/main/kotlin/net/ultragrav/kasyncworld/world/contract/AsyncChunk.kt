@@ -11,8 +11,6 @@ import net.ultragrav.kasyncworld.world.chunk.block.position.AWBlockPosition
 import net.ultragrav.kasyncworld.world.chunk.heightmap.AWHeightMap
 import net.ultragrav.kasyncworld.world.contract.section.AsyncChunkSection
 import net.ultragrav.kasyncworld.world.contract.section.AsyncChunkSectionFactory
-import org.bukkit.HeightMap
-import org.bukkit.persistence.PersistentDataContainer
 
 /**
  * A simple representation of a chunk. This representation is not
@@ -44,8 +42,8 @@ interface AsyncChunk : AsyncChunkSectionFactory {
     fun removeBlockEntity(x: Int, y: Int, z: Int)
     fun clearBlockEntities()
 
-    fun setSection(sectionIndex: Int, section: AsyncChunkSection?)
-    fun getSection(sectionIndex: Int): AsyncChunkSection?
+    fun setSection(sectionIndexMinBased: Int, section: AsyncChunkSection?)
+    fun getSection(sectionIndexMinBased: Int): AsyncChunkSection?
 
     fun clearSections()
 

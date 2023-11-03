@@ -1,6 +1,7 @@
 package net.ultragrav.kasyncworld.world.inmemory
 
 import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
+import net.ultragrav.kasyncworld.world.chunk.serialization.ChunkCodec
 import org.bukkit.World.Environment
 
 data class InMemoryWorldOptions(
@@ -9,4 +10,5 @@ data class InMemoryWorldOptions(
     val sizeChunksY: Int,
     val heightOptions: ChunkHeightOptions,
     val compressUnloadedChunks: Boolean,
+    val codec: ChunkCodec
 )

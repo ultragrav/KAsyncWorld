@@ -76,12 +76,12 @@ class SpigotAsyncChunk(
         blockEntities.clear()
     }
 
-    override fun setSection(sectionIndex: Int, section: AsyncChunkSection?) {
-        sections[sectionIndex - heightOptions.minSection] = section
+    override fun setSection(sectionIndexMinBased: Int, section: AsyncChunkSection?) {
+        sections[sectionIndexMinBased - heightOptions.minSection] = section
     }
 
-    override fun getSection(sectionIndex: Int): AsyncChunkSection? {
-        return sections[sectionIndex - heightOptions.minSection]
+    override fun getSection(sectionIndexMinBased: Int): AsyncChunkSection? {
+        return sections[sectionIndexMinBased - heightOptions.minSection]
     }
 
     private fun getOrMakeSection(sectionY: Int): AsyncChunkSection {

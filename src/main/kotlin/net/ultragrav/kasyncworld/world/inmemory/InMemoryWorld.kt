@@ -1,6 +1,6 @@
 package net.ultragrav.kasyncworld.world.inmemory
 
-import net.ultragrav.kasyncworld.world.contract.AsyncChunk
+import org.bukkit.World
 
 interface InMemoryWorld {
 
@@ -9,7 +9,7 @@ interface InMemoryWorld {
 
     val chunkProvider: AsyncChunkProvider
 
-    fun serialize(): ByteArray
+    val bukkitWorld: World
 
     fun unload(save: Boolean)
 }

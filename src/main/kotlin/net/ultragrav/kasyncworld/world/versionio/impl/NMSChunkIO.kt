@@ -10,6 +10,7 @@ import net.minecraft.world.level.chunk.LevelChunk
 import net.minecraft.world.level.chunk.LevelChunkSection
 import net.minecraft.world.ticks.ProtoChunkTicks
 import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
+import net.ultragrav.kasyncworld.world.chunk.block.storage.wrapped.WrappedPalettedContainer
 import net.ultragrav.kasyncworld.world.chunk.heightmap.AWHeightMap
 import net.ultragrav.kasyncworld.world.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.contract.AsyncChunkFactory
@@ -23,7 +24,25 @@ import org.bukkit.craftbukkit.v1_20_R2.entity.CraftEntity
 class NMSChunkIO : ChunkIO {
 
     override fun writeChunk(bukkitChunk: Chunk, chunk: AsyncChunk, options: ChunkWriteOptions) {
+        val nms = (bukkitChunk as CraftChunk).getHandle(ChunkStatus.FULL)
+                as? LevelChunk ?: throw IllegalStateException("Chunk is not fully loaded")
 
+        // Sections (Blocks)
+        for (i in 0 until nms.sectionsCount) {
+            val nmsSection = nms.sections[i] ?: continue
+            val section = chunk.getSection(i) ?: continue
+            writeSection(section, nmsSection)
+        }
+    }
+
+    private fun writeSection(section: AsyncChunkSection, nmsSection: LevelChunkSection) {
+        // Blocks
+        val wrappedStates = WrappedPalettedContainer(nmsSection.states)
+        section.blocks.applyTo(wrappedStates)
+
+        // Biomes
+        val wrappedBiomes = WrappedPalettedContainer(nmsSection.biomes)
+        section.biomes.applyTo(wrappedBiomes)
     }
 
     override fun sendPackets(bukkitChunk: Chunk, chunk: AsyncChunk) {
@@ -54,6 +73,7 @@ class NMSChunkIO : ChunkIO {
         // Entities
         bukkitChunk.entities.map { it as CraftEntity }
             .map { it.handle }
+            .filter { it.persist }
             .map {
                 val tag = CompoundTag()
                 it.save(tag)

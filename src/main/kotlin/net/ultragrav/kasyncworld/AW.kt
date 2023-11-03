@@ -1,7 +1,7 @@
 package net.ultragrav.kasyncworld
 
 import net.ultragrav.kasyncworld.world.chunk.queue.ChunkQueue
-import net.ultragrav.kasyncworld.world.chunk.serialization.ChunkSerializer
+import net.ultragrav.kasyncworld.world.chunk.serialization.ChunkCodec
 import net.ultragrav.kasyncworld.world.versionio.ChunkIO
 import org.bukkit.plugin.Plugin
 
@@ -14,6 +14,6 @@ object AW : AWApi {
         get() = TODO("Not yet implemented")
     override val chunkIO: ChunkIO
         get() = TODO("Not yet implemented")
-    override val serializer: ChunkSerializer
+    override val serializer: ChunkCodec
         get() = TODO("Not yet implemented")
 }
