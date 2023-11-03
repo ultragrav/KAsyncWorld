@@ -97,4 +97,27 @@ class ChangeIterationStrategyTest {
             .map { storage.get(it) }
         assertEquals(emptyList<Int>(), results)
     }
+
+    @Test
+    fun testGet() {
+        val strategy = ChangeIterationStrategy(10)
+        strategy.set(0)
+        strategy.set(5)
+        strategy.set(3)
+        strategy.set(9)
+        strategy.set(0)
+        strategy.unset(5)
+        strategy.unset(9)
+
+        assertTrue(strategy.get(0))
+        assertTrue(strategy.get(3))
+        assertFalse(strategy.get(1))
+        assertFalse(strategy.get(2))
+        assertFalse(strategy.get(4))
+        assertFalse(strategy.get(5))
+        assertFalse(strategy.get(6))
+        assertFalse(strategy.get(7))
+        assertFalse(strategy.get(8))
+        assertFalse(strategy.get(9))
+    }
 }

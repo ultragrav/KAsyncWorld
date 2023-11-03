@@ -29,16 +29,15 @@ class ChangeIterationStrategy(override val size: Int) : IterationStrategy {
     override fun unset(index: Int) {
         val realIndex = index + 1
 
-        val prev = backwards.get(realIndex)
-        val prevNext = forwards.get(prev)
-        val next = forwards.get(realIndex)
+        if (!get(index)) return
 
-        // Is it even in the chain?
-        // Note that realIndex != 0
-        if (prevNext != realIndex) return
+        val prev = backwards.get(realIndex)
+        val next = forwards.get(realIndex)
 
         if (next != 0) {
             backwards.set(next, prev)
+        } else {
+            current = prev
         }
 
         forwards.set(prev, next)
@@ -47,6 +46,10 @@ class ChangeIterationStrategy(override val size: Int) : IterationStrategy {
         forwards.set(realIndex, 0)
 
         numChanges--
+    }
+
+    override fun get(index: Int): Boolean {
+        return forwards.get(index + 1) != 0 || index == current - 1
     }
 
     override fun clone(): IterationStrategy {

@@ -83,8 +83,6 @@ internal class SpigotAsyncWorld internal constructor(val world: World) : AsyncWo
         }
 
         val writeOptions = ChunkWriteOptions(
-            ignoreEmptySections = true,
-            appendTiles = true,
             appendEntities = true,
         )
 

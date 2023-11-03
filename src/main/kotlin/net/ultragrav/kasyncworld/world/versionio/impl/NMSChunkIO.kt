@@ -1,10 +1,13 @@
 package net.ultragrav.kasyncworld.world.versionio.impl
 
+import net.minecraft.core.BlockPos
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.ListTag
 import net.minecraft.resources.ResourceLocation
+import net.minecraft.world.entity.EntityType
 import net.minecraft.world.level.ChunkPos
+import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.chunk.ChunkStatus
 import net.minecraft.world.level.chunk.LevelChunk
 import net.minecraft.world.level.chunk.LevelChunkSection
@@ -27,12 +30,55 @@ class NMSChunkIO : ChunkIO {
         val nms = (bukkitChunk as CraftChunk).getHandle(ChunkStatus.FULL)
                 as? LevelChunk ?: throw IllegalStateException("Chunk is not fully loaded")
 
+        val cx = nms.locX
+        val cz = nms.locZ
+
         // Sections (Blocks)
         for (i in 0 until nms.sectionsCount) {
             val nmsSection = nms.sections[i] ?: continue
             val section = chunk.getSection(i) ?: continue
+
+            // Remove tile entities at edited block positions
+            section.blocks.indexIterator().forEach { index ->
+                val x = section.getBlockX(index)
+                val y = section.getBlockY(index)
+                val z = section.getBlockZ(index)
+                val pos = BlockPos(x, y, z)
+                nms.removeBlockEntity(pos)
+            }
+
             writeSection(section, nmsSection)
         }
+
+        chunk.blockEntities.forEach { (pos, tag) ->
+            val nmsPos = BlockPos(pos.x, pos.y, pos.z)
+            val nmsBlockEntity = BlockEntity.loadStatic(
+                nmsPos,
+                chunk.getBlock(pos.x, pos.y, pos.z),
+                tag
+            ) ?: return@forEach
+            nmsBlockEntity.level = nms.level
+            nms.addAndRegisterBlockEntity(nmsBlockEntity)
+        }
+
+        // Entities
+        if (!options.appendEntities) {
+            nms.level.entityLookup.getOrCreateChunk(cx, cz)
+                .chunkEntities
+                .toList()
+                .forEach {
+                    it.remove()
+                }
+        }
+
+        val decodedEntities = EntityType.loadEntitiesRecursive(chunk.entities, nms.level).toList()
+        nms.level.entityLookup.addEntityChunkEntities(decodedEntities, ChunkPos(nms.locX, nms.locZ))
+
+        // Persistent Data
+        nms.persistentDataContainer.clear()
+        nms.persistentDataContainer.putAll(chunk.persistentData)
+
+
     }
 
     private fun writeSection(section: AsyncChunkSection, nmsSection: LevelChunkSection) {
@@ -126,25 +172,11 @@ class NMSChunkIO : ChunkIO {
 
     private fun readSection(async: AsyncChunkSection, section: LevelChunkSection) {
         // Blocks
-        val states = section.states
-        for (i in 0 until 4096) {
-            val x = i and 0xF
-            val y = i shr 8
-            val z = i shr 4 and 0xF
-
-            val state = states.get(x, y, z)
-            async.setBlock(x, y, z, state)
-        }
+        val wrappedStates = WrappedPalettedContainer(section.states)
+        wrappedStates.applyTo(async.blocks)
 
         // Biomes
-        val biomes = section.biomes
-        for (i in 0 until 64) {
-            val x = i and 0b11
-            val y = i shr 4
-            val z = i shr 2 and 0b11
-            val b = biomes.get(x, y, z)
-            async.setBiome(x, y, z, b)
-        }
-
+        val wrappedBiomes = WrappedPalettedContainer(section.biomes)
+        wrappedBiomes.applyTo(async.biomes)
     }
 }
