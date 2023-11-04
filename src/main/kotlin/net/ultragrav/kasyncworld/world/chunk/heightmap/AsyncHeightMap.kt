@@ -3,7 +3,6 @@ package net.ultragrav.kasyncworld.world.chunk.heightmap
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.levelgen.Heightmap
 import net.ultragrav.kasyncworld.world.contract.AsyncChunk
-import java.util.function.Predicate
 
 class AsyncHeightMap(
     val type: Heightmap.Types,
@@ -33,30 +32,27 @@ class AsyncHeightMap(
     }
 
     fun recompute() {
-
-        val maxHeight = heightOptions.maxBuildHeight
-        val minHeight = heightOptions.minBuildHeight
-
         for (x in 0..15) {
             for (z in 0..15) {
-                setHeight(x, z, minHeight)
+                recomputeColumn(x, z)
             }
         }
+    }
 
-        for (y in (maxHeight - 1) downTo minHeight) {
+    fun recomputeColumn(x: Int, z: Int, startFrom: Int = heightOptions.maxBuildHeightExclusive - 1) {
+        val minHeight = heightOptions.minBuildHeightInclusive
+
+        setHeight(x, z, minHeight)
+
+        for (y in (startFrom - 1) downTo minHeight) {
             if (stateProvider.canSkipLayer(y, type.isOpaque)) continue
 
-            for (x in 0..15) {
-                for (z in 0..15) {
-                    val block = stateProvider.getBlock(x, y, z)
-                    if (type.isOpaque.test(block)) {
-                        setHeight(x, z, y + 1)
-                        break
-                    }
-                }
+            val block = stateProvider.getBlock(x, y, z)
+            if (type.isOpaque.test(block)) {
+                setHeight(x, z, y + 1)
+                break
             }
         }
-
     }
 
     fun update(x: Int, y: Int, z: Int, blockData: BlockState): Boolean {
@@ -75,7 +71,7 @@ class AsyncHeightMap(
         } else if (currentHeight - 1 == y) {
             // If the block data is not opaque and is right below the current height in the heightmap:
 
-            for (j in (y - 1) downTo heightOptions.minBuildHeight) {
+            for (j in (y - 1) downTo heightOptions.minBuildHeightInclusive) {
                 val belowBlock = stateProvider.getBlock(x, j, z)
 
                 // If we found an opaque block below:
@@ -86,11 +82,38 @@ class AsyncHeightMap(
             }
 
             // If we didn't find any opaque blocks all the way down, set to minBuildHeight:
-            setHeight(x, z, heightOptions.minBuildHeight)
+            setHeight(x, z, heightOptions.minBuildHeightInclusive)
             return true
         }
 
         return false
+    }
+
+    fun applyTo(other: AsyncHeightMap) {
+        for (x in 0..15) {
+            for (z in 0..15) {
+                other.setHeight(x, z, getHeight(x, z))
+            }
+        }
+    }
+
+    fun editWith(other: AsyncHeightMap) {
+        for (x in 0..15) {
+            for (z in 0..15) {
+                val edited = other.getHeight(x, z)
+                val curr = getHeight(x, z)
+
+                if (edited == curr) continue
+
+                if (edited > curr) {
+                    setHeight(x, z, edited)
+                    continue
+                }
+
+                recomputeColumn(x, z, curr)
+
+            }
+        }
     }
 
 }

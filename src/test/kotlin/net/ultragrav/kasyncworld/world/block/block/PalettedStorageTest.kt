@@ -13,15 +13,16 @@ import net.ultragrav.kasyncworld.world.chunk.block.palette.SimplePalette
 import org.bukkit.Material
 import org.bukkit.block.data.BlockData
 import org.junit.jupiter.api.Test
+import java.util.Objects
 import kotlin.test.assertEquals
 
 class PalettedStorageTest {
 
-    val AIR = EmptyBlockData(Material.AIR)
-    val STONE = EmptyBlockData(Material.STONE)
+    val AIR = Any()
+    val STONE = Any()
 
-    private fun createStorage(): PalettedStorageImpl<BlockData> {
-        val config = object : PalettedStorageImplConfig<BlockData> {
+    private fun createStorage(): PalettedStorageImpl<Any> {
+        val config = object : PalettedStorageImplConfig<Any> {
             override val size = 4096
             override val defaultState = AIR
 
@@ -32,8 +33,8 @@ class PalettedStorageTest {
                 return IntCounts(bits, size)
             }
 
-            override fun createPalette(localToGlobal: Map<Int, Int>): Palette<BlockData> {
-                val palette = SimplePalette<BlockData>()
+            override fun createPalette(): Palette<Any> {
+                val palette = SimplePalette<Any>()
                 palette.getId(defaultState)
                 return palette
             }

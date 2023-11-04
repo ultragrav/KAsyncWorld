@@ -14,9 +14,19 @@ import net.ultragrav.kasyncworld.world.versionio.HeightmapWriteType
 import org.bukkit.World
 import java.util.concurrent.CompletableFuture
 
-internal class SpigotAsyncWorld internal constructor(val world: World) : AsyncWorld {
+internal class SpigotAsyncWorld internal constructor(val world: World, val editType: AsyncWorld.EditType) : AsyncWorld {
 
     private val chunkMap = mutableMapOf<Long, AsyncChunk>()
+
+    override val heightOptions = ChunkHeightOptions(
+        (world.maxHeight - world.minHeight) shr 4,
+        world.minHeight shr 4,
+    )
+
+    init {
+        require(world.minHeight % 16 == 0) { "World min height must be a multiple of 16" }
+        require(world.maxHeight % 16 == 0) { "World max height must be a multiple of 16" }
+    }
 
     override fun setBlock(x: Int, y: Int, z: Int, block: BlockState) {
         val chunkX = x shr 4
@@ -47,45 +57,47 @@ internal class SpigotAsyncWorld internal constructor(val world: World) : AsyncWo
     }
 
     override fun setChunk(cx: Int, cz: Int, chunk: AsyncChunk) {
-        synchronized(this) {
-            chunkMap[getChunkKey(cx, cz)] = chunk
-        }
+        chunkMap[getChunkKey(cx, cz)] = chunk
     }
 
     override fun getChunk(cx: Int, cz: Int): AsyncChunk {
         val key = getChunkKey(cx, cz)
-        return synchronized(this) {
-            val worldHeight = world.maxHeight - world.minHeight
-            check(worldHeight and 0xF == 0) { "World height must be a multiple of 16" }
-            chunkMap.getOrPut(key) {
-                val chunk = createChunk(
-                    ChunkHeightOptions(
-                        numSections = worldHeight shr 4,
-                        minSection = world.minHeight shr 4
-                    )
-                )
-                chunkMap[key] = chunk
-                chunk
-            }
+        return chunkMap.getOrPut(key) {
+            val chunk = createChunk()
+            chunkMap[key] = chunk
+            chunk
         }
     }
 
     override fun flush(): CompletableFuture<Void> {
-        TODO("Not yet implemented")
+        val chunks = chunkMap.toMap()
+        chunkMap.clear()
+
+        val writeOptions = ChunkWriteOptions(
+            appendEntities = true,
+            heightmapWriteType = HeightmapWriteType.MERGE,
+            writePersistentContainer = false
+        )
+
+        return CompletableFuture.allOf(
+            *chunks.map { (key, chunk) ->
+                val cx = getChunkX(key)
+                val cz = getChunkZ(key)
+                AW.chunkQueue.enqueue(cx, cz, world, chunk, writeOptions)
+            }.toTypedArray()
+        )
     }
 
     override fun syncFlush() {
         val io = AW.chunkIO
 
-        val chunks = synchronized(this) {
-            val copy = chunkMap.toMap()
-            chunkMap.clear()
-            copy
-        }
+        val chunks = chunkMap.toMap()
+        chunkMap.clear()
 
         val writeOptions = ChunkWriteOptions(
             appendEntities = true,
             heightmapWriteType = HeightmapWriteType.MERGE,
+            writePersistentContainer = false
         )
 
         chunks.forEach { (key, chunk) ->
@@ -97,6 +109,7 @@ internal class SpigotAsyncWorld internal constructor(val world: World) : AsyncWo
     }
 
     override fun createChunk(heightOptions: ChunkHeightOptions): AsyncChunk {
-        return SpigotAsyncChunk(heightOptions)
+        return SpigotAsyncChunk(heightOptions, editType)
     }
+
 }

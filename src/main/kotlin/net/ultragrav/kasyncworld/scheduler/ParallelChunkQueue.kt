@@ -1,18 +1,17 @@
 package net.ultragrav.kasyncworld.scheduler
 
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
 import net.ultragrav.kasyncworld.world.chunk.queue.ChunkQueue
 import net.ultragrav.kasyncworld.world.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.versionio.ChunkIO
 import net.ultragrav.kasyncworld.world.versionio.ChunkWriteOptions
+import org.bukkit.Bukkit
 import org.bukkit.World
+import org.bukkit.plugin.Plugin
 import java.util.concurrent.CompletableFuture
 
 
-class NormalChunkQueue(val io: ChunkIO) : ChunkQueue {
+class ParallelChunkQueue(val plugin: Plugin, val io: ChunkIO) : ChunkQueue {
 
     val batchSize = 16
 
@@ -26,6 +25,17 @@ class NormalChunkQueue(val io: ChunkIO) : ChunkQueue {
     )
 
     private val queue = mutableListOf<EnqueuedChunk>()
+
+    private var taskId = -1
+
+    fun start() {
+        taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::processNextBatch, 0, 1)
+    }
+
+    fun end() {
+        if (taskId == -1) return
+        Bukkit.getScheduler().cancelTask(taskId)
+    }
 
     override fun enqueue(
         x: Int,
@@ -75,5 +85,6 @@ class NormalChunkQueue(val io: ChunkIO) : ChunkQueue {
                 }
             }
         }
+        batch.forEach { it.future.complete(null) }
     }
 }

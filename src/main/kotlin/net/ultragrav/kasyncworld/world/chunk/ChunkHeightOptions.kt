@@ -1,8 +1,8 @@
 package net.ultragrav.kasyncworld.world.chunk
 
 data class ChunkHeightOptions(val numSections: Int, val minSection: Int) {
-    val minBuildHeight: Int get() = minSection shl 4
-    val maxBuildHeight: Int get() = height + minBuildHeight
+    val minBuildHeightInclusive: Int get() = minSection shl 4
+    val maxBuildHeightExclusive: Int get() = height + minBuildHeightInclusive
     val height: Int get() = numSections shl 4
 }
 

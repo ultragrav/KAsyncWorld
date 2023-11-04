@@ -16,10 +16,10 @@ class NMSHeightmapStorageWrapper(val heightmap: Heightmap, val chunk: LevelChunk
     }
 
     override fun setHeight(x: Int, z: Int, height: Int) {
-        heightmap.
+        heightmap.setFirstAvailable(x, z, height)
     }
 
     override fun clone(): HeightmapStorage {
-        TODO("Not yet implemented")
+        return NMSHeightmapStorageWrapper(heightmap, chunk)
     }
 }

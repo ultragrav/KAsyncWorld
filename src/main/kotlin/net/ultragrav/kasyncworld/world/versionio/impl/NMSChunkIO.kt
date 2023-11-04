@@ -16,6 +16,8 @@ import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
 import net.ultragrav.kasyncworld.world.chunk.block.position.AWBlockPosition
 import net.ultragrav.kasyncworld.world.chunk.block.storage.wrapped.WrappedPalettedContainer
 import net.ultragrav.kasyncworld.world.chunk.heightmap.AsyncHeightMap
+import net.ultragrav.kasyncworld.world.chunk.heightmap.wrapper.NMSHeightmapStateProvider
+import net.ultragrav.kasyncworld.world.chunk.heightmap.wrapper.NMSHeightmapStorageWrapper
 import net.ultragrav.kasyncworld.world.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.contract.AsyncChunkFactory
 import net.ultragrav.kasyncworld.world.contract.section.AsyncChunkSection
@@ -52,42 +54,49 @@ class NMSChunkIO : ChunkIO {
             return blockIndex in section.blocks.iterationStrategy
         }
 
-        // Remove existing block entities
-        nms.blockEntities.toList().forEach { (pos, _) ->
-            val wasBlockSet = wasBlockEdited(pos)
-            val isTileSet = AWBlockPosition(pos.x, pos.y, pos.z) in chunk.blockEntities
-            if (!wasBlockSet && !isTileSet) return@forEach
-            nms.removeBlockEntity(pos)
-        }
+        // This method might be run chunk-wise-parallel, so we need to make sure
+        // that parts that interact with the level are synchronized
+        synchronized(this) {
+            // Remove existing block entities
+            nms.blockEntities.toList().forEach { (pos, _) ->
+                val wasBlockSet = wasBlockEdited(pos)
+                val isTileSet = AWBlockPosition(pos.x, pos.y, pos.z) in chunk.blockEntities
+                if (!wasBlockSet && !isTileSet) return@forEach
+                nms.removeBlockEntity(pos)
+            }
 
-        // Add new ones
-        chunk.blockEntities.forEach { (pos, tag) ->
-            val nmsPos = BlockPos(pos.x, pos.y, pos.z)
-            val nmsBlockEntity = BlockEntity.loadStatic(
-                nmsPos,
-                chunk.getBlock(pos.x, pos.y, pos.z),
-                tag
-            ) ?: return@forEach
-            nmsBlockEntity.level = nms.level
-            nms.addAndRegisterBlockEntity(nmsBlockEntity)
-        }
+            // Add new ones
+            chunk.blockEntities.forEach { (pos, tag) ->
+                val nmsPos = BlockPos(pos.x, pos.y, pos.z)
+                val nmsBlockEntity = BlockEntity.loadStatic(
+                    nmsPos,
+                    chunk.getBlock(pos.x, pos.y, pos.z),
+                    tag
+                ) ?: return@forEach
+                nmsBlockEntity.level = nms.level
+                nms.addAndRegisterBlockEntity(nmsBlockEntity)
+            }
 
-        // Entities
-        if (!options.appendEntities) {
-            nms.level.entityLookup.getOrCreateChunk(cx, cz)
-                .chunkEntities
-                .toList()
-                .forEach {
-                    it.remove()
-                }
-        }
+            // Entities
+            if (!options.appendEntities) {
+                nms.level.entityLookup.getOrCreateChunk(cx, cz)
+                    .chunkEntities
+                    .toList()
+                    .forEach {
+                        it.remove()
+                    }
+            }
 
-        val decodedEntities = EntityType.loadEntitiesRecursive(chunk.entities, nms.level).toList()
-        nms.level.entityLookup.addEntityChunkEntities(decodedEntities, ChunkPos(nms.locX, nms.locZ))
+            val decodedEntities = EntityType.loadEntitiesRecursive(chunk.entities, nms.level).toList()
+            nms.level.entityLookup.addEntityChunkEntities(decodedEntities, ChunkPos(nms.locX, nms.locZ))
+
+        }
 
         // Persistent Data
-        nms.persistentDataContainer.clear()
-        nms.persistentDataContainer.putAll(chunk.persistentData)
+        if (options.writePersistentContainer) {
+            nms.persistentDataContainer.clear()
+            nms.persistentDataContainer.putAll(chunk.persistentData)
+        }
 
         // Fluid and Block Ticks
         val blockTicks = chunk.blockTicks
@@ -113,15 +122,27 @@ class NMSChunkIO : ChunkIO {
         }
 
         // Heightmaps
-        when (options.heightmapWriteType) {
-            HeightmapWriteType.IGNORE -> {}
-            HeightmapWriteType.OVERWRITE -> {
-                val heightmaps = nms.heightmaps
-                heightmaps.forEach { (key, _) ->
-                    heightmaps.set(key, AsyncHeightMap(chunk.heightmaps[key]!!))
+        val heightmaps = nms.heightmaps
+        heightmaps.forEach { (key, wrapped) ->
+            val wrapper = AsyncHeightMap(
+                key,
+                NMSHeightmapStorageWrapper(wrapped, nms),
+                NMSHeightmapStateProvider(nms)
+            )
+            val hm = chunk.heightMaps[key] ?: return@forEach
+
+            when (options.heightmapWriteType) {
+                HeightmapWriteType.IGNORE -> {}
+                HeightmapWriteType.OVERWRITE -> {
+                    hm.applyTo(wrapper)
+                }
+
+                HeightmapWriteType.MERGE -> {
+                    hm.editWith(wrapper)
                 }
             }
         }
+
 
     }
 
@@ -161,15 +182,19 @@ class NMSChunkIO : ChunkIO {
             .forEach { (pos, ent) -> chunk.setBlockEntity(pos.x, pos.y, pos.z, ent) }
 
         // Entities
-        bukkitChunk.entities.map { it as CraftEntity }
-            .map { it.handle }
-            .filter { it.persist }
-            .map {
-                val tag = CompoundTag()
-                it.save(tag)
-                tag
-            }
-            .forEach { chunk.addEntity(it) }
+        // Chunk-wise parallelism is not possible here, because entities
+        // are stored in a level data structure. So we must synchronize.
+        synchronized(this) {
+            bukkitChunk.entities.map { it as CraftEntity }
+                .map { it.handle }
+                .filter { it.persist }
+                .map {
+                    val tag = CompoundTag()
+                    it.save(tag)
+                    tag
+                }
+                .forEach { chunk.addEntity(it) }
+        }
 
         // Persistent data
         chunk.persistentData = nms.persistentDataContainer.toTagCompound()
@@ -202,11 +227,14 @@ class NMSChunkIO : ChunkIO {
                 type,
                 chunk
             )
-            for (x in 0 until 16) {
-                for (z in 0 until 16) {
-                    newHeightMap.setHeight(x, z, map.getFirstAvailable(x, z))
-                }
-            }
+
+            val wrapper = AsyncHeightMap(
+                type,
+                NMSHeightmapStorageWrapper(map, nms),
+                NMSHeightmapStateProvider(nms)
+            )
+
+            wrapper.applyTo(newHeightMap)
 
             chunk.setHeightMap(type, newHeightMap)
         }

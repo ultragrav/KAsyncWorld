@@ -1,6 +1,15 @@
 package net.ultragrav.kasyncworld.world.impl
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import net.minecraft.core.Holder
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.core.registries.Registries
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.server.MinecraftServer
+import net.minecraft.world.level.biome.Biome
+import net.minecraft.world.level.biome.Biomes
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.state.BlockState
@@ -8,13 +17,27 @@ import net.minecraft.world.level.levelgen.Heightmap
 import net.minecraft.world.level.material.Fluid
 import net.minecraft.world.ticks.SavedTick
 import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
+import net.ultragrav.kasyncworld.world.chunk.block.bit.BitStorage
+import net.ultragrav.kasyncworld.world.chunk.block.bit.NumberStorage
+import net.ultragrav.kasyncworld.world.chunk.block.count.IntCounts
+import net.ultragrav.kasyncworld.world.chunk.block.count.TypeCounts
+import net.ultragrav.kasyncworld.world.chunk.block.iteration.ChangeIterationStrategy
+import net.ultragrav.kasyncworld.world.chunk.block.iteration.IterationStrategy
+import net.ultragrav.kasyncworld.world.chunk.block.iteration.NormalIterationStrategy
+import net.ultragrav.kasyncworld.world.chunk.block.palette.Palette
+import net.ultragrav.kasyncworld.world.chunk.block.palette.SimplePalette
 import net.ultragrav.kasyncworld.world.chunk.block.position.AWBlockPosition
+import net.ultragrav.kasyncworld.world.chunk.block.storage.PalettedStorage
+import net.ultragrav.kasyncworld.world.chunk.block.storage.PalettedStorageImpl
+import net.ultragrav.kasyncworld.world.chunk.block.storage.PalettedStorageImplConfig
 import net.ultragrav.kasyncworld.world.chunk.heightmap.AsyncHeightMap
 import net.ultragrav.kasyncworld.world.contract.AsyncChunk
+import net.ultragrav.kasyncworld.world.contract.AsyncWorld
 import net.ultragrav.kasyncworld.world.contract.section.AsyncChunkSection
 
 class SpigotAsyncChunk(
-    override val heightOptions: ChunkHeightOptions
+    override val heightOptions: ChunkHeightOptions,
+    val editType: AsyncWorld.EditType
 ) : AsyncChunk {
 
     override val sections: Array<AsyncChunkSection?> = arrayOfNulls(heightOptions.numSections)
@@ -53,7 +76,7 @@ class SpigotAsyncChunk(
             throw IllegalArgumentException("Height map has different height options")
         }
 
-        heightMaps[type] = heightMap.clone(chunk = this)
+        heightMaps[type] = heightMap.clone()
     }
 
     override fun clearHeightMaps() {
@@ -106,8 +129,11 @@ class SpigotAsyncChunk(
     }
 
     override fun clone(): AsyncChunk {
-        val copy = SpigotAsyncChunk(heightOptions)
+        val copy = SpigotAsyncChunk(heightOptions, editType)
         copy.entities.addAll(entities)
+        copy.blockTicks.addAll(blockTicks)
+        copy.fluidTicks.addAll(fluidTicks)
+        copy.persistentData = persistentData.copy()
         copy.blockEntities.putAll(blockEntities)
         copy.heightMaps.putAll(heightMaps)
         copy.sections.forEachIndexed { index, section ->
@@ -116,7 +142,110 @@ class SpigotAsyncChunk(
         return copy
     }
 
+    val sparseBlockConfig = object : PalettedStorageImplConfig<BlockState> {
+        override val size = 4096
+        override val defaultState = Blocks.AIR.defaultBlockState()
+
+        override fun createStorage(bits: Int): NumberStorage {
+            return BitStorage(size, bits)
+        }
+
+        override fun createCounter(bits: Int): TypeCounts {
+            return IntCounts(size, bits)
+        }
+
+        override fun createPalette(): Palette<BlockState> {
+            return SimplePalette()
+        }
+
+        override fun createIterationStrategy(): IterationStrategy {
+            return ChangeIterationStrategy(size)
+        }
+
+    }
+
+    val sparseBiomeConfig = object : PalettedStorageImplConfig<Holder<Biome>> {
+        override val size = 64
+
+        override val defaultState = MinecraftServer.getServer().registryAccess().registryOrThrow(Registries.BIOME)
+            .getHolderOrThrow(Biomes.PLAINS)
+
+        override fun createStorage(bits: Int): NumberStorage {
+            return BitStorage(size, bits)
+        }
+
+        override fun createCounter(bits: Int): TypeCounts {
+            return IntCounts(size, bits)
+        }
+
+        override fun createPalette(): Palette<Holder<Biome>> {
+            return SimplePalette()
+        }
+
+        override fun createIterationStrategy(): IterationStrategy {
+            return ChangeIterationStrategy(size)
+        }
+
+    }
+
+    val denseBlockConfig = object : PalettedStorageImplConfig<BlockState> {
+        override val size = 4096
+        override val defaultState = Blocks.AIR.defaultBlockState()
+
+        override fun createStorage(bits: Int): NumberStorage {
+            return BitStorage(size, bits)
+        }
+
+        override fun createCounter(bits: Int): TypeCounts {
+            return IntCounts(size, bits)
+        }
+
+        override fun createPalette(): Palette<BlockState> {
+            return SimplePalette()
+        }
+
+        override fun createIterationStrategy(): IterationStrategy {
+            return NormalIterationStrategy(size)
+        }
+
+    }
+
+    val denseBiomeConfig = object : PalettedStorageImplConfig<Holder<Biome>> {
+        override val size = 64
+
+        override val defaultState = MinecraftServer.getServer().registryAccess().registryOrThrow(Registries.BIOME)
+            .getHolderOrThrow(Biomes.PLAINS)
+
+        override fun createStorage(bits: Int): NumberStorage {
+            return BitStorage(size, bits)
+        }
+
+        override fun createCounter(bits: Int): TypeCounts {
+            return IntCounts(size, bits)
+        }
+
+        override fun createPalette(): Palette<Holder<Biome>> {
+            return SimplePalette()
+        }
+
+        override fun createIterationStrategy(): IterationStrategy {
+            return NormalIterationStrategy(size)
+        }
+
+    }
+
     override fun createSection(): AsyncChunkSection {
-        TODO("Not yet implemented")
+        when (editType) {
+            AsyncWorld.EditType.SPARSE, AsyncWorld.EditType.MIXED -> {
+                val blocks = PalettedStorageImpl(sparseBlockConfig)
+                val biomes = PalettedStorageImpl(sparseBiomeConfig)
+                return BasicAsyncChunkSection(blocks, biomes)
+            }
+            AsyncWorld.EditType.DENSE -> {
+                val blocks = PalettedStorageImpl(denseBlockConfig)
+                val biomes = PalettedStorageImpl(denseBiomeConfig)
+                return BasicAsyncChunkSection(blocks, biomes)
+            }
+        }
     }
 }

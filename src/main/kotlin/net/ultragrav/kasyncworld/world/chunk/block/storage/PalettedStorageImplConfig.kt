@@ -10,6 +10,6 @@ interface PalettedStorageImplConfig<T> {
     val defaultState: T
     fun createStorage(bits: Int): NumberStorage
     fun createCounter(bits: Int): TypeCounts
-    fun createPalette(localToGlobal: Map<Int, Int> = emptyMap()): Palette<T>
+    fun createPalette(): Palette<T>
     fun createIterationStrategy(): IterationStrategy
 }

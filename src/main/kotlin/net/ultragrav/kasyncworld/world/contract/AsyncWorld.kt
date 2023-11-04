@@ -2,9 +2,13 @@ package net.ultragrav.kasyncworld.world.contract
 
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.level.block.state.BlockState
+import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
 import java.util.concurrent.CompletableFuture
 
 interface AsyncWorld : AsyncChunkFactory {
+
+    val heightOptions: ChunkHeightOptions
+
     /**
      * Set the block at the given coordinates. If the block data provided is
      * a state that requires a tile entity, the tile entity will be set as well.
@@ -57,4 +61,10 @@ interface AsyncWorld : AsyncChunkFactory {
      * use on any thread other than the main thread.
      */
     fun syncFlush()
+
+    fun createChunk() = createChunk(heightOptions)
+
+    enum class EditType {
+        DENSE, SPARSE, MIXED
+    }
 }
