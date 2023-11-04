@@ -235,16 +235,17 @@ class SpigotAsyncChunk(
     }
 
     override fun createSection(): AsyncChunkSection {
-        when (editType) {
+        return when (editType) {
             AsyncWorld.EditType.SPARSE, AsyncWorld.EditType.MIXED -> {
                 val blocks = PalettedStorageImpl(sparseBlockConfig)
                 val biomes = PalettedStorageImpl(sparseBiomeConfig)
-                return BasicAsyncChunkSection(blocks, biomes)
+                BasicAsyncChunkSection(blocks, biomes)
             }
+
             AsyncWorld.EditType.DENSE -> {
                 val blocks = PalettedStorageImpl(denseBlockConfig)
                 val biomes = PalettedStorageImpl(denseBiomeConfig)
-                return BasicAsyncChunkSection(blocks, biomes)
+                BasicAsyncChunkSection(blocks, biomes)
             }
         }
     }
