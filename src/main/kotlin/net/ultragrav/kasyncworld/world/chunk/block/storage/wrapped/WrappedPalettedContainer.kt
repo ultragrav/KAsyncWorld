@@ -20,6 +20,8 @@ class WrappedPalettedContainer<T>(
     override val palette: Palette<T>
         get() = WrappedPalette(wrapped.registry, wrapped.data.palette)
 
+    override val fastCountsAndTypesSupported = false
+
     override fun types(): Set<T> {
         return (0 until wrapped.data.palette.size)
             .map { wrapped.data.palette.valueFor(it) }

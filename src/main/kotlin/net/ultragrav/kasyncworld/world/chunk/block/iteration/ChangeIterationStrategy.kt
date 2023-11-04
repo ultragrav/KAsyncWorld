@@ -29,7 +29,7 @@ class ChangeIterationStrategy(override val size: Int) : IterationStrategy {
     override fun unset(index: Int) {
         val realIndex = index + 1
 
-        if (!get(index)) return
+        if (!contains(index)) return
 
         val prev = backwards.get(realIndex)
         val next = forwards.get(realIndex)
@@ -48,7 +48,7 @@ class ChangeIterationStrategy(override val size: Int) : IterationStrategy {
         numChanges--
     }
 
-    override fun get(index: Int): Boolean {
+    override fun contains(index: Int): Boolean {
         return forwards.get(index + 1) != 0 || index == current - 1
     }
 

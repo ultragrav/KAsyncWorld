@@ -11,7 +11,18 @@ class PalettedStorageImpl<T>(
         private set
     override var iterationStrategy = config.createIterationStrategy()
         private set
+
+    override val fastCountsAndTypesSupported = true
+
     private var counts = config.createCounter(initialBits)
+
+    init {
+        val defaultId = palette.getId(config.defaultState)
+        counts.set(defaultId, config.size)
+        if (defaultId != 0) {
+            (0 until config.size).forEach { storage.set(it, defaultId) }
+        }
+    }
 
     override fun count(type: T): Int {
         if (!palette.isMapped(type)) return 0

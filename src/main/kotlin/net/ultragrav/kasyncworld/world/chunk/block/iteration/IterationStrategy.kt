@@ -9,7 +9,7 @@ interface IterationStrategy : Iterable<Int> {
 
     fun set(index: Int)
     fun unset(index: Int)
-    fun get(index: Int): Boolean
+    operator fun contains(index: Int): Boolean
 
     fun clone(): IterationStrategy
 

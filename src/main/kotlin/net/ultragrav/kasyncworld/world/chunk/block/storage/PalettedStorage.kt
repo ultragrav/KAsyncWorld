@@ -8,6 +8,7 @@ interface PalettedStorage<T> : Iterable<Indexed<T>> {
     val storage: NumberStorage
     val palette: Palette<T>
     val iterationStrategy: IterationStrategy
+    val fastCountsAndTypesSupported: Boolean
     fun count(type: T): Int
     fun types(): Set<T>
     fun get(index: Int): T

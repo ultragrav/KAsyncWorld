@@ -9,7 +9,7 @@ import net.minecraft.world.level.material.Fluid
 import net.minecraft.world.ticks.SavedTick
 import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
 import net.ultragrav.kasyncworld.world.chunk.block.position.AWBlockPosition
-import net.ultragrav.kasyncworld.world.chunk.heightmap.AWHeightMap
+import net.ultragrav.kasyncworld.world.chunk.heightmap.AsyncHeightMap
 import net.ultragrav.kasyncworld.world.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.contract.section.AsyncChunkSection
 
@@ -18,7 +18,7 @@ class SpigotAsyncChunk(
 ) : AsyncChunk {
 
     override val sections: Array<AsyncChunkSection?> = arrayOfNulls(heightOptions.numSections)
-    override val heightMaps: MutableMap<Heightmap.Types, AWHeightMap> = mutableMapOf()
+    override val heightMaps: MutableMap<Heightmap.Types, AsyncHeightMap> = mutableMapOf()
     override val blockEntities: MutableMap<AWBlockPosition, CompoundTag> = mutableMapOf()
     override val entities: MutableList<CompoundTag> = mutableListOf()
 
@@ -44,11 +44,11 @@ class SpigotAsyncChunk(
         return section.getBlock(x, y and 15, z)
     }
 
-    override fun getHeightMap(type: Heightmap.Types): AWHeightMap {
-        return heightMaps.getOrPut(type) { AWHeightMap(type, this) }
+    override fun getHeightMap(type: Heightmap.Types): AsyncHeightMap {
+        return heightMaps.getOrPut(type) { AsyncHeightMap(type, this) }
     }
 
-    override fun setHeightMap(type: Heightmap.Types, heightMap: AWHeightMap) {
+    override fun setHeightMap(type: Heightmap.Types, heightMap: AsyncHeightMap) {
         if (heightMap.heightOptions != this.heightOptions) {
             throw IllegalArgumentException("Height map has different height options")
         }

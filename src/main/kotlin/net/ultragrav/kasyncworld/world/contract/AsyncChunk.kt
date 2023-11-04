@@ -8,7 +8,8 @@ import net.minecraft.world.level.material.Fluid
 import net.minecraft.world.ticks.SavedTick
 import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
 import net.ultragrav.kasyncworld.world.chunk.block.position.AWBlockPosition
-import net.ultragrav.kasyncworld.world.chunk.heightmap.AWHeightMap
+import net.ultragrav.kasyncworld.world.chunk.heightmap.AsyncHeightMap
+import net.ultragrav.kasyncworld.world.chunk.heightmap.HeightmapStateProvider
 import net.ultragrav.kasyncworld.world.contract.section.AsyncChunkSection
 import net.ultragrav.kasyncworld.world.contract.section.AsyncChunkSectionFactory
 
@@ -19,7 +20,7 @@ import net.ultragrav.kasyncworld.world.contract.section.AsyncChunkSectionFactory
 interface AsyncChunk : AsyncChunkSectionFactory {
 
     val heightOptions: ChunkHeightOptions
-    val heightMaps: Map<Heightmap.Types, AWHeightMap>
+    val heightMaps: Map<Heightmap.Types, AsyncHeightMap>
     val blockEntities: Map<AWBlockPosition, CompoundTag>
     val sections: Array<AsyncChunkSection?>
     val entities: List<CompoundTag>
@@ -33,8 +34,8 @@ interface AsyncChunk : AsyncChunkSectionFactory {
     fun unsetBlock(x: Int, y: Int, z: Int)
     fun getBlock(x: Int, y: Int, z: Int): BlockState
 
-    fun getHeightMap(type: Heightmap.Types): AWHeightMap
-    fun setHeightMap(type: Heightmap.Types, heightMap: AWHeightMap)
+    fun getHeightMap(type: Heightmap.Types): AsyncHeightMap
+    fun setHeightMap(type: Heightmap.Types, heightMap: AsyncHeightMap)
     fun clearHeightMaps()
 
     fun getBlockEntity(x: Int, y: Int, z: Int): CompoundTag?

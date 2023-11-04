@@ -13,13 +13,15 @@ import net.minecraft.world.level.chunk.LevelChunk
 import net.minecraft.world.level.chunk.LevelChunkSection
 import net.minecraft.world.ticks.ProtoChunkTicks
 import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
+import net.ultragrav.kasyncworld.world.chunk.block.position.AWBlockPosition
 import net.ultragrav.kasyncworld.world.chunk.block.storage.wrapped.WrappedPalettedContainer
-import net.ultragrav.kasyncworld.world.chunk.heightmap.AWHeightMap
+import net.ultragrav.kasyncworld.world.chunk.heightmap.AsyncHeightMap
 import net.ultragrav.kasyncworld.world.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.contract.AsyncChunkFactory
 import net.ultragrav.kasyncworld.world.contract.section.AsyncChunkSection
 import net.ultragrav.kasyncworld.world.versionio.ChunkIO
 import net.ultragrav.kasyncworld.world.versionio.ChunkWriteOptions
+import net.ultragrav.kasyncworld.world.versionio.HeightmapWriteType
 import org.bukkit.Chunk
 import org.bukkit.craftbukkit.v1_20_R2.CraftChunk
 import org.bukkit.craftbukkit.v1_20_R2.entity.CraftEntity
@@ -37,19 +39,28 @@ class NMSChunkIO : ChunkIO {
         for (i in 0 until nms.sectionsCount) {
             val nmsSection = nms.sections[i] ?: continue
             val section = chunk.getSection(i) ?: continue
-
-            // Remove tile entities at edited block positions
-            section.blocks.indexIterator().forEach { index ->
-                val x = section.getBlockX(index)
-                val y = section.getBlockY(index)
-                val z = section.getBlockZ(index)
-                val pos = BlockPos(x, y, z)
-                nms.removeBlockEntity(pos)
-            }
-
             writeSection(section, nmsSection)
         }
 
+        fun wasBlockEdited(pos: BlockPos): Boolean {
+            val sectionIndexMB = pos.y shr 4
+            val section = chunk.getSection(sectionIndexMB) ?: return false
+            val sectionX = pos.x and 15
+            val sectionY = pos.y and 15
+            val sectionZ = pos.z and 15
+            val blockIndex = section.getBlockIndex(sectionX, sectionY, sectionZ)
+            return blockIndex in section.blocks.iterationStrategy
+        }
+
+        // Remove existing block entities
+        nms.blockEntities.toList().forEach { (pos, _) ->
+            val wasBlockSet = wasBlockEdited(pos)
+            val isTileSet = AWBlockPosition(pos.x, pos.y, pos.z) in chunk.blockEntities
+            if (!wasBlockSet && !isTileSet) return@forEach
+            nms.removeBlockEntity(pos)
+        }
+
+        // Add new ones
         chunk.blockEntities.forEach { (pos, tag) ->
             val nmsPos = BlockPos(pos.x, pos.y, pos.z)
             val nmsBlockEntity = BlockEntity.loadStatic(
@@ -78,6 +89,39 @@ class NMSChunkIO : ChunkIO {
         nms.persistentDataContainer.clear()
         nms.persistentDataContainer.putAll(chunk.persistentData)
 
+        // Fluid and Block Ticks
+        val blockTicks = chunk.blockTicks
+        nms.blockTicks.removeIf { wasBlockEdited(it.pos) }
+        blockTicks.forEachIndexed { index, it ->
+            nms.blockTicks.schedule(
+                it.unpack(
+                    nms.level.gameTime,
+                    (index - blockTicks.size).toLong()
+                )
+            )
+        }
+
+        val fluidTicks = chunk.fluidTicks
+        nms.fluidTicks.removeIf { wasBlockEdited(it.pos) }
+        fluidTicks.forEachIndexed { index, it ->
+            nms.fluidTicks.schedule(
+                it.unpack(
+                    nms.level.gameTime,
+                    (index - fluidTicks.size).toLong()
+                )
+            )
+        }
+
+        // Heightmaps
+        when (options.heightmapWriteType) {
+            HeightmapWriteType.IGNORE -> {}
+            HeightmapWriteType.OVERWRITE -> {
+                val heightmaps = nms.heightmaps
+                heightmaps.forEach { (key, _) ->
+                    heightmaps.set(key, AsyncHeightMap(chunk.heightmaps[key]!!))
+                }
+            }
+        }
 
     }
 
@@ -154,7 +198,7 @@ class NMSChunkIO : ChunkIO {
 
         // Height Maps
         nms.heightmaps.forEach { (type, map) ->
-            val newHeightMap = AWHeightMap(
+            val newHeightMap = AsyncHeightMap(
                 type,
                 chunk
             )

@@ -2,36 +2,34 @@ package net.ultragrav.kasyncworld.world.chunk.heightmap
 
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.levelgen.Heightmap
-import net.ultragrav.kasyncworld.ceilLog2
-import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
 import net.ultragrav.kasyncworld.world.contract.AsyncChunk
-import net.ultragrav.kasyncworld.world.chunk.block.bit.BitStorage
-import net.ultragrav.kasyncworld.world.chunk.block.bit.NumberStorage
-import org.bukkit.HeightMap
-import org.bukkit.Material
-import org.bukkit.block.data.BlockData
-import org.bukkit.block.data.Waterlogged
-import org.bukkit.block.data.type.Leaves
 import java.util.function.Predicate
 
-class AWHeightMap(val type: Heightmap.Types, val chunk: AsyncChunk) {
+class AsyncHeightMap(
+    val type: Heightmap.Types,
+    private val data: HeightmapStorage,
+    private val stateProvider: HeightmapStateProvider
+) {
 
-    val heightOptions = chunk.heightOptions
+    constructor(type: Heightmap.Types, chunk: AsyncChunk) :
+            this(
+                type,
+                BasicHeightmapStorage(chunk),
+                ChunkHeightmapStateProvider(chunk)
+            )
 
-    private var data: NumberStorage = BitStorage(ceilLog2(heightOptions.maxBuildHeight + 1), 256)
+    val heightOptions = data.heightOptions
 
     fun setHeight(x: Int, z: Int, height: Int) {
-        data.set(x shl 4 or (z and 0xF), height - heightOptions.minBuildHeight)
+        data.setHeight(x, z, height)
     }
 
     fun getHeight(x: Int, z: Int): Int {
-        return data.get(x shl 4 or (z and 0xF)) + heightOptions.minBuildHeight
+        return data.getHeight(x, z)
     }
 
-    fun clone(chunk: AsyncChunk = this.chunk): AWHeightMap {
-        val map = AWHeightMap(type, chunk)
-        map.data = data.clone()
-        return map
+    fun clone(stateProvider: HeightmapStateProvider = this.stateProvider): AsyncHeightMap {
+        return AsyncHeightMap(type, data.clone(), stateProvider)
     }
 
     fun recompute() {
@@ -39,10 +37,18 @@ class AWHeightMap(val type: Heightmap.Types, val chunk: AsyncChunk) {
         val maxHeight = heightOptions.maxBuildHeight
         val minHeight = heightOptions.minBuildHeight
 
+        for (x in 0..15) {
+            for (z in 0..15) {
+                setHeight(x, z, minHeight)
+            }
+        }
+
         for (y in (maxHeight - 1) downTo minHeight) {
+            if (stateProvider.canSkipLayer(y, type.isOpaque)) continue
+
             for (x in 0..15) {
                 for (z in 0..15) {
-                    val block = chunk.getBlock(x, y, z)
+                    val block = stateProvider.getBlock(x, y, z)
                     if (type.isOpaque.test(block)) {
                         setHeight(x, z, y + 1)
                         break
@@ -70,7 +76,7 @@ class AWHeightMap(val type: Heightmap.Types, val chunk: AsyncChunk) {
             // If the block data is not opaque and is right below the current height in the heightmap:
 
             for (j in (y - 1) downTo heightOptions.minBuildHeight) {
-                val belowBlock = chunk.getBlock(x, j, z)
+                val belowBlock = stateProvider.getBlock(x, j, z)
 
                 // If we found an opaque block below:
                 if (type.isOpaque.test(belowBlock)) {

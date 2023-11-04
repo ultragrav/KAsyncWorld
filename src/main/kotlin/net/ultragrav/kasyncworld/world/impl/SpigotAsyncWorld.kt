@@ -10,6 +10,7 @@ import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
 import net.ultragrav.kasyncworld.world.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.contract.AsyncWorld
 import net.ultragrav.kasyncworld.world.versionio.ChunkWriteOptions
+import net.ultragrav.kasyncworld.world.versionio.HeightmapWriteType
 import org.bukkit.World
 import java.util.concurrent.CompletableFuture
 
@@ -84,6 +85,7 @@ internal class SpigotAsyncWorld internal constructor(val world: World) : AsyncWo
 
         val writeOptions = ChunkWriteOptions(
             appendEntities = true,
+            heightmapWriteType = HeightmapWriteType.MERGE,
         )
 
         chunks.forEach { (key, chunk) ->
