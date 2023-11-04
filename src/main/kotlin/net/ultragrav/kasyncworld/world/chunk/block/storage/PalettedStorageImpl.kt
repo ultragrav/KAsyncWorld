@@ -5,9 +5,9 @@ class PalettedStorageImpl<T>(
     initialBits: Int = 4
 ) : PalettedStorage<T> {
 
-    override var storage = config.createStorage(initialBits)
+    var storage = config.createStorage(initialBits)
         private set
-    override var palette = config.createPalette()
+    var palette = config.createPalette()
         private set
     override var iterationStrategy = config.createIterationStrategy()
         private set

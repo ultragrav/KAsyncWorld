@@ -1,10 +1,8 @@
 package net.ultragrav.kasyncworld.world.chunk.block.storage.wrapped
 
 import net.minecraft.world.level.chunk.PalettedContainer
-import net.ultragrav.kasyncworld.world.chunk.block.bit.NumberStorage
 import net.ultragrav.kasyncworld.world.chunk.block.iteration.IterationStrategy
 import net.ultragrav.kasyncworld.world.chunk.block.iteration.NormalIterationStrategy
-import net.ultragrav.kasyncworld.world.chunk.block.palette.Palette
 import net.ultragrav.kasyncworld.world.chunk.block.storage.Indexed
 import net.ultragrav.kasyncworld.world.chunk.block.storage.PalettedStorage
 
@@ -13,12 +11,6 @@ class WrappedPalettedContainer<T>(
     override val iterationStrategy: IterationStrategy =
         NormalIterationStrategy(wrapped.data.storage.size)
 ) : MinecraftPalettedStorage<T> {
-
-    override val storage: NumberStorage
-        get() = WrappedBitStorage(wrapped.data.storage)
-
-    override val palette: Palette<T>
-        get() = WrappedPalette(wrapped.registry, wrapped.data.palette)
 
     override val fastCountsAndTypesSupported = false
 
