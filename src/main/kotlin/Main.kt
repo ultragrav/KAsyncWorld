@@ -1,7 +1,7 @@
-fun main(args: Array<String>) {
-    println("Hello World!")
+import net.minecraft.world.level.block.Blocks
+import net.ultragrav.kasyncworld.AW
+import net.ultragrav.kasyncworld.world.contract.AsyncWorld
+import org.bukkit.Bukkit
 
-    // Try adding program arguments via Run/Debug configuration.
-    // Learn more about running applications: https://www.jetbrains.com/help/idea/running-applications.html.
-    println("Program arguments: ${args.joinToString()}")
+fun main(args: Array<String>) {
 }
