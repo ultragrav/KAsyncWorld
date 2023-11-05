@@ -51,6 +51,7 @@ class SpigotAsyncChunk(
     override fun setBlock(x: Int, y: Int, z: Int, block: BlockState) {
         val section = getOrMakeSection(y shr 4)
         section.setBlock(x, y and 15, z, block)
+        heightMaps.values.forEach { it.update(x, y, z, block) }
     }
 
     override fun unsetBlock(x: Int, y: Int, z: Int) {

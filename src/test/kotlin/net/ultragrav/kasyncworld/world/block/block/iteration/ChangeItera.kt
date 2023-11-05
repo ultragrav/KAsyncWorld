@@ -99,6 +99,15 @@ class ChangeIterationStrategyTest {
     }
 
     @Test
+    fun testNumChanges() {
+        val strategy = LinkedChangeIteration(10)
+        strategy.set(1)
+        strategy.set(1)
+        strategy.set(1)
+        assertEquals(1, strategy.iterator().asSequence().toList().size)
+    }
+
+    @Test
     fun testGet() {
         val strategy = LinkedChangeIteration(10)
         strategy.set(0)

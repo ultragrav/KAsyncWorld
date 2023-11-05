@@ -1,12 +1,15 @@
 package net.ultragrav.kasyncworld.scheduler
 
 import kotlinx.coroutines.*
+import net.minecraft.world.level.chunk.ChunkStatus
+import net.minecraft.world.level.chunk.LevelChunk
 import net.ultragrav.kasyncworld.world.chunk.queue.ChunkQueue
 import net.ultragrav.kasyncworld.world.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.versionio.ChunkIO
 import net.ultragrav.kasyncworld.world.versionio.ChunkWriteOptions
 import org.bukkit.Bukkit
 import org.bukkit.World
+import org.bukkit.craftbukkit.v1_20_R2.CraftChunk
 import org.bukkit.plugin.Plugin
 import java.util.concurrent.CompletableFuture
 
@@ -75,16 +78,18 @@ class ParallelChunkQueue(val plugin: Plugin, val io: ChunkIO) : ChunkQueue {
 
         runBlocking {
             batch.forEach { job ->
-                val bukkitChunk = job.world.getChunkAt(job.x, job.z)
-                val chunk = job.chunk
                 launch {
+                    val bukkitChunk = job.world.getChunkAt(job.x, job.z)
+                    val chunk = job.chunk
+                    val handle = (bukkitChunk as CraftChunk).getHandle(ChunkStatus.FULL) as LevelChunk
                     withContext(Dispatchers.IO) {
-                        io.writeChunk(bukkitChunk, chunk, job.writeOptions.copy(sendPackets = false))
+                        io.writeChunk(handle, chunk, job.writeOptions.copy(sendPackets = false))
                     }
-                    io.sendPackets(bukkitChunk, chunk)
+                    io.sendPackets(bukkitChunk.world, job.x, job.z)
                 }
             }
         }
+
         batch.forEach { it.future.complete(null) }
     }
 }

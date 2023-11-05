@@ -5,7 +5,10 @@ import net.ultragrav.kasyncworld.world.chunk.block.bit.BitStorage
 
 class LinkedChangeIteration(override val size: Int) : IterationStrategy {
 
+    @Volatile
     private var numChanges = 0
+
+    @Volatile
     private var current = 0
 
     // Index 0 is where the initial index is stored. All other indexes are shifted
@@ -16,9 +19,9 @@ class LinkedChangeIteration(override val size: Int) : IterationStrategy {
     private val backwards = BitStorage(size + 1, ceilLog2(size + 1))
 
     override fun set(index: Int) {
+        if (contains(index)) return
+
         val realIndex = index + 1
-        val old = forwards.get(realIndex)
-        if (old != 0) return
 
         forwards.set(current, realIndex)
         backwards.set(realIndex, current)

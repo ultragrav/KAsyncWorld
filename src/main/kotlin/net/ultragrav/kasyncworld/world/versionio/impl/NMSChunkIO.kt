@@ -27,14 +27,13 @@ import net.ultragrav.kasyncworld.world.versionio.ChunkReadOptions
 import net.ultragrav.kasyncworld.world.versionio.ChunkWriteOptions
 import net.ultragrav.kasyncworld.world.versionio.HeightmapWriteType
 import org.bukkit.Chunk
+import org.bukkit.World
 import org.bukkit.craftbukkit.v1_20_R2.CraftChunk
 import org.bukkit.craftbukkit.v1_20_R2.entity.CraftEntity
 
 class NMSChunkIO : ChunkIO {
 
-    override fun writeChunk(bukkitChunk: Chunk, chunk: AsyncChunk, options: ChunkWriteOptions) {
-        val nms = (bukkitChunk as CraftChunk).getHandle(ChunkStatus.FULL)
-                as? LevelChunk ?: throw IllegalStateException("Chunk is not fully loaded")
+    override fun writeChunk(nms: LevelChunk, chunk: AsyncChunk, options: ChunkWriteOptions) {
 
         val cx = nms.locX
         val cz = nms.locZ
@@ -139,21 +138,14 @@ class NMSChunkIO : ChunkIO {
             }
 
             when (options.heightmapWriteType) {
-                HeightmapWriteType.RECALCULATE -> {
-                    wrapper.recompute()
-                }
-                HeightmapWriteType.OVERWRITE -> {
-                    hm.overwrite(wrapper)
-                }
-
-                HeightmapWriteType.MERGE -> {
-                    hm.editWith(wrapper)
-                }
+                HeightmapWriteType.RECALCULATE -> wrapper.recompute()
+                HeightmapWriteType.OVERWRITE -> hm.overwrite(wrapper)
+                HeightmapWriteType.MERGE -> wrapper.editWith(hm)
             }
         }
 
         if (options.sendPackets) {
-            sendPackets(bukkitChunk, chunk)
+            sendPackets(nms.level.world, nms.locX, nms.locZ)
         }
 
 
@@ -169,13 +161,11 @@ class NMSChunkIO : ChunkIO {
         section.biomes.applyTo(wrappedBiomes)
     }
 
-    override fun sendPackets(bukkitChunk: Chunk, chunk: AsyncChunk) {
-        bukkitChunk.world.refreshChunk(bukkitChunk.x, bukkitChunk.z)
+    override fun sendPackets(world: World, cx: Int, cz: Int) {
+        world.refreshChunk(cx, cz)
     }
 
-    override fun readChunk(bukkitChunk: Chunk, factory: AsyncChunkFactory, options: ChunkReadOptions): AsyncChunk {
-        val nms = (bukkitChunk as CraftChunk).getHandle(ChunkStatus.FULL)
-                as? LevelChunk ?: throw IllegalStateException("Chunk is not fully loaded")
+    override fun readChunk(nms: LevelChunk, factory: AsyncChunkFactory, options: ChunkReadOptions): AsyncChunk {
 
         val cx = nms.locX
         val cz = nms.locZ
@@ -204,15 +194,17 @@ class NMSChunkIO : ChunkIO {
         // are stored in a level data structure. So we must synchronize.
         if (options.readEntities) {
             synchronized(this) {
-                bukkitChunk.entities.map { it as CraftEntity }
-                    .map { it.handle }
-                    .filter { it.persist }
-                    .map {
+                nms.level.entityLookup.getChunk(cx, cz)
+                    ?.chunkEntities
+                    ?.map { it as CraftEntity }
+                    ?.map { it.handle }
+                    ?.filter { it.persist }
+                    ?.map {
                         val tag = CompoundTag()
                         it.save(tag)
                         tag
                     }
-                    .forEach { chunk.addEntity(it) }
+                    ?.forEach { chunk.addEntity(it) }
             }
         }
 
