@@ -6,6 +6,8 @@ import org.bukkit.World
 import java.util.concurrent.CompletableFuture
 
 interface ChunkQueue {
+    fun start()
+    fun stop()
     fun enqueue(
         x: Int,
         z: Int,

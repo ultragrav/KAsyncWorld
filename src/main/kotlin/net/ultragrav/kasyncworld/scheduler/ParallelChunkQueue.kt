@@ -28,11 +28,11 @@ class ParallelChunkQueue(val plugin: Plugin, val io: ChunkIO) : ChunkQueue {
 
     private var taskId = -1
 
-    fun start() {
+    override fun start() {
         taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::processNextBatch, 0, 1)
     }
 
-    fun end() {
+    override fun stop() {
         if (taskId == -1) return
         Bukkit.getScheduler().cancelTask(taskId)
     }

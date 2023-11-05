@@ -9,5 +9,5 @@ interface ChunkIO {
     fun writeChunk(bukkitChunk: Chunk, chunk: AsyncChunk, options: ChunkWriteOptions)
     fun sendPackets(bukkitChunk: Chunk, chunk: AsyncChunk)
     // May be run chunk-wise parallel
-    fun readChunk(bukkitChunk: Chunk, factory: AsyncChunkFactory): AsyncChunk
+    fun readChunk(bukkitChunk: Chunk, factory: AsyncChunkFactory, options: ChunkReadOptions): AsyncChunk
 }

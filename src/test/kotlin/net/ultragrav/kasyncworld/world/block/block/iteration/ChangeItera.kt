@@ -1,21 +1,21 @@
 package net.ultragrav.kasyncworld.world.block.block.iteration
 
 import net.ultragrav.kasyncworld.world.chunk.block.bit.BitStorage
-import net.ultragrav.kasyncworld.world.chunk.block.iteration.ChangeIterationStrategy
+import net.ultragrav.kasyncworld.world.chunk.block.iteration.LinkedChangeIteration
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 class ChangeIterationStrategyTest {
     @Test
     fun testIterationOrder() {
-        val strategy = ChangeIterationStrategy(10)
+        val strategy = LinkedChangeIteration(10)
         strategy.set(0)
         strategy.set(5)
         strategy.set(3)
         strategy.set(9)
         strategy.set(0)
 
-        val storage = BitStorage(4, 10)
+        val storage = BitStorage(10, 4)
         storage.set(0, 1)
         storage.set(5, 2)
         storage.set(3, 3)
@@ -29,7 +29,7 @@ class ChangeIterationStrategyTest {
 
     @Test
     fun testUnset() {
-        val strategy = ChangeIterationStrategy(10)
+        val strategy = LinkedChangeIteration(10)
         strategy.set(0)
         strategy.set(5)
         strategy.set(3)
@@ -38,7 +38,7 @@ class ChangeIterationStrategyTest {
         strategy.unset(5)
         strategy.unset(3)
 
-        val storage = BitStorage(4, 10)
+        val storage = BitStorage(10, 4)
         storage.set(0, 1)
         storage.set(5, 2)
         storage.set(3, 3)
@@ -52,7 +52,7 @@ class ChangeIterationStrategyTest {
 
     @Test
     fun testUnsetFirst() {
-        val strategy = ChangeIterationStrategy(10)
+        val strategy = LinkedChangeIteration(10)
         strategy.set(0)
         strategy.set(5)
         strategy.set(3)
@@ -60,7 +60,7 @@ class ChangeIterationStrategyTest {
         strategy.set(0)
         strategy.unset(0)
 
-        val storage = BitStorage(4, 10)
+        val storage = BitStorage(10, 4)
         storage.set(0, 1)
         storage.set(5, 2)
         storage.set(3, 3)
@@ -74,7 +74,7 @@ class ChangeIterationStrategyTest {
 
     @Test
     fun testUnsetAll() {
-        val strategy = ChangeIterationStrategy(10)
+        val strategy = LinkedChangeIteration(10)
         strategy.set(0)
         strategy.set(5)
         strategy.set(3)
@@ -86,7 +86,7 @@ class ChangeIterationStrategyTest {
         strategy.unset(9)
 
 
-        val storage = BitStorage(4, 10)
+        val storage = BitStorage(10, 4)
         storage.set(0, 1)
         storage.set(5, 2)
         storage.set(3, 3)
@@ -100,7 +100,7 @@ class ChangeIterationStrategyTest {
 
     @Test
     fun testGet() {
-        val strategy = ChangeIterationStrategy(10)
+        val strategy = LinkedChangeIteration(10)
         strategy.set(0)
         strategy.set(5)
         strategy.set(3)

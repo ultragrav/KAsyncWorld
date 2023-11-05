@@ -3,17 +3,17 @@ package net.ultragrav.kasyncworld.world.chunk.block.iteration
 import net.ultragrav.kasyncworld.ceilLog2
 import net.ultragrav.kasyncworld.world.chunk.block.bit.BitStorage
 
-class ChangeIterationStrategy(override val size: Int) : IterationStrategy {
+class LinkedChangeIteration(override val size: Int) : IterationStrategy {
 
     private var numChanges = 0
     private var current = 0
 
     // Index 0 is where the initial index is stored. All other indexes are shifted
     // by +1.
-    private val forwards = BitStorage(ceilLog2(size + 1), size + 1)
+    private val forwards = BitStorage(size + 1, ceilLog2(size + 1))
 
     // Index 0 unused.
-    private val backwards = BitStorage(ceilLog2(size + 1), size + 1)
+    private val backwards = BitStorage(size + 1, ceilLog2(size + 1))
 
     override fun set(index: Int) {
         val realIndex = index + 1
@@ -53,7 +53,7 @@ class ChangeIterationStrategy(override val size: Int) : IterationStrategy {
     }
 
     override fun clone(): IterationStrategy {
-        val strategy = ChangeIterationStrategy(size)
+        val strategy = LinkedChangeIteration(size)
         strategy.numChanges = numChanges
         strategy.current = current
         System.arraycopy(forwards.raw(), 0, strategy.forwards.raw(), 0, forwards.raw().size)

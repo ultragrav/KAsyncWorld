@@ -7,13 +7,10 @@ import net.ultragrav.kasyncworld.world.chunk.block.bit.BitStorage
 import net.ultragrav.kasyncworld.world.chunk.block.bit.NumberStorage
 import net.ultragrav.kasyncworld.world.chunk.block.count.IntCounts
 import net.ultragrav.kasyncworld.world.chunk.block.count.TypeCounts
-import net.ultragrav.kasyncworld.world.chunk.block.iteration.ChangeIterationStrategy
+import net.ultragrav.kasyncworld.world.chunk.block.iteration.LinkedChangeIteration
 import net.ultragrav.kasyncworld.world.chunk.block.palette.Palette
 import net.ultragrav.kasyncworld.world.chunk.block.palette.SimplePalette
-import org.bukkit.Material
-import org.bukkit.block.data.BlockData
 import org.junit.jupiter.api.Test
-import java.util.Objects
 import kotlin.test.assertEquals
 
 class PalettedStorageTest {
@@ -27,7 +24,7 @@ class PalettedStorageTest {
             override val defaultState = AIR
 
             override fun createStorage(bits: Int): NumberStorage =
-                BitStorage(bits, size)
+                BitStorage(size, bits)
 
             override fun createCounter(bits: Int): TypeCounts {
                 return IntCounts(bits, size)
@@ -40,7 +37,7 @@ class PalettedStorageTest {
             }
 
             override fun createIterationStrategy(): IterationStrategy =
-                ChangeIterationStrategy(size)
+                LinkedChangeIteration(size)
 
         }
 

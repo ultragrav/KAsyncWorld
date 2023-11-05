@@ -5,6 +5,7 @@ import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.ListTag
 import net.minecraft.resources.ResourceLocation
+import net.minecraft.server.network.PlayerChunkSender
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.level.ChunkPos
 import net.minecraft.world.level.block.entity.BlockEntity
@@ -15,6 +16,7 @@ import net.minecraft.world.ticks.ProtoChunkTicks
 import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
 import net.ultragrav.kasyncworld.world.chunk.block.position.AWBlockPosition
 import net.ultragrav.kasyncworld.world.chunk.block.storage.wrapped.WrappedPalettedContainer
+import net.ultragrav.kasyncworld.world.chunk.getSectionIndexMB
 import net.ultragrav.kasyncworld.world.chunk.heightmap.AsyncHeightMap
 import net.ultragrav.kasyncworld.world.chunk.heightmap.wrapper.NMSHeightmapStateProvider
 import net.ultragrav.kasyncworld.world.chunk.heightmap.wrapper.NMSHeightmapStorageWrapper
@@ -22,6 +24,7 @@ import net.ultragrav.kasyncworld.world.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.contract.AsyncChunkFactory
 import net.ultragrav.kasyncworld.world.contract.section.AsyncChunkSection
 import net.ultragrav.kasyncworld.world.versionio.ChunkIO
+import net.ultragrav.kasyncworld.world.versionio.ChunkReadOptions
 import net.ultragrav.kasyncworld.world.versionio.ChunkWriteOptions
 import net.ultragrav.kasyncworld.world.versionio.HeightmapWriteType
 import org.bukkit.Chunk
@@ -39,8 +42,18 @@ class NMSChunkIO : ChunkIO {
 
         // Sections (Blocks)
         for (i in 0 until nms.sectionsCount) {
-            val nmsSection = nms.sections[i] ?: continue
-            val section = chunk.getSection(i) ?: continue
+            val section = chunk.sections[i] ?: continue
+            val nmsSection = nms.sections[i] ?: run {
+                println("Failed to find section $i in chunk $cx, $cz")
+                LevelChunkSection(
+                    nms.biomeRegistry,
+                    nms.level,
+                    nms.pos,
+                    chunk.heightOptions.getSectionIndexMB(i)
+                )
+            }
+            println("Writing section $i in chunk $cx, $cz")
+            nms.sections[i] = nmsSection
             writeSection(section, nmsSection)
         }
 
@@ -143,6 +156,10 @@ class NMSChunkIO : ChunkIO {
             }
         }
 
+        if (options.sendPackets) {
+            sendPackets(bukkitChunk, chunk)
+        }
+
 
     }
 
@@ -157,10 +174,10 @@ class NMSChunkIO : ChunkIO {
     }
 
     override fun sendPackets(bukkitChunk: Chunk, chunk: AsyncChunk) {
-        TODO("Not yet implemented")
+        bukkitChunk.world.refreshChunk(bukkitChunk.x, bukkitChunk.z)
     }
 
-    override fun readChunk(bukkitChunk: Chunk, factory: AsyncChunkFactory): AsyncChunk {
+    override fun readChunk(bukkitChunk: Chunk, factory: AsyncChunkFactory, options: ChunkReadOptions): AsyncChunk {
         val nms = (bukkitChunk as CraftChunk).getHandle(ChunkStatus.FULL)
                 as? LevelChunk ?: throw IllegalStateException("Chunk is not fully loaded")
 
@@ -171,72 +188,85 @@ class NMSChunkIO : ChunkIO {
         val chunk = factory.createChunk(height)
 
         // Sections (Blocks)
-        for (i in 0 until nms.sectionsCount) {
-            val nmsSection = nms.sections[i] ?: continue
-            val section = chunk.createSection()
-            readSection(section, nmsSection)
+        if (options.readBlocksAndBiomes) {
+            for (i in 0 until nms.sectionsCount) {
+                val nmsSection = nms.sections[i] ?: continue
+                val section = chunk.createSection()
+                readSection(section, nmsSection)
+                chunk.setSection(chunk.heightOptions.getSectionIndexMB(i), section)
+            }
         }
 
         // Block Entities
-        nms.blockEntities.mapValues { it.value.saveWithFullMetadata() }
-            .forEach { (pos, ent) -> chunk.setBlockEntity(pos.x, pos.y, pos.z, ent) }
+        if (options.readBlockEntities) {
+            nms.blockEntities.mapValues { it.value.saveWithFullMetadata() }
+                .forEach { (pos, ent) -> chunk.setBlockEntity(pos.x, pos.y, pos.z, ent) }
+        }
 
         // Entities
         // Chunk-wise parallelism is not possible here, because entities
         // are stored in a level data structure. So we must synchronize.
-        synchronized(this) {
-            bukkitChunk.entities.map { it as CraftEntity }
-                .map { it.handle }
-                .filter { it.persist }
-                .map {
-                    val tag = CompoundTag()
-                    it.save(tag)
-                    tag
-                }
-                .forEach { chunk.addEntity(it) }
+        if (options.readEntities) {
+            synchronized(this) {
+                bukkitChunk.entities.map { it as CraftEntity }
+                    .map { it.handle }
+                    .filter { it.persist }
+                    .map {
+                        val tag = CompoundTag()
+                        it.save(tag)
+                        tag
+                    }
+                    .forEach { chunk.addEntity(it) }
+            }
         }
 
         // Persistent data
-        chunk.persistentData = nms.persistentDataContainer.toTagCompound()
+        if (options.readPersistentContainer) {
+            chunk.persistentData = nms.persistentDataContainer.toTagCompound()
+        }
 
-        // Block/Fluid ticks
-        val ticksForSerialization = nms.ticksForSerialization
+        if (options.readTicks) {
+            // Block/Fluid ticks
+            val ticksForSerialization = nms.ticksForSerialization
 
-        val blockTicksTag = ticksForSerialization.blocks.save(nms.level.gameTime) {
-            BuiltInRegistries.BLOCK.getKey(it).toString()
-        } as ListTag
+            val blockTicksTag = ticksForSerialization.blocks.save(nms.level.gameTime) {
+                BuiltInRegistries.BLOCK.getKey(it).toString()
+            } as ListTag
 
-        val fluidTicksTag = ticksForSerialization.fluids.save(nms.level.gameTime) {
-            BuiltInRegistries.FLUID.getKey(it).toString()
-        } as ListTag
+            val fluidTicksTag = ticksForSerialization.fluids.save(nms.level.gameTime) {
+                BuiltInRegistries.FLUID.getKey(it).toString()
+            } as ListTag
 
-        val blockTicks = ProtoChunkTicks.load(blockTicksTag, {
-            BuiltInRegistries.BLOCK.getOptional(ResourceLocation.tryParse(it))
-        }, ChunkPos(cx, cz))
+            val blockTicks = ProtoChunkTicks.load(blockTicksTag, {
+                BuiltInRegistries.BLOCK.getOptional(ResourceLocation.tryParse(it))
+            }, ChunkPos(cx, cz))
 
-        val fluidTicks = ProtoChunkTicks.load(fluidTicksTag, {
-            BuiltInRegistries.FLUID.getOptional(ResourceLocation.tryParse(it))
-        }, ChunkPos(cx, cz))
+            val fluidTicks = ProtoChunkTicks.load(fluidTicksTag, {
+                BuiltInRegistries.FLUID.getOptional(ResourceLocation.tryParse(it))
+            }, ChunkPos(cx, cz))
 
-        chunk.blockTicks = blockTicks.scheduledTicks()
-        chunk.fluidTicks = fluidTicks.scheduledTicks()
+            chunk.blockTicks = blockTicks.scheduledTicks()
+            chunk.fluidTicks = fluidTicks.scheduledTicks()
+        }
 
-        // Height Maps
-        nms.heightmaps.forEach { (type, map) ->
-            val newHeightMap = AsyncHeightMap(
-                type,
-                chunk
-            )
+        if (options.readHeightmaps) {
+            // Height Maps
+            nms.heightmaps.forEach { (type, map) ->
+                val newHeightMap = AsyncHeightMap(
+                    type,
+                    chunk
+                )
 
-            val wrapper = AsyncHeightMap(
-                type,
-                NMSHeightmapStorageWrapper(map, nms),
-                NMSHeightmapStateProvider(nms)
-            )
+                val wrapper = AsyncHeightMap(
+                    type,
+                    NMSHeightmapStorageWrapper(map, nms),
+                    NMSHeightmapStateProvider(nms)
+                )
 
-            wrapper.applyTo(newHeightMap)
+                wrapper.applyTo(newHeightMap)
 
-            chunk.setHeightMap(type, newHeightMap)
+                chunk.setHeightMap(type, newHeightMap)
+            }
         }
 
         return chunk

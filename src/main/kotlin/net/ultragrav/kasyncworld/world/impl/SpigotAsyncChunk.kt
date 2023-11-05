@@ -1,10 +1,6 @@
 package net.ultragrav.kasyncworld.world.impl
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import net.minecraft.core.Holder
-import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.core.registries.Registries
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.server.MinecraftServer
@@ -21,13 +17,12 @@ import net.ultragrav.kasyncworld.world.chunk.block.bit.BitStorage
 import net.ultragrav.kasyncworld.world.chunk.block.bit.NumberStorage
 import net.ultragrav.kasyncworld.world.chunk.block.count.IntCounts
 import net.ultragrav.kasyncworld.world.chunk.block.count.TypeCounts
-import net.ultragrav.kasyncworld.world.chunk.block.iteration.ChangeIterationStrategy
+import net.ultragrav.kasyncworld.world.chunk.block.iteration.LinkedChangeIteration
 import net.ultragrav.kasyncworld.world.chunk.block.iteration.IterationStrategy
-import net.ultragrav.kasyncworld.world.chunk.block.iteration.NormalIterationStrategy
+import net.ultragrav.kasyncworld.world.chunk.block.iteration.FlagChangeIteration
 import net.ultragrav.kasyncworld.world.chunk.block.palette.Palette
 import net.ultragrav.kasyncworld.world.chunk.block.palette.SimplePalette
 import net.ultragrav.kasyncworld.world.chunk.block.position.AWBlockPosition
-import net.ultragrav.kasyncworld.world.chunk.block.storage.PalettedStorage
 import net.ultragrav.kasyncworld.world.chunk.block.storage.PalettedStorageImpl
 import net.ultragrav.kasyncworld.world.chunk.block.storage.PalettedStorageImplConfig
 import net.ultragrav.kasyncworld.world.chunk.heightmap.AsyncHeightMap
@@ -53,7 +48,6 @@ class SpigotAsyncChunk(
     override fun setBlock(x: Int, y: Int, z: Int, block: BlockState) {
         val section = getOrMakeSection(y shr 4)
         section.setBlock(x, y and 15, z, block)
-
     }
 
     override fun unsetBlock(x: Int, y: Int, z: Int) {
@@ -151,7 +145,7 @@ class SpigotAsyncChunk(
         }
 
         override fun createCounter(bits: Int): TypeCounts {
-            return IntCounts(size, bits)
+            return IntCounts(bits, size)
         }
 
         override fun createPalette(): Palette<BlockState> {
@@ -159,7 +153,7 @@ class SpigotAsyncChunk(
         }
 
         override fun createIterationStrategy(): IterationStrategy {
-            return ChangeIterationStrategy(size)
+            return LinkedChangeIteration(size)
         }
 
     }
@@ -175,7 +169,7 @@ class SpigotAsyncChunk(
         }
 
         override fun createCounter(bits: Int): TypeCounts {
-            return IntCounts(size, bits)
+            return IntCounts(bits, size)
         }
 
         override fun createPalette(): Palette<Holder<Biome>> {
@@ -183,7 +177,7 @@ class SpigotAsyncChunk(
         }
 
         override fun createIterationStrategy(): IterationStrategy {
-            return ChangeIterationStrategy(size)
+            return LinkedChangeIteration(size)
         }
 
     }
@@ -197,7 +191,7 @@ class SpigotAsyncChunk(
         }
 
         override fun createCounter(bits: Int): TypeCounts {
-            return IntCounts(size, bits)
+            return IntCounts(bits, size)
         }
 
         override fun createPalette(): Palette<BlockState> {
@@ -205,7 +199,7 @@ class SpigotAsyncChunk(
         }
 
         override fun createIterationStrategy(): IterationStrategy {
-            return NormalIterationStrategy(size)
+            return FlagChangeIteration(size)
         }
 
     }
@@ -221,7 +215,7 @@ class SpigotAsyncChunk(
         }
 
         override fun createCounter(bits: Int): TypeCounts {
-            return IntCounts(size, bits)
+            return IntCounts(bits, size)
         }
 
         override fun createPalette(): Palette<Holder<Biome>> {
@@ -229,7 +223,7 @@ class SpigotAsyncChunk(
         }
 
         override fun createIterationStrategy(): IterationStrategy {
-            return NormalIterationStrategy(size)
+            return FlagChangeIteration(size)
         }
 
     }

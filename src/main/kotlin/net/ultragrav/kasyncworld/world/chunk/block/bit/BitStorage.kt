@@ -1,6 +1,9 @@
 package net.ultragrav.kasyncworld.world.chunk.block.bit
 
-class BitStorage(override val bits: Int, override val size: Int) : NumberStorage {
+class BitStorage(
+    override val size: Int,
+    override val bits: Int
+) : NumberStorage {
 
     init {
         require(bits in 1..64) { "bits must be in range 1..64" }
@@ -30,7 +33,7 @@ class BitStorage(override val bits: Int, override val size: Int) : NumberStorage
     }
 
     override fun clone(): NumberStorage {
-        val storage = BitStorage(bits, size)
+        val storage = BitStorage(size, bits)
         System.arraycopy(data, 0, storage.data, 0, data.size)
         return storage
     }

@@ -32,28 +32,28 @@ internal class SpigotAsyncWorld internal constructor(val world: World, val editT
         val chunkX = x shr 4
         val chunkZ = z shr 4
         val chunk = getChunk(chunkX, chunkZ)
-        chunk.setBlock(x and 15, y, z and 15, block)
+        chunk.setBlock(x and 15, y.coerceIn(heightOptions.buildableYRange), z and 15, block)
     }
 
     override fun setBlockEntity(x: Int, y: Int, z: Int, tile: CompoundTag) {
         val chunkX = x shr 4
         val chunkZ = z shr 4
         val chunk = getChunk(chunkX, chunkZ)
-        chunk.setBlockEntity(x and 15, y, z and 15, tile)
+        chunk.setBlockEntity(x and 15, y.coerceIn(heightOptions.buildableYRange), z and 15, tile)
     }
 
     override fun unsetBlock(x: Int, y: Int, z: Int) {
         val chunkX = x shr 4
         val chunkZ = z shr 4
         val chunk = getChunk(chunkX, chunkZ)
-        chunk.unsetBlock(x and 15, y, z and 15)
+        chunk.unsetBlock(x and 15, y.coerceIn(heightOptions.buildableYRange), z and 15)
     }
 
     override fun unsetBlockEntity(x: Int, y: Int, z: Int) {
         val chunkX = x shr 4
         val chunkZ = z shr 4
         val chunk = getChunk(chunkX, chunkZ)
-        chunk.removeBlockEntity(x and 15, y, z and 15)
+        chunk.removeBlockEntity(x and 15, y.coerceIn(heightOptions.buildableYRange), z and 15)
     }
 
     override fun setChunk(cx: Int, cz: Int, chunk: AsyncChunk) {

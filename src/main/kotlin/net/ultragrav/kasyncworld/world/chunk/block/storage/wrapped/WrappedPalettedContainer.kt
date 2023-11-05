@@ -2,14 +2,14 @@ package net.ultragrav.kasyncworld.world.chunk.block.storage.wrapped
 
 import net.minecraft.world.level.chunk.PalettedContainer
 import net.ultragrav.kasyncworld.world.chunk.block.iteration.IterationStrategy
-import net.ultragrav.kasyncworld.world.chunk.block.iteration.NormalIterationStrategy
+import net.ultragrav.kasyncworld.world.chunk.block.iteration.NormalIteration
 import net.ultragrav.kasyncworld.world.chunk.block.storage.Indexed
 import net.ultragrav.kasyncworld.world.chunk.block.storage.PalettedStorage
 
 class WrappedPalettedContainer<T>(
     override val wrapped: PalettedContainer<T>,
     override val iterationStrategy: IterationStrategy =
-        NormalIterationStrategy(wrapped.data.storage.size)
+        NormalIteration(wrapped.data.storage.size)
 ) : MinecraftPalettedStorage<T> {
 
     override val fastCountsAndTypesSupported = false
