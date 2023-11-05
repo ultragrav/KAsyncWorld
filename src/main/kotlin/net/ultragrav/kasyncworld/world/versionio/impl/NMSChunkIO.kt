@@ -5,7 +5,6 @@ import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.ListTag
 import net.minecraft.resources.ResourceLocation
-import net.minecraft.server.network.PlayerChunkSender
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.level.ChunkPos
 import net.minecraft.world.level.block.entity.BlockEntity
@@ -43,18 +42,10 @@ class NMSChunkIO : ChunkIO {
         // Sections (Blocks)
         for (i in 0 until nms.sectionsCount) {
             val section = chunk.sections[i] ?: continue
-            val nmsSection = nms.sections[i] ?: run {
-                println("Failed to find section $i in chunk $cx, $cz")
-                LevelChunkSection(
-                    nms.biomeRegistry,
-                    nms.level,
-                    nms.pos,
-                    chunk.heightOptions.getSectionIndexMB(i)
-                )
-            }
-            println("Writing section $i in chunk $cx, $cz")
+            val nmsSection = nms.sections[i] ?: continue
             nms.sections[i] = nmsSection
             writeSection(section, nmsSection)
+            nmsSection.recalcBlockCounts()
         }
 
         fun wasBlockEdited(pos: BlockPos): Boolean {
@@ -142,12 +133,17 @@ class NMSChunkIO : ChunkIO {
                 NMSHeightmapStorageWrapper(wrapped, nms),
                 NMSHeightmapStateProvider(nms)
             )
-            val hm = chunk.heightMaps[key] ?: return@forEach
+            val hm = chunk.heightMaps[key] ?: run {
+                wrapper.recompute()
+                return@forEach
+            }
 
             when (options.heightmapWriteType) {
-                HeightmapWriteType.IGNORE -> {}
+                HeightmapWriteType.RECALCULATE -> {
+                    wrapper.recompute()
+                }
                 HeightmapWriteType.OVERWRITE -> {
-                    hm.applyTo(wrapper)
+                    hm.overwrite(wrapper)
                 }
 
                 HeightmapWriteType.MERGE -> {
@@ -263,7 +259,7 @@ class NMSChunkIO : ChunkIO {
                     NMSHeightmapStateProvider(nms)
                 )
 
-                wrapper.applyTo(newHeightMap)
+                wrapper.overwrite(newHeightMap)
 
                 chunk.setHeightMap(type, newHeightMap)
             }

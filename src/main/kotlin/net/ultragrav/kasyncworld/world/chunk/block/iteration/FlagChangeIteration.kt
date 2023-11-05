@@ -26,7 +26,7 @@ class FlagChangeIteration(override val size: Int) : IterationStrategy {
 
     override fun iterator(): Iterator<Int> {
         return object : Iterator<Int> {
-            private var index = 0
+            private var index = -1
             private var next = -1
 
             init {
@@ -34,6 +34,7 @@ class FlagChangeIteration(override val size: Int) : IterationStrategy {
             }
 
             private fun findNext() {
+                index++
                 while (index < size) {
                     if (flags.get(index) == 1) {
                         next = index

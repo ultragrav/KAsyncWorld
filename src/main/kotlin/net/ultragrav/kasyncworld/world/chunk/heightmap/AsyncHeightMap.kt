@@ -89,7 +89,7 @@ class AsyncHeightMap(
         return false
     }
 
-    fun applyTo(other: AsyncHeightMap) {
+    fun overwrite(other: AsyncHeightMap) {
         for (x in 0..15) {
             for (z in 0..15) {
                 other.setHeight(x, z, getHeight(x, z))

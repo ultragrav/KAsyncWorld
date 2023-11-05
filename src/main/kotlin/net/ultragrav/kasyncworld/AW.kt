@@ -12,6 +12,7 @@ import net.ultragrav.kasyncworld.world.contract.AsyncWorld
 import net.ultragrav.kasyncworld.world.impl.SpigotAsyncWorld
 import net.ultragrav.kasyncworld.world.versionio.ChunkIO
 import net.ultragrav.kasyncworld.world.versionio.impl.NMSChunkIO
+import org.bukkit.Bukkit
 import org.bukkit.World
 import org.bukkit.plugin.Plugin
 import java.nio.ByteBuffer
@@ -47,11 +48,16 @@ object AW : AWApi {
     fun editAsync(world: World, editType: AsyncWorld.EditType, job: AsyncWorld.() -> Unit): CompletableFuture<Void> {
         val asyncWorld = createAsyncWorld(world, editType)
         val scope = CoroutineScope(Dispatchers.IO)
-        scope.launch { job(asyncWorld) }
-        return asyncWorld.flush()
+        val future = CompletableFuture<Void>()
+        scope.launch {
+            job(asyncWorld)
+            asyncWorld.flush().thenAccept { future.complete(null) }
+        }
+        return future
     }
 
     inline fun editSync(world: World, editType: AsyncWorld.EditType, job: AsyncWorld.() -> Unit) {
+        require(Bukkit.isPrimaryThread()) { "Cannot use editSync on asynchronous thread!" }
         val asyncWorld = createAsyncWorld(world, editType)
         job(asyncWorld)
         asyncWorld.syncFlush()

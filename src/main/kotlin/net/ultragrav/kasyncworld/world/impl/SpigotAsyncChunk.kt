@@ -36,7 +36,10 @@ class SpigotAsyncChunk(
 ) : AsyncChunk {
 
     override val sections: Array<AsyncChunkSection?> = arrayOfNulls(heightOptions.numSections)
-    override val heightMaps: MutableMap<Heightmap.Types, AsyncHeightMap> = mutableMapOf()
+    override val heightMaps: MutableMap<Heightmap.Types, AsyncHeightMap> = Heightmap.Types
+        .values()
+        .associateWith { AsyncHeightMap(it, this) }
+        .toMutableMap()
     override val blockEntities: MutableMap<AWBlockPosition, CompoundTag> = mutableMapOf()
     override val entities: MutableList<CompoundTag> = mutableListOf()
 

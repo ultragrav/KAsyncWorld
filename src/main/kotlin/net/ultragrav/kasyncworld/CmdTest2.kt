@@ -16,13 +16,11 @@ class CmdTest2 : SpigotCommand() {
         val pos = spigotPlayer.location.toVector().toBlockVector()
         val timeNs = measureNanoTime {
             AW.editSync(spigotPlayer.world, AsyncWorld.EditType.SPARSE) {
-                for (dx in -10..10) {
-                    for (dz in -10..10) {
-                        val x = dx + pos.blockX
-                        val z = dz + pos.blockZ
-                        val y = pos.blockY - 1
-                        setBlock(x, y, z, Blocks.STONE.defaultBlockState())
-                    }
+                for (i in 0 until 100000) {
+                    val x = pos.blockX + (Math.random() * 100).toInt() - 50
+                    val y = pos.blockY + (Math.random() * 100).toInt() - 50
+                    val z = pos.blockZ + (Math.random() * 100).toInt() - 50
+                    setBlock(x, y, z, Blocks.AIR.defaultBlockState())
                 }
             }
         }

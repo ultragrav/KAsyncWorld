@@ -1,5 +1,6 @@
 package net.ultragrav.kasyncworld.world.chunk.block.storage.wrapped
 
+import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.chunk.PalettedContainer
 import net.ultragrav.kasyncworld.world.chunk.block.iteration.IterationStrategy
 import net.ultragrav.kasyncworld.world.chunk.block.iteration.NormalIteration
@@ -42,8 +43,7 @@ class WrappedPalettedContainer<T>(
     }
 
     override fun set(index: Int, type: T) {
-        val id = wrapped.data.palette.idFor(type)
-        wrapped.data.storage[index] = id
+        wrapped.set(index, type)
         iterationStrategy.set(index)
     }
 

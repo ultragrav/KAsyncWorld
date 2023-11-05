@@ -10,5 +10,5 @@ data class ChunkWriteOptions(
 enum class HeightmapWriteType {
     OVERWRITE,
     MERGE,
-    IGNORE,
+    RECALCULATE,
 }
