@@ -3,6 +3,7 @@ package net.ultragrav.kasyncworld.world.inmemory.impl.task
 import ca.spottedleaf.concurrentutil.executor.standard.PrioritisedExecutor
 import io.papermc.paper.chunk.system.scheduling.ChunkProgressionTask
 import io.papermc.paper.chunk.system.scheduling.ChunkTaskScheduler
+import io.papermc.paper.chunk.system.scheduling.NewChunkHolder
 import net.minecraft.core.registries.Registries
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.ChunkPos
@@ -19,6 +20,7 @@ import net.ultragrav.kasyncworld.world.inmemory.AsyncChunkProvider
 class AWChunkLoadTask(
     scheduler: ChunkTaskScheduler,
     world: ServerLevel,
+    val holder: NewChunkHolder,
     chunkX: Int,
     chunkZ: Int,
     private val chunkProvider: AsyncChunkProvider
@@ -50,7 +52,6 @@ class AWChunkLoadTask(
 
             complete(protoChunk, null)
         }
-
 
         val chunkSections = chunk.sections
             .map {
@@ -91,6 +92,19 @@ class AWChunkLoadTask(
             biomesRegistry,
             null
         )
+
+        val baseX = chunkX shl 4
+        val baseZ = chunkZ shl 4
+
+        chunk.blockEntities
+            .forEach { (pos, nbt) ->
+                nbt.putInt("x", pos.x + baseX)
+                nbt.putInt("y", pos.y)
+                nbt.putInt("z", pos.z + baseZ)
+                protoChunk.setBlockEntityNbt(nbt)
+            }
+
+        holder.entityChunk.
 
         complete(protoChunk, null)
     }

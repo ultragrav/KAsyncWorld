@@ -8,8 +8,8 @@ import org.bukkit.World
 
 interface ChunkIO {
     // May be run chunk-wise parallel
-    fun writeChunk(nms: LevelChunk, chunk: AsyncChunk, options: ChunkWriteOptions)
+    fun writeChunk(bukkitChunk: Chunk, chunk: AsyncChunk, options: ChunkWriteOptions)
     fun sendPackets(world: World, cx: Int, cz: Int)
     // May be run chunk-wise parallel
-    fun readChunk(nms: LevelChunk, factory: AsyncChunkFactory, options: ChunkReadOptions): AsyncChunk
+    fun readChunk(bukkitChunk: Chunk, factory: AsyncChunkFactory, options: ChunkReadOptions): AsyncChunk
 }

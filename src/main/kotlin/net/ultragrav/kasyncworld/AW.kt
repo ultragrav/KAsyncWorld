@@ -10,8 +10,14 @@ import net.ultragrav.kasyncworld.world.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.contract.AsyncChunkFactory
 import net.ultragrav.kasyncworld.world.contract.AsyncWorld
 import net.ultragrav.kasyncworld.world.impl.SpigotAsyncWorld
+import net.ultragrav.kasyncworld.world.inmemory.LocatedCompressedChunk
+import net.ultragrav.kasyncworld.world.inmemory.PackedWorld
+import net.ultragrav.kasyncworld.world.inmemory.SCompressedAsyncChunk
 import net.ultragrav.kasyncworld.world.versionio.ChunkIO
 import net.ultragrav.kasyncworld.world.versionio.impl.NMSChunkIO
+import net.ultragrav.kserializer.json.JsonArray
+import net.ultragrav.kserializer.json.JsonObject
+import net.ultragrav.serializer.GravSerializer
 import org.bukkit.Bukkit
 import org.bukkit.World
 import org.bukkit.plugin.Plugin
@@ -21,11 +27,20 @@ import java.util.concurrent.CompletableFuture
 object AW : AWApi {
 
 
-    override val chunkIO = NMSChunkIO()
+    override val chunkIO: ChunkIO = NMSChunkIO()
 
     override lateinit var chunkQueue: ChunkQueue
     override val codec: ChunkCodec
         get() = object : ChunkCodec {
+            override val id: String
+                get() = "null"
+            override val version: Int
+                get() = 0
+
+            override fun earlierVersion(): ChunkCodec? {
+                return null
+            }
+
             override fun encode(chunk: AsyncChunk): ByteArray {
                 throw UnsupportedOperationException("Cannot encode chunk")
             }
@@ -57,9 +72,69 @@ object AW : AWApi {
     }
 
     inline fun editSync(world: World, editType: AsyncWorld.EditType, job: AsyncWorld.() -> Unit) {
-        require(Bukkit.isPrimaryThread()) { "Cannot use editSync on asynchronous thread!" }
+        require(Bukkit.isPrimaryThread()) { "Cannot use editSync on an asynchronous thread!" }
         val asyncWorld = createAsyncWorld(world, editType)
         job(asyncWorld)
         asyncWorld.syncFlush()
     }
+
+    override fun serializePackedWorld(packedWorld: PackedWorld): ByteArray {
+        val json = JsonObject()
+        val array = JsonArray()
+        for (chunk in packedWorld.chunks) {
+            val chunkJson = JsonObject()
+            chunkJson["x"] = chunk.x
+            chunkJson["z"] = chunk.z
+            val codec = chunk.chunk.codec
+            chunkJson["codec"] = codec.id
+            chunkJson["version"] = codec.version
+            chunkJson["data"] = chunk.chunk.bytes
+            array.add(chunkJson)
+        }
+        json["chunks"] = array
+        return json.toByteArray()
+    }
+
+    override fun deserializePackedWorld(data: ByteArray, codec: ChunkCodec): PackedWorld {
+        val json = JsonObject.deserialize(GravSerializer(data))
+
+        val chunks = mutableListOf<LocatedCompressedChunk>()
+        val array = json.getArray("chunks")
+        val size = array.size
+        for (i in 0 until size) {
+            val chunkJson = array.getObject(i)
+            val x = chunkJson.getNumber("x").toInt()
+            val z = chunkJson.getNumber("z").toInt()
+            val isCorrectCodec = chunkJson.getString("codec") == codec.id
+            if (!isCorrectCodec) throw IllegalArgumentException("Codec mismatch: ${chunkJson.getString("codec")} != ${codec.id}")
+
+            val version = chunkJson.getNumber("version").toInt()
+            val chunkBytes = chunkJson.getBinary("data").value
+
+            if (version > codec.version) throw IllegalArgumentException("Version mismatch: $version > ${codec.version}")
+
+            var currentCodec = codec
+            while (version < currentCodec.version) currentCodec = currentCodec.earlierVersion() ?: throw IllegalArgumentException("Cannot find codec for version $version")
+            require(version == currentCodec.version) { "Could not find version $version of codec ${currentCodec.id}" }
+
+            val compressedChunk = SCompressedAsyncChunk(chunkBytes, currentCodec)
+            chunks.add(LocatedCompressedChunk(x, z, compressedChunk))
+        }
+
+        return PackedWorld(chunks)
+    }
+}
+
+fun World.editSync(editType: AsyncWorld.EditType, job: AsyncWorld.() -> Unit) {
+    AW.editSync(this, editType, job)
+}
+
+fun World.editAsync(editType: AsyncWorld.EditType, job: AsyncWorld.() -> Unit): CompletableFuture<Void> {
+    return AW.editAsync(this, editType, job)
+}
+
+fun JsonObject.toByteArray(): ByteArray {
+    val ser = GravSerializer()
+    this.serialize(ser)
+    return ser.toByteArray()
 }

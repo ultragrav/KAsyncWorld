@@ -51,6 +51,18 @@ class LinkedChangeIteration(override val size: Int) : IterationStrategy {
         numChanges--
     }
 
+    override fun setAll() {
+        for (i in 0 until size) {
+            set(i)
+        }
+    }
+
+    override fun unsetAll() {
+        for (i in 0 until size) {
+            unset(i)
+        }
+    }
+
     override fun contains(index: Int): Boolean {
         return forwards.get(index + 1) != 0 || index == current - 1
     }

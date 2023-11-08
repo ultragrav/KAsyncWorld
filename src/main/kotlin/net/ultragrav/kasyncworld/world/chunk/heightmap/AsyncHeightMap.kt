@@ -31,7 +31,7 @@ class AsyncHeightMap(
         return AsyncHeightMap(type, data.clone(), stateProvider)
     }
 
-    fun recompute() {
+    fun recalculate() {
         for (x in 0..15) {
             for (z in 0..15) {
                 recomputeColumn(x, z)
@@ -107,6 +107,7 @@ class AsyncHeightMap(
 
                 if (edited > curr) {
                     setHeight(x, z, edited)
+                    recomputeColumn(x, z, edited)
                     continue
                 }
 

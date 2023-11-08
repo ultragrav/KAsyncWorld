@@ -12,4 +12,6 @@ interface InMemoryWorld {
     val bukkitWorld: World
 
     fun unload(save: Boolean)
+
+    fun save(): PackedWorld
 }

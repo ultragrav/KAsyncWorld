@@ -1,5 +1,6 @@
 package net.ultragrav.kasyncworld.world.versionio.impl
 
+import ca.spottedleaf.starlight.common.light.StarLightEngine
 import net.minecraft.core.BlockPos
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.nbt.CompoundTag
@@ -7,11 +8,13 @@ import net.minecraft.nbt.ListTag
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.level.ChunkPos
+import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.entity.BlockEntity
-import net.minecraft.world.level.chunk.ChunkStatus
-import net.minecraft.world.level.chunk.LevelChunk
+import net.minecraft.world.level.block.entity.BlockEntityTicker
+import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.chunk.LevelChunkSection
 import net.minecraft.world.ticks.ProtoChunkTicks
+import net.minecraft.world.ticks.SavedTick
 import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
 import net.ultragrav.kasyncworld.world.chunk.block.position.AWBlockPosition
 import net.ultragrav.kasyncworld.world.chunk.block.storage.wrapped.WrappedPalettedContainer
@@ -28,12 +31,17 @@ import net.ultragrav.kasyncworld.world.versionio.ChunkWriteOptions
 import net.ultragrav.kasyncworld.world.versionio.HeightmapWriteType
 import org.bukkit.Chunk
 import org.bukkit.World
-import org.bukkit.craftbukkit.v1_20_R2.CraftChunk
+import org.bukkit.craftbukkit.v1_20_R2.CraftWorld
 import org.bukkit.craftbukkit.v1_20_R2.entity.CraftEntity
 
 class NMSChunkIO : ChunkIO {
 
-    override fun writeChunk(nms: LevelChunk, chunk: AsyncChunk, options: ChunkWriteOptions) {
+    override fun writeChunk(bukkitChunk: Chunk, chunk: AsyncChunk, options: ChunkWriteOptions) {
+
+        val nms = (bukkitChunk.world as CraftWorld)
+            .handle
+            .chunkSource
+            .getChunkAtIfLoadedImmediately(bukkitChunk.x, bukkitChunk.z) ?: throw IllegalStateException("Chunk not loaded")
 
         val cx = nms.locX
         val cz = nms.locZ
@@ -69,8 +77,10 @@ class NMSChunkIO : ChunkIO {
             }
 
             // Add new ones
+            val baseX = cx shl 4
+            val baseZ = cz shl 4
             chunk.blockEntities.forEach { (pos, tag) ->
-                val nmsPos = BlockPos(pos.x, pos.y, pos.z)
+                val nmsPos = BlockPos(pos.x + baseX, pos.y, pos.z + baseZ)
                 val nmsBlockEntity = BlockEntity.loadStatic(
                     nmsPos,
                     chunk.getBlock(pos.x, pos.y, pos.z),
@@ -86,7 +96,9 @@ class NMSChunkIO : ChunkIO {
                     .chunkEntities
                     .toList()
                     .forEach {
-                        it.remove()
+                        if (it.type != org.bukkit.entity.EntityType.PLAYER) {
+                            it.remove()
+                        }
                     }
             }
 
@@ -106,7 +118,7 @@ class NMSChunkIO : ChunkIO {
         nms.blockTicks.removeIf { wasBlockEdited(it.pos) }
         blockTicks.forEachIndexed { index, it ->
             nms.blockTicks.schedule(
-                it.unpack(
+                offsetTick(it, cx, cz).unpack(
                     nms.level.gameTime,
                     (index - blockTicks.size).toLong()
                 )
@@ -117,7 +129,7 @@ class NMSChunkIO : ChunkIO {
         nms.fluidTicks.removeIf { wasBlockEdited(it.pos) }
         fluidTicks.forEachIndexed { index, it ->
             nms.fluidTicks.schedule(
-                it.unpack(
+                offsetTick(it, cx, cz).unpack(
                     nms.level.gameTime,
                     (index - fluidTicks.size).toLong()
                 )
@@ -125,23 +137,28 @@ class NMSChunkIO : ChunkIO {
         }
 
         // Heightmaps
-        val heightmaps = nms.heightmaps
-        heightmaps.forEach { (key, wrapped) ->
+        nms.heightmaps.forEach { (key, wrapped) ->
             val wrapper = AsyncHeightMap(
                 key,
                 NMSHeightmapStorageWrapper(wrapped, nms),
                 NMSHeightmapStateProvider(nms)
             )
             val hm = chunk.heightMaps[key] ?: run {
-                wrapper.recompute()
+                wrapper.recalculate()
                 return@forEach
             }
 
             when (options.heightmapWriteType) {
-                HeightmapWriteType.RECALCULATE -> wrapper.recompute()
+                HeightmapWriteType.RECALCULATE -> wrapper.recalculate()
                 HeightmapWriteType.OVERWRITE -> hm.overwrite(wrapper)
                 HeightmapWriteType.MERGE -> wrapper.editWith(hm)
             }
+        }
+        if (options.relight) {
+            nms.isLightCorrect = false
+            val emptySections = StarLightEngine.getEmptySectionsForChunk(nms)
+            nms.level.chunkSource.lightEngine.theLightEngine.lightChunk(nms, emptySections)
+            nms.isLightCorrect = true
         }
 
         if (options.sendPackets) {
@@ -165,7 +182,12 @@ class NMSChunkIO : ChunkIO {
         world.refreshChunk(cx, cz)
     }
 
-    override fun readChunk(nms: LevelChunk, factory: AsyncChunkFactory, options: ChunkReadOptions): AsyncChunk {
+    override fun readChunk(bukkitChunk: Chunk, factory: AsyncChunkFactory, options: ChunkReadOptions): AsyncChunk {
+
+        val nms = (bukkitChunk.world as CraftWorld)
+            .handle
+            .chunkSource
+            .getChunkAtIfLoadedImmediately(bukkitChunk.x, bukkitChunk.z) ?: throw IllegalStateException("Chunk is not loaded")
 
         val cx = nms.locX
         val cz = nms.locZ
@@ -186,7 +208,7 @@ class NMSChunkIO : ChunkIO {
         // Block Entities
         if (options.readBlockEntities) {
             nms.blockEntities.mapValues { it.value.saveWithFullMetadata() }
-                .forEach { (pos, ent) -> chunk.setBlockEntity(pos.x, pos.y, pos.z, ent) }
+                .forEach { (pos, ent) -> chunk.setBlockEntity(pos.x and 0xF, pos.y, pos.z and 0xF, ent) }
         }
 
         // Entities
@@ -234,7 +256,11 @@ class NMSChunkIO : ChunkIO {
             }, ChunkPos(cx, cz))
 
             chunk.blockTicks = blockTicks.scheduledTicks()
+                .map { relativizeTick(it) }
+                .toMutableList()
             chunk.fluidTicks = fluidTicks.scheduledTicks()
+                .map { relativizeTick(it) }
+                .toMutableList()
         }
 
         if (options.readHeightmaps) {
@@ -258,6 +284,26 @@ class NMSChunkIO : ChunkIO {
         }
 
         return chunk
+    }
+
+    fun <T> relativizeTick(tick: SavedTick<T>): SavedTick<T> {
+        return SavedTick(
+            tick.type,
+            BlockPos(tick.pos.x and 0xF, tick.pos.y, tick.pos.z and 0xF),
+            tick.delay,
+            tick.priority
+        )
+    }
+
+    fun <T> offsetTick(tick: SavedTick<T>, cx: Int, cz: Int): SavedTick<T> {
+        val offsetX = cx shl 4
+        val offsetZ = cz shl 4
+        return SavedTick(
+            tick.type,
+            BlockPos(tick.pos.x + offsetX, tick.pos.y, tick.pos.z + offsetZ),
+            tick.delay,
+            tick.priority
+        )
     }
 
     private fun readSection(async: AsyncChunkSection, section: LevelChunkSection) {

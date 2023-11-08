@@ -12,6 +12,8 @@ import net.ultragrav.kasyncworld.world.chunk.heightmap.AsyncHeightMap
 import net.ultragrav.kasyncworld.world.chunk.heightmap.HeightmapStateProvider
 import net.ultragrav.kasyncworld.world.contract.section.AsyncChunkSection
 import net.ultragrav.kasyncworld.world.contract.section.AsyncChunkSectionFactory
+import net.ultragrav.kasyncworld.world.versionio.ChunkWriteOptions
+import net.ultragrav.kasyncworld.world.versionio.HeightmapWriteType
 
 /**
  * A simple representation of a chunk. This representation is not
@@ -21,7 +23,7 @@ interface AsyncChunk : AsyncChunkSectionFactory {
 
     val heightOptions: ChunkHeightOptions
     val heightMaps: Map<Heightmap.Types, AsyncHeightMap>
-    val blockEntities: Map<AWBlockPosition, CompoundTag>
+    val blockEntities: Map<AWBlockPosition, CompoundTag> // Stored relative to chunk
     val sections: Array<AsyncChunkSection?>
     val entities: List<CompoundTag>
 

@@ -1,5 +1,6 @@
 package net.ultragrav.kasyncworld.world.impl
 
+import net.minecraft.core.BlockPos
 import net.minecraft.core.Holder
 import net.minecraft.core.registries.Registries
 import net.minecraft.nbt.CompoundTag
@@ -8,6 +9,8 @@ import net.minecraft.world.level.biome.Biome
 import net.minecraft.world.level.biome.Biomes
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.Blocks
+import net.minecraft.world.level.block.EntityBlock
+import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.levelgen.Heightmap
 import net.minecraft.world.level.material.Fluid
@@ -17,9 +20,9 @@ import net.ultragrav.kasyncworld.world.chunk.block.bit.BitStorage
 import net.ultragrav.kasyncworld.world.chunk.block.bit.NumberStorage
 import net.ultragrav.kasyncworld.world.chunk.block.count.IntCounts
 import net.ultragrav.kasyncworld.world.chunk.block.count.TypeCounts
-import net.ultragrav.kasyncworld.world.chunk.block.iteration.LinkedChangeIteration
-import net.ultragrav.kasyncworld.world.chunk.block.iteration.IterationStrategy
 import net.ultragrav.kasyncworld.world.chunk.block.iteration.FlagChangeIteration
+import net.ultragrav.kasyncworld.world.chunk.block.iteration.IterationStrategy
+import net.ultragrav.kasyncworld.world.chunk.block.iteration.LinkedChangeIteration
 import net.ultragrav.kasyncworld.world.chunk.block.palette.Palette
 import net.ultragrav.kasyncworld.world.chunk.block.palette.SimplePalette
 import net.ultragrav.kasyncworld.world.chunk.block.position.AWBlockPosition
@@ -30,7 +33,7 @@ import net.ultragrav.kasyncworld.world.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.contract.AsyncWorld
 import net.ultragrav.kasyncworld.world.contract.section.AsyncChunkSection
 
-class SpigotAsyncChunk(
+class EditingAsyncChunk(
     override val heightOptions: ChunkHeightOptions,
     val editType: AsyncWorld.EditType
 ) : AsyncChunk {
@@ -52,6 +55,11 @@ class SpigotAsyncChunk(
         val section = getOrMakeSection(y shr 4)
         section.setBlock(x, y and 15, z, block)
         heightMaps.values.forEach { it.update(x, y, z, block) }
+        if (block.hasBlockEntity()) {
+            val tag = (block.block as EntityBlock).newBlockEntity(BlockPos(0, 0, 0), block)
+                ?.saveWithId() ?: return
+            setBlockEntity(x, y, z, tag)
+        }
     }
 
     override fun unsetBlock(x: Int, y: Int, z: Int) {
@@ -127,7 +135,7 @@ class SpigotAsyncChunk(
     }
 
     override fun clone(): AsyncChunk {
-        val copy = SpigotAsyncChunk(heightOptions, editType)
+        val copy = EditingAsyncChunk(heightOptions, editType)
         copy.entities.addAll(entities)
         copy.blockTicks.addAll(blockTicks)
         copy.fluidTicks.addAll(fluidTicks)

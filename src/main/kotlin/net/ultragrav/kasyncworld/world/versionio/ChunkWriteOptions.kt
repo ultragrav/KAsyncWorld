@@ -5,6 +5,7 @@ data class ChunkWriteOptions(
     val heightmapWriteType: HeightmapWriteType = HeightmapWriteType.OVERWRITE,
     val writePersistentContainer: Boolean = true,
     val sendPackets: Boolean = true,
+    val relight: Boolean = true,
 )
 
 enum class HeightmapWriteType {

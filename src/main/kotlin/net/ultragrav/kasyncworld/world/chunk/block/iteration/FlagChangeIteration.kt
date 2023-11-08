@@ -14,6 +14,20 @@ class FlagChangeIteration(override val size: Int) : IterationStrategy {
         flags.set(index, 0)
     }
 
+    override fun setAll() {
+        val raw = flags.raw()
+        for (i in raw.indices) {
+            raw[i] = 0L.inv()
+        }
+    }
+
+    override fun unsetAll() {
+        val raw = flags.raw()
+        for (i in raw.indices) {
+            raw[i] = 0L
+        }
+    }
+
     override fun contains(index: Int): Boolean {
         return flags.get(index) == 1
     }

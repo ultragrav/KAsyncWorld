@@ -10,4 +10,5 @@ interface AsyncChunkProvider {
     fun storeChunk(x: Int, z: Int, chunk: AsyncChunk)
     fun setChunks(chunkMap: Map<ChunkPos, CompressedAsyncChunk>)
     fun getChunks(): Map<ChunkPos, CompressedAsyncChunk>
+    fun getLocatedChunks(): List<LocatedCompressedChunk>
 }

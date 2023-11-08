@@ -14,11 +14,11 @@ class FraudulentChunkTaskScheduler(world: ServerLevel, workers: PrioritisedThrea
     ) {
     override fun createTask(
         chunkX: Int, chunkZ: Int, chunk: ChunkAccess?,
-        chunkHolder: NewChunkHolder?, neighbours: List<ChunkAccess?>?,
+        chunkHolder: NewChunkHolder, neighbours: List<ChunkAccess?>?,
         toStatus: ChunkStatus, initialPriority: PrioritisedExecutor.Priority?
     ): ChunkProgressionTask {
         if (toStatus === ChunkStatus.EMPTY) {
-            return AWChunkLoadTask(this, world, chunkX, chunkZ, TODO())
+            return AWChunkLoadTask(this, world, chunkHolder, chunkX, chunkZ, TODO())
         }
         return super.createTask(chunkX, chunkZ, chunk, chunkHolder, neighbours, toStatus, initialPriority)
     }

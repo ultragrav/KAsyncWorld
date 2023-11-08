@@ -78,12 +78,11 @@ class ParallelChunkQueue(val plugin: Plugin, val io: ChunkIO) : ChunkQueue {
 
         runBlocking {
             batch.forEach { job ->
+                val bukkitChunk = job.world.getChunkAt(job.x, job.z)
+                val chunk = job.chunk
                 launch {
-                    val bukkitChunk = job.world.getChunkAt(job.x, job.z)
-                    val chunk = job.chunk
-                    val handle = (bukkitChunk as CraftChunk).getHandle(ChunkStatus.FULL) as LevelChunk
                     withContext(Dispatchers.IO) {
-                        io.writeChunk(handle, chunk, job.writeOptions.copy(sendPackets = false))
+                        io.writeChunk(bukkitChunk, chunk, job.writeOptions.copy(sendPackets = false))
                     }
                     io.sendPackets(bukkitChunk.world, job.x, job.z)
                 }
