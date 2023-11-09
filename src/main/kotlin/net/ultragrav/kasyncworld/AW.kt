@@ -26,10 +26,10 @@ import java.util.concurrent.CompletableFuture
 
 object AW : AWApi {
 
-
     override val chunkIO: ChunkIO = NMSChunkIO()
 
     override lateinit var chunkQueue: ChunkQueue
+
     override val codec: ChunkCodec
         get() = object : ChunkCodec {
             override val id: String
@@ -49,6 +49,10 @@ object AW : AWApi {
                 throw UnsupportedOperationException("Cannot decode chunk")
             }
         }
+    override val editingChunkFactory: AsyncChunkFactory
+        get() = TODO("Not yet implemented")
+    override val storageChunkFactory: AsyncChunkFactory
+        get() = TODO("Not yet implemented")
 
 
     override fun initialize(plugin: Plugin) {

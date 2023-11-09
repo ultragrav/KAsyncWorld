@@ -2,6 +2,7 @@ package net.ultragrav.kasyncworld
 
 import net.ultragrav.kasyncworld.world.chunk.queue.ChunkQueue
 import net.ultragrav.kasyncworld.world.chunk.serialization.ChunkCodec
+import net.ultragrav.kasyncworld.world.contract.AsyncChunkFactory
 import net.ultragrav.kasyncworld.world.contract.AsyncWorld
 import net.ultragrav.kasyncworld.world.inmemory.PackedWorld
 import net.ultragrav.kasyncworld.world.versionio.ChunkIO
@@ -13,6 +14,9 @@ interface AWApi {
     val chunkQueue: ChunkQueue
     val chunkIO: ChunkIO
     val codec: ChunkCodec
+
+    val editingChunkFactory: AsyncChunkFactory
+    val storageChunkFactory: AsyncChunkFactory
 
     fun createAsyncWorld(world: World, editType: AsyncWorld.EditType): AsyncWorld
 

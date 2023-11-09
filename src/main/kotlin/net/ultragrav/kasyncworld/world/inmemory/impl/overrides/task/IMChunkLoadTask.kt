@@ -1,23 +1,30 @@
-package net.ultragrav.kasyncworld.world.inmemory.impl.task
+package net.ultragrav.kasyncworld.world.inmemory.impl.overrides.task
 
 import ca.spottedleaf.concurrentutil.executor.standard.PrioritisedExecutor
 import io.papermc.paper.chunk.system.scheduling.ChunkProgressionTask
 import io.papermc.paper.chunk.system.scheduling.ChunkTaskScheduler
 import io.papermc.paper.chunk.system.scheduling.NewChunkHolder
 import net.minecraft.core.registries.Registries
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.nbt.ListTag
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.ChunkPos
 import net.minecraft.world.level.biome.Biomes
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.chunk.*
+import net.minecraft.world.level.levelgen.Heightmap
 import net.minecraft.world.level.material.Fluid
 import net.minecraft.world.ticks.ProtoChunkTicks
 import net.ultragrav.kasyncworld.world.chunk.block.storage.wrapped.MinecraftPalettedStorage
 import net.ultragrav.kasyncworld.world.chunk.block.storage.wrapped.WrappedPalettedContainer
+import net.ultragrav.kasyncworld.world.chunk.heightmap.AsyncHeightMap
+import net.ultragrav.kasyncworld.world.chunk.heightmap.wrapper.NMSHeightmapStateProvider
+import net.ultragrav.kasyncworld.world.chunk.heightmap.wrapper.NMSHeightmapStorageWrapper
 import net.ultragrav.kasyncworld.world.inmemory.AsyncChunkProvider
+import net.ultragrav.kasyncworld.world.versionio.impl.NMSChunkIO
 
-class AWChunkLoadTask(
+class IMChunkLoadTask(
     scheduler: ChunkTaskScheduler,
     world: ServerLevel,
     val holder: NewChunkHolder,
@@ -104,7 +111,30 @@ class AWChunkLoadTask(
                 protoChunk.setBlockEntityNbt(nbt)
             }
 
-        holder.entityChunk.
+        // Write entities to a list tag
+        val entitiesListTag = ListTag().apply {
+            chunk.entities.map { NMSChunkIO.offsetEntityTag(it, chunkX, chunkZ) }
+                .forEach { entity -> add(entity) }
+        }
+        val entitiesCompoundTag = CompoundTag().apply {
+            put("Entities", entitiesListTag)
+        }
+
+        holder.pendingEntityChunk = entitiesCompoundTag
+
+        // Height maps
+        chunk.heightMaps.forEach { (type, ahm) ->
+            val nmsHm = protoChunk.getOrCreateHeightmapUnprimed(type)
+            val wrappedNmsHm = AsyncHeightMap(
+                type,
+                NMSHeightmapStorageWrapper(nmsHm, protoChunk),
+                NMSHeightmapStateProvider(protoChunk),
+            )
+            ahm.overwrite(wrappedNmsHm)
+        }
+
+        // Persistent data
+        protoChunk.persistentDataContainer.putAll(chunk.persistentData)
 
         complete(protoChunk, null)
     }

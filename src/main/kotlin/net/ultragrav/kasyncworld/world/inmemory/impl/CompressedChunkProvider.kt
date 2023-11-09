@@ -6,10 +6,11 @@ import net.ultragrav.kasyncworld.world.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.contract.AsyncChunkFactory
 import net.ultragrav.kasyncworld.world.inmemory.AsyncChunkProvider
 import net.ultragrav.kasyncworld.world.inmemory.CompressedAsyncChunk
+import net.ultragrav.kasyncworld.world.inmemory.LocatedCompressedChunk
 import net.ultragrav.kasyncworld.world.inmemory.SCompressedAsyncChunk
 
 class CompressedChunkProvider(
-    private val factory: AsyncChunkFactory,
+    override val factory: AsyncChunkFactory,
     override val codec: ChunkCodec
 ) : AsyncChunkProvider {
 
@@ -32,6 +33,10 @@ class CompressedChunkProvider(
 
     override fun getChunks(): Map<ChunkPos, CompressedAsyncChunk> {
         return chunks
+    }
+
+    override fun getLocatedChunks(): List<LocatedCompressedChunk> {
+        return chunks.map { LocatedCompressedChunk(it.key.x, it.key.z, it.value) }
     }
 
 }

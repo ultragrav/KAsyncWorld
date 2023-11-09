@@ -1,17 +1,19 @@
 package net.ultragrav.kasyncworld.world.versionio.impl
 
 import ca.spottedleaf.starlight.common.light.StarLightEngine
+import io.papermc.paper.world.ChunkEntitySlices
 import net.minecraft.core.BlockPos
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.nbt.DoubleTag
 import net.minecraft.nbt.ListTag
+import net.minecraft.nbt.Tag
 import net.minecraft.resources.ResourceLocation
+import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.level.ChunkPos
-import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.entity.BlockEntity
-import net.minecraft.world.level.block.entity.BlockEntityTicker
-import net.minecraft.world.level.block.entity.BlockEntityType
+import net.minecraft.world.level.chunk.ChunkAccess
 import net.minecraft.world.level.chunk.LevelChunkSection
 import net.minecraft.world.ticks.ProtoChunkTicks
 import net.minecraft.world.ticks.SavedTick
@@ -41,7 +43,8 @@ class NMSChunkIO : ChunkIO {
         val nms = (bukkitChunk.world as CraftWorld)
             .handle
             .chunkSource
-            .getChunkAtIfLoadedImmediately(bukkitChunk.x, bukkitChunk.z) ?: throw IllegalStateException("Chunk not loaded")
+            .getChunkAtIfLoadedImmediately(bukkitChunk.x, bukkitChunk.z)
+            ?: throw IllegalStateException("Chunk not loaded")
 
         val cx = nms.locX
         val cz = nms.locZ
@@ -102,7 +105,8 @@ class NMSChunkIO : ChunkIO {
                     }
             }
 
-            val decodedEntities = EntityType.loadEntitiesRecursive(chunk.entities, nms.level).toList()
+            val entities = chunk.entities.map { offsetEntityTag(it, cx, cz) }
+            val decodedEntities = EntityType.loadEntitiesRecursive(entities, nms.level).toList()
             nms.level.entityLookup.addEntityChunkEntities(decodedEntities, ChunkPos(nms.locX, nms.locZ))
 
         }
@@ -183,136 +187,173 @@ class NMSChunkIO : ChunkIO {
     }
 
     override fun readChunk(bukkitChunk: Chunk, factory: AsyncChunkFactory, options: ChunkReadOptions): AsyncChunk {
-
         val nms = (bukkitChunk.world as CraftWorld)
             .handle
             .chunkSource
-            .getChunkAtIfLoadedImmediately(bukkitChunk.x, bukkitChunk.z) ?: throw IllegalStateException("Chunk is not loaded")
+            .getChunkAtIfLoadedImmediately(bukkitChunk.x, bukkitChunk.z)
+            ?: throw IllegalStateException("Chunk is not loaded")
+        val height = ChunkHeightOptions(nms.sectionsCount, nms.minSection)
+        val chunk = factory.createChunk(height)
 
         val cx = nms.locX
         val cz = nms.locZ
 
-        val height = ChunkHeightOptions(nms.sectionsCount, nms.minSection)
-        val chunk = factory.createChunk(height)
-
-        // Sections (Blocks)
-        if (options.readBlocksAndBiomes) {
-            for (i in 0 until nms.sectionsCount) {
-                val nmsSection = nms.sections[i] ?: continue
-                val section = chunk.createSection()
-                readSection(section, nmsSection)
-                chunk.setSection(chunk.heightOptions.getSectionIndexMB(i), section)
-            }
+        // Chunk-wise parallelism is not possible here as we are
+        // using EntityLookup, which is a shared resource.
+        val entityChunk = synchronized(this) {
+            nms.level.entityLookup.getChunk(cx, cz)
         }
 
-        // Block Entities
-        if (options.readBlockEntities) {
-            nms.blockEntities.mapValues { it.value.saveWithFullMetadata() }
-                .forEach { (pos, ent) -> chunk.setBlockEntity(pos.x and 0xF, pos.y, pos.z and 0xF, ent) }
-        }
-
-        // Entities
-        // Chunk-wise parallelism is not possible here, because entities
-        // are stored in a level data structure. So we must synchronize.
-        if (options.readEntities) {
-            synchronized(this) {
-                nms.level.entityLookup.getChunk(cx, cz)
-                    ?.chunkEntities
-                    ?.map { it as CraftEntity }
-                    ?.map { it.handle }
-                    ?.filter { it.persist }
-                    ?.map {
-                        val tag = CompoundTag()
-                        it.save(tag)
-                        tag
-                    }
-                    ?.forEach { chunk.addEntity(it) }
-            }
-        }
-
-        // Persistent data
-        if (options.readPersistentContainer) {
-            chunk.persistentData = nms.persistentDataContainer.toTagCompound()
-        }
-
-        if (options.readTicks) {
-            // Block/Fluid ticks
-            val ticksForSerialization = nms.ticksForSerialization
-
-            val blockTicksTag = ticksForSerialization.blocks.save(nms.level.gameTime) {
-                BuiltInRegistries.BLOCK.getKey(it).toString()
-            } as ListTag
-
-            val fluidTicksTag = ticksForSerialization.fluids.save(nms.level.gameTime) {
-                BuiltInRegistries.FLUID.getKey(it).toString()
-            } as ListTag
-
-            val blockTicks = ProtoChunkTicks.load(blockTicksTag, {
-                BuiltInRegistries.BLOCK.getOptional(ResourceLocation.tryParse(it))
-            }, ChunkPos(cx, cz))
-
-            val fluidTicks = ProtoChunkTicks.load(fluidTicksTag, {
-                BuiltInRegistries.FLUID.getOptional(ResourceLocation.tryParse(it))
-            }, ChunkPos(cx, cz))
-
-            chunk.blockTicks = blockTicks.scheduledTicks()
-                .map { relativizeTick(it) }
-                .toMutableList()
-            chunk.fluidTicks = fluidTicks.scheduledTicks()
-                .map { relativizeTick(it) }
-                .toMutableList()
-        }
-
-        if (options.readHeightmaps) {
-            // Height Maps
-            nms.heightmaps.forEach { (type, map) ->
-                val newHeightMap = AsyncHeightMap(
-                    type,
-                    chunk
-                )
-
-                val wrapper = AsyncHeightMap(
-                    type,
-                    NMSHeightmapStorageWrapper(map, nms),
-                    NMSHeightmapStateProvider(nms)
-                )
-
-                wrapper.overwrite(newHeightMap)
-
-                chunk.setHeightMap(type, newHeightMap)
-            }
-        }
+        readChunk(nms.level, nms, entityChunk, chunk, options)
 
         return chunk
     }
 
-    fun <T> relativizeTick(tick: SavedTick<T>): SavedTick<T> {
-        return SavedTick(
-            tick.type,
-            BlockPos(tick.pos.x and 0xF, tick.pos.y, tick.pos.z and 0xF),
-            tick.delay,
-            tick.priority
-        )
-    }
+    companion object {
+        fun readChunk(
+            level: ServerLevel,
+            nms: ChunkAccess,
+            entityChunk: ChunkEntitySlices?,
+            chunk: AsyncChunk,
+            options: ChunkReadOptions
+        ) {
 
-    fun <T> offsetTick(tick: SavedTick<T>, cx: Int, cz: Int): SavedTick<T> {
-        val offsetX = cx shl 4
-        val offsetZ = cz shl 4
-        return SavedTick(
-            tick.type,
-            BlockPos(tick.pos.x + offsetX, tick.pos.y, tick.pos.z + offsetZ),
-            tick.delay,
-            tick.priority
-        )
-    }
+            val cx = nms.locX
+            val cz = nms.locZ
 
-    private fun readSection(async: AsyncChunkSection, section: LevelChunkSection) {
-        // Blocks
-        val wrappedStates = WrappedPalettedContainer(section.states)
-        wrappedStates.applyTo(async.blocks)
+            // Sections (Blocks)
+            if (options.readBlocksAndBiomes) {
+                for (i in 0 until nms.sectionsCount) {
+                    val nmsSection = nms.sections[i] ?: continue
+                    val section = chunk.createSection()
+                    readSection(section, nmsSection)
+                    chunk.setSection(chunk.heightOptions.getSectionIndexMB(i), section)
+                }
+            }
 
-        // Biomes
-        val wrappedBiomes = WrappedPalettedContainer(section.biomes)
-        wrappedBiomes.applyTo(async.biomes)
+            // Block Entities
+            if (options.readBlockEntities) {
+                nms.blockEntities.mapValues { it.value.saveWithFullMetadata() }
+                    .forEach { (pos, ent) -> chunk.setBlockEntity(pos.x and 0xF, pos.y, pos.z and 0xF, ent) }
+            }
+
+            // Entities
+            if (options.readEntities) {
+                entityChunk?.chunkEntities
+                    ?.map { it as CraftEntity }
+                    ?.map { it.handle }
+                    ?.filter { it.shouldBeSaved() }
+                    ?.mapNotNull {
+                        val tag = CompoundTag()
+                        if (it.save(tag)) tag
+                        else null
+                    }
+                    ?.map { relativizeEntityTag(it, cx, cz) }
+                    ?.forEach { chunk.addEntity(it) }
+            }
+
+            // Persistent data
+            if (options.readPersistentContainer) {
+                chunk.persistentData = nms.persistentDataContainer.toTagCompound()
+            }
+
+            if (options.readTicks) {
+                // Block/Fluid ticks
+                val ticksForSerialization = nms.ticksForSerialization
+
+                val blockTicksTag = ticksForSerialization.blocks.save(level.gameTime) {
+                    BuiltInRegistries.BLOCK.getKey(it).toString()
+                } as ListTag
+
+                val fluidTicksTag = ticksForSerialization.fluids.save(level.gameTime) {
+                    BuiltInRegistries.FLUID.getKey(it).toString()
+                } as ListTag
+
+                val blockTicks = ProtoChunkTicks.load(blockTicksTag, {
+                    BuiltInRegistries.BLOCK.getOptional(ResourceLocation.tryParse(it))
+                }, ChunkPos(cx, cz))
+
+                val fluidTicks = ProtoChunkTicks.load(fluidTicksTag, {
+                    BuiltInRegistries.FLUID.getOptional(ResourceLocation.tryParse(it))
+                }, ChunkPos(cx, cz))
+
+                chunk.blockTicks = blockTicks.scheduledTicks()
+                    .map { relativizeTick(it) }
+                    .toMutableList()
+                chunk.fluidTicks = fluidTicks.scheduledTicks()
+                    .map { relativizeTick(it) }
+                    .toMutableList()
+            }
+
+            if (options.readHeightmaps) {
+                // Height Maps
+                nms.heightmaps.forEach { (type, map) ->
+                    val newHeightMap = AsyncHeightMap(
+                        type,
+                        chunk
+                    )
+
+                    val wrapper = AsyncHeightMap(
+                        type,
+                        NMSHeightmapStorageWrapper(map, nms),
+                        NMSHeightmapStateProvider(nms)
+                    )
+
+                    wrapper.overwrite(newHeightMap)
+
+                    chunk.setHeightMap(type, newHeightMap)
+                }
+            }
+        }
+
+        fun <T> relativizeTick(tick: SavedTick<T>): SavedTick<T> {
+            return SavedTick(
+                tick.type,
+                BlockPos(tick.pos.x and 0xF, tick.pos.y, tick.pos.z and 0xF),
+                tick.delay,
+                tick.priority
+            )
+        }
+
+        fun <T> offsetTick(tick: SavedTick<T>, cx: Int, cz: Int): SavedTick<T> {
+            val offsetX = cx shl 4
+            val offsetZ = cz shl 4
+            return SavedTick(
+                tick.type,
+                BlockPos(tick.pos.x + offsetX, tick.pos.y, tick.pos.z + offsetZ),
+                tick.delay,
+                tick.priority
+            )
+        }
+
+        fun relativizeEntityTag(tag: CompoundTag, cx: Int, cz: Int): CompoundTag {
+            val pos = tag.getList("Pos", Tag.TAG_DOUBLE.toInt())
+            val currX = pos.getDouble(0)
+            val currZ = pos.getDouble(2)
+            pos[0] = DoubleTag.valueOf(currX - (cx shl 4))
+            pos[2] = DoubleTag.valueOf(currZ - (cz shl 4))
+            return tag
+        }
+
+        fun offsetEntityTag(tag: CompoundTag, cx: Int, cz: Int): CompoundTag {
+            val pos = tag.getList("Pos", Tag.TAG_DOUBLE.toInt())
+            val currX = pos.getDouble(0)
+            val currZ = pos.getDouble(2)
+            pos[0] = DoubleTag.valueOf(currX + (cx shl 4))
+            pos[2] = DoubleTag.valueOf(currZ + (cz shl 4))
+            return tag
+        }
+
+        private fun readSection(async: AsyncChunkSection, section: LevelChunkSection) {
+            // Blocks
+            if (!section.hasOnlyAir()) {
+                val wrappedStates = WrappedPalettedContainer(section.states)
+                wrappedStates.applyTo(async.blocks)
+            }
+
+            // Biomes
+            val wrappedBiomes = WrappedPalettedContainer(section.biomes)
+            wrappedBiomes.applyTo(async.biomes)
+        }
     }
 }

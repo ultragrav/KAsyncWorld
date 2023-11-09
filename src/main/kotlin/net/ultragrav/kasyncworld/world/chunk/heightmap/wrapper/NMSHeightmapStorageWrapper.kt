@@ -1,11 +1,12 @@
 package net.ultragrav.kasyncworld.world.chunk.heightmap.wrapper
 
+import net.minecraft.world.level.chunk.ChunkAccess
 import net.minecraft.world.level.chunk.LevelChunk
 import net.minecraft.world.level.levelgen.Heightmap
 import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
 import net.ultragrav.kasyncworld.world.chunk.heightmap.HeightmapStorage
 
-class NMSHeightmapStorageWrapper(val heightmap: Heightmap, val chunk: LevelChunk) : HeightmapStorage {
+class NMSHeightmapStorageWrapper(val heightmap: Heightmap, val chunk: ChunkAccess) : HeightmapStorage {
     override val heightOptions: ChunkHeightOptions = ChunkHeightOptions(
         numSections = chunk.sectionsCount,
         minSection = chunk.minSection
