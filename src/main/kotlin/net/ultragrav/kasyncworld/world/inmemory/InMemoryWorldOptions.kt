@@ -6,8 +6,8 @@ import org.bukkit.World.Environment
 
 data class InMemoryWorldOptions(
     val environment: Environment,
-    val sizeChunksX: Int,
-    val sizeChunksY: Int,
+    val chunkBoundsX: IntRange,
+    val chunkBoundsZ: IntRange,
     val heightOptions: ChunkHeightOptions,
     val compressUnloadedChunks: Boolean,
     val codec: ChunkCodec

@@ -33,10 +33,14 @@ class IMChunkHolder(
     scheduler
 ) {
     override fun saveChunk(chunk: ChunkAccess, unloading: Boolean): Boolean {
-        val heightOptions = ChunkHeightOptions(chunk.sections.size, chunk.minSection)
-        val asyncChunk = chunkProvider.factory.createChunk(heightOptions)
-        NMSChunkIO.readChunk(world, chunk, entityChunk, asyncChunk, ChunkReadOptions())
-        chunkProvider.storeChunk(chunkX, chunkZ, asyncChunk)
+
+        if (chunkX in chunkProvider.boundsX && chunkZ in chunkProvider.boundsZ) {
+            val heightOptions = ChunkHeightOptions(chunk.sections.size, chunk.minSection)
+            val asyncChunk = chunkProvider.factory.createChunk(heightOptions)
+            NMSChunkIO.readChunk(world, chunk, entityChunk, asyncChunk, ChunkReadOptions())
+            chunkProvider.storeChunk(chunkX, chunkZ, asyncChunk)
+        }
+
         getUnloadTask(RegionFileIOThread.RegionFileType.CHUNK_DATA)
             ?.completable
             ?.complete(null)

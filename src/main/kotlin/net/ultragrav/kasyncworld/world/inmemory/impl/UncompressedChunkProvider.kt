@@ -7,22 +7,27 @@ import net.ultragrav.kasyncworld.world.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.contract.AsyncChunkFactory
 import net.ultragrav.kasyncworld.world.inmemory.AsyncChunkProvider
 import net.ultragrav.kasyncworld.world.inmemory.CompressedAsyncChunk
+import net.ultragrav.kasyncworld.world.inmemory.LocatedCompressedChunk
 import net.ultragrav.kasyncworld.world.inmemory.SCompressedAsyncChunk
 import net.ultragrav.serializer.compressors.StandardCompressor
 import java.nio.ByteBuffer
 
 class UncompressedChunkProvider(
-    private val factory: AsyncChunkFactory,
-    override val codec: ChunkCodec
+    override val factory: AsyncChunkFactory,
+    override val codec: ChunkCodec,
+    override val boundsX: IntRange,
+    override val boundsZ: IntRange
 ) : AsyncChunkProvider {
 
     private val chunks = mutableMapOf<ChunkPos, AsyncChunk>()
 
     override fun loadChunk(x: Int, z: Int): AsyncChunk? {
+        if (x !in boundsX || z !in boundsZ) return null
         return chunks[ChunkPos(x, z)]
     }
 
     override fun storeChunk(x: Int, z: Int, chunk: AsyncChunk) {
+        if (x !in boundsX || z !in boundsZ) return
         chunks[ChunkPos(x, z)] = chunk
     }
 
@@ -39,5 +44,9 @@ class UncompressedChunkProvider(
             map[pos] = SCompressedAsyncChunk(chunk, codec)
         }
         return map
+    }
+
+    override fun getLocatedChunks(): List<LocatedCompressedChunk> {
+        return chunks.map { LocatedCompressedChunk(it.key.x, it.key.z, SCompressedAsyncChunk(it.value, codec)) }
     }
 }

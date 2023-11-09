@@ -7,22 +7,28 @@ import net.minecraft.server.MinecraftServer
 import net.minecraft.server.dedicated.DedicatedServer
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.Difficulty
-import net.minecraft.world.level.*
+import net.minecraft.world.level.GameRules
+import net.minecraft.world.level.GameType
+import net.minecraft.world.level.LevelSettings
 import net.minecraft.world.level.dimension.LevelStem
 import net.minecraft.world.level.levelgen.WorldOptions
 import net.minecraft.world.level.storage.PrimaryLevelData
+import net.ultragrav.kasyncworld.AW
 import net.ultragrav.kasyncworld.world.inmemory.*
 import net.ultragrav.kasyncworld.world.inmemory.impl.overrides.IMServerLevel
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.World.Environment
-import org.bukkit.craftbukkit.v1_20_R2.CraftServer
-import org.bukkit.event.world.WorldInitEvent
 import org.bukkit.event.world.WorldLoadEvent
 
 class PaperWorldProvider : WorldProvider {
 
-    private fun createWorld(name: String, seed: Long, environment: Environment, chunkProvider: AsyncChunkProvider): ServerLevel {
+    private fun createWorld(
+        name: String,
+        seed: Long,
+        environment: Environment,
+        chunkProvider: AsyncChunkProvider
+    ): ServerLevel {
         val worldOptions = WorldOptions(seed, true, false)
 
         val mcServer = MinecraftServer.getServer() as DedicatedServer
@@ -101,8 +107,27 @@ class PaperWorldProvider : WorldProvider {
     }
 
     override fun createWorld(name: String, options: InMemoryWorldOptions): InMemoryWorld {
+
         val chunkProvider =
-            if (options.compressUnloadedChunks) CompressedChunkProvider(AW.)
+            if (options.compressUnloadedChunks) {
+                CompressedChunkProvider(
+                    AW.storageChunkFactory,
+                    AW.codec,
+                    options.chunkBoundsX,
+                    options.chunkBoundsZ
+                )
+            } else {
+                UncompressedChunkProvider(
+                    AW.storageChunkFactory,
+                    AW.codec,
+                    options.chunkBoundsX,
+                    options.chunkBoundsZ
+                )
+            }
+
+        val serverLevel = createWorld(name, 123L, options.environment, chunkProvider)
+
+        return PaperMemoryWorld(serverLevel, name, options, chunkProvider)
     }
 
     override fun createWorld(name: String, options: InMemoryWorldOptions, packed: PackedWorld): InMemoryWorld {

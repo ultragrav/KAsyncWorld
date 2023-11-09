@@ -8,6 +8,8 @@ import net.ultragrav.kasyncworld.world.contract.AsyncChunkFactory
 interface AsyncChunkProvider {
     val codec: ChunkCodec
     val factory: AsyncChunkFactory
+    val boundsX: IntRange
+    val boundsZ: IntRange
     fun loadChunk(x: Int, z: Int): AsyncChunk?
     fun storeChunk(x: Int, z: Int, chunk: AsyncChunk)
     fun setChunks(chunkMap: Map<ChunkPos, CompressedAsyncChunk>)

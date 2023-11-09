@@ -10,6 +10,8 @@ import net.ultragrav.kasyncworld.world.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.contract.AsyncChunkFactory
 import net.ultragrav.kasyncworld.world.contract.AsyncWorld
 import net.ultragrav.kasyncworld.world.impl.SpigotAsyncWorld
+import net.ultragrav.kasyncworld.world.impl.factory.EditingChunkFactory
+import net.ultragrav.kasyncworld.world.impl.factory.StorageChunkFactory
 import net.ultragrav.kasyncworld.world.inmemory.LocatedCompressedChunk
 import net.ultragrav.kasyncworld.world.inmemory.PackedWorld
 import net.ultragrav.kasyncworld.world.inmemory.SCompressedAsyncChunk
@@ -25,6 +27,8 @@ import java.nio.ByteBuffer
 import java.util.concurrent.CompletableFuture
 
 object AW : AWApi {
+
+    val debug = true
 
     override val chunkIO: ChunkIO = NMSChunkIO()
 
@@ -49,11 +53,9 @@ object AW : AWApi {
                 throw UnsupportedOperationException("Cannot decode chunk")
             }
         }
-    override val editingChunkFactory: AsyncChunkFactory
-        get() = TODO("Not yet implemented")
-    override val storageChunkFactory: AsyncChunkFactory
-        get() = TODO("Not yet implemented")
 
+    override val editingChunkFactory = EditingChunkFactory()
+    override val storageChunkFactory = StorageChunkFactory()
 
     override fun initialize(plugin: Plugin) {
         chunkQueue = ParallelChunkQueue(plugin, chunkIO)
@@ -126,6 +128,11 @@ object AW : AWApi {
         }
 
         return PackedWorld(chunks)
+    }
+
+    internal fun debug(msg: String) {
+        if (!debug) return
+        Bukkit.getLogger().info("[AW Debug] $msg")
     }
 }
 
