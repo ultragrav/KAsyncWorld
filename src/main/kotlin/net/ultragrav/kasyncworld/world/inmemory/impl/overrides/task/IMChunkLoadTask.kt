@@ -1,9 +1,11 @@
 package net.ultragrav.kasyncworld.world.inmemory.impl.overrides.task
 
 import ca.spottedleaf.concurrentutil.executor.standard.PrioritisedExecutor
+import io.papermc.paper.chunk.system.poi.PoiChunk
 import io.papermc.paper.chunk.system.scheduling.ChunkProgressionTask
 import io.papermc.paper.chunk.system.scheduling.ChunkTaskScheduler
 import io.papermc.paper.chunk.system.scheduling.NewChunkHolder
+import io.papermc.paper.world.ChunkEntitySlices
 import net.minecraft.core.registries.Registries
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.ListTag
@@ -48,6 +50,9 @@ class IMChunkLoadTask(
 
         val biomesRegistry = world.registryAccess().registryOrThrow(Registries.BIOME)
 
+        holder.pendingEntityChunk = CompoundTag()
+        holder.poiChunk = PoiChunk(world, holder.chunkX, holder.chunkZ, world.minSection, world.maxSection)
+
         val chunk = chunkProvider.loadChunk(chunkX, chunkZ) ?: return run {
             val protoChunk = ProtoChunk(
                 ChunkPos(chunkX, chunkZ),
@@ -56,6 +61,8 @@ class IMChunkLoadTask(
                 biomesRegistry,
                 null
             )
+
+            protoChunk.status = ChunkStatus.FULL
 
             complete(protoChunk, null)
         }
@@ -105,15 +112,16 @@ class IMChunkLoadTask(
 
         chunk.blockEntities
             .forEach { (pos, nbt) ->
-                nbt.putInt("x", pos.x + baseX)
-                nbt.putInt("y", pos.y)
-                nbt.putInt("z", pos.z + baseZ)
-                protoChunk.setBlockEntityNbt(nbt)
+                val copy = nbt.copy()
+                copy.putInt("x", pos.x + baseX)
+                copy.putInt("y", pos.y)
+                copy.putInt("z", pos.z + baseZ)
+                protoChunk.setBlockEntityNbt(copy)
             }
 
         // Write entities to a list tag
         val entitiesListTag = ListTag().apply {
-            chunk.entities.map { NMSChunkIO.offsetEntityTag(it, chunkX, chunkZ) }
+            chunk.entities.map { NMSChunkIO.offsetEntityTag(it.copy(), chunkX, chunkZ) }
                 .forEach { entity -> add(entity) }
         }
         val entitiesCompoundTag = CompoundTag().apply {
@@ -136,6 +144,7 @@ class IMChunkLoadTask(
         // Persistent data
         protoChunk.persistentDataContainer.putAll(chunk.persistentData)
 
+        protoChunk.status = ChunkStatus.FULL
         complete(protoChunk, null)
     }
 

@@ -1,4 +1,4 @@
-package net.ultragrav.kasyncworld.world.chunk.serialization
+package net.ultragrav.kasyncworld.world.chunk.codec
 
 import net.ultragrav.kasyncworld.world.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.contract.AsyncChunkFactory

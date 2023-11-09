@@ -72,12 +72,16 @@ class NMSChunkIO : ChunkIO {
         // that parts that interact with the level are synchronized
         synchronized(this) {
             // Remove existing block entities
-            nms.blockEntities.toList().forEach { (pos, _) ->
-                val wasBlockSet = wasBlockEdited(pos)
-                val isTileSet = AWBlockPosition(pos.x, pos.y, pos.z) in chunk.blockEntities
-                if (!wasBlockSet && !isTileSet) return@forEach
-                nms.removeBlockEntity(pos)
-            }
+            nms.blockEntities
+                .mapKeys { BlockPos(it.key.x - (cx shl 4), it.key.y, it.key.z - (cz shl 4)) }
+                .toList()
+                .forEach { (pos, _) ->
+                    val wasBlockSet = wasBlockEdited(pos)
+                    val isTileSet =
+                        AWBlockPosition(pos.x, pos.y, pos.z) in chunk.blockEntities
+                    if (!wasBlockSet && !isTileSet) return@forEach
+                    nms.removeBlockEntity(pos)
+                }
 
             // Add new ones
             val baseX = cx shl 4
@@ -105,7 +109,7 @@ class NMSChunkIO : ChunkIO {
                     }
             }
 
-            val entities = chunk.entities.map { offsetEntityTag(it, cx, cz) }
+            val entities = chunk.entities.map { offsetEntityTag(it.copy(), cx, cz) }
             val decodedEntities = EntityType.loadEntitiesRecursive(entities, nms.level).toList()
             nms.level.entityLookup.addEntityChunkEntities(decodedEntities, ChunkPos(nms.locX, nms.locZ))
 
@@ -332,6 +336,10 @@ class NMSChunkIO : ChunkIO {
             val currZ = pos.getDouble(2)
             pos[0] = DoubleTag.valueOf(currX - (cx shl 4))
             pos[2] = DoubleTag.valueOf(currZ - (cz shl 4))
+
+            println("Relativized entity tag: $tag")
+            println("Was at $currX, $currZ")
+            println("Now at ${pos.getDouble(0)}, ${pos.getDouble(2)}")
             return tag
         }
 
@@ -339,6 +347,7 @@ class NMSChunkIO : ChunkIO {
             val pos = tag.getList("Pos", Tag.TAG_DOUBLE.toInt())
             val currX = pos.getDouble(0)
             val currZ = pos.getDouble(2)
+            println("Shifting entity coordinate $currX, $currZ by $cx, $cz to ${currX + (cx shl 4)}, ${currZ + (cz shl 4)}")
             pos[0] = DoubleTag.valueOf(currX + (cx shl 4))
             pos[2] = DoubleTag.valueOf(currZ + (cz shl 4))
             return tag

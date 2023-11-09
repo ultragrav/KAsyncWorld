@@ -1,6 +1,6 @@
 package net.ultragrav.kasyncworld.world.inmemory
 
-import net.ultragrav.kasyncworld.world.chunk.serialization.ChunkCodec
+import net.ultragrav.kasyncworld.world.chunk.codec.ChunkCodec
 import net.ultragrav.kasyncworld.world.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.contract.AsyncChunkFactory
 

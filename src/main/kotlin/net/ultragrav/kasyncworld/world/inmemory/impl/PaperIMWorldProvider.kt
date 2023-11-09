@@ -61,9 +61,10 @@ class PaperIMWorldProvider : IMWorldProvider {
         )
 
         val dedicatedProperties = mcServer.properties
-        val levelStemRegistry = mcServer.worldLoader.datapackWorldgen.registryOrThrow(Registries.LEVEL_STEM)
+        var levelStemRegistry = mcServer.worldLoader.datapackDimensions.registryOrThrow(Registries.LEVEL_STEM)
         val createDimensions = dedicatedProperties.createDimensions(mcServer.worldLoader.datapackWorldgen)
         val baked = createDimensions.bake(levelStemRegistry)
+        levelStemRegistry = baked.dimensions
         val lifecycle = baked.lifecycle().add(mcServer.worldLoader.datapackWorldgen.allRegistriesLifecycle())
 
         val levelData = PrimaryLevelData(levelSettings, worldOptions, baked.specialWorldProperty, lifecycle)
@@ -114,14 +115,14 @@ class PaperIMWorldProvider : IMWorldProvider {
             if (options.compressUnloadedChunks) {
                 CompressedChunkProvider(
                     AW.storageChunkFactory,
-                    AW.codec,
+                    options.codec,
                     options.chunkBoundsX,
                     options.chunkBoundsZ
                 )
             } else {
                 UncompressedChunkProvider(
                     AW.storageChunkFactory,
-                    AW.codec,
+                    options.codec,
                     options.chunkBoundsX,
                     options.chunkBoundsZ
                 )

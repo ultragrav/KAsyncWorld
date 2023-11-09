@@ -1,12 +1,20 @@
 package net.ultragrav.kasyncworld.cmd
 
+import kotlinx.coroutines.*
 import net.kyori.adventure.text.Component
 import net.minecraft.world.level.block.Blocks
 import net.ultragrav.command.platform.SpigotCommand
 import net.ultragrav.kasyncworld.AW
 import net.ultragrav.kasyncworld.editSync
+import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
 import net.ultragrav.kasyncworld.world.contract.AsyncWorld
+import net.ultragrav.kasyncworld.world.inmemory.InMemoryWorld
+import net.ultragrav.kasyncworld.world.inmemory.InMemoryWorldOptions
+import org.bukkit.Location
+import org.bukkit.World
+import java.util.*
 import kotlin.system.measureNanoTime
+import kotlin.system.measureTimeMillis
 
 class CmdTest : SpigotCommand() {
     init {
@@ -14,27 +22,32 @@ class CmdTest : SpigotCommand() {
     }
 
     override fun perform() {
-        val pos = spigotPlayer.location.toVector().toBlockVector()
-        val pl = spigotPlayer
-        val timeNanos = System.nanoTime()
-        spigotPlayer.world.editSync(AsyncWorld.EditType.SPARSE) {
-            val writeTime = measureNanoTime {
-                for (dx in -1..1) {
-                    for (dz in -1..1) {
-                        for (dy in -1 downTo -1) {
-                            val x = pos.blockX + dx
-                            val y = pos.blockY + dy
-                            val z = pos.blockZ + dz
-                            setBlock(x, y, z, Blocks.CHEST.defaultBlockState())
-                        }
-                    }
-                }
-            }
-            pl.sendMessage(Component.text("Queued in ${writeTime / 1000000.0}ms"))
+
+        val world: InMemoryWorld
+
+        val millis = measureTimeMillis {
+            world = AW.inMemoryWorldProvider.createWorld(
+                "Test-World-${UUID.randomUUID()}",
+                InMemoryWorldOptions(
+                    World.Environment.NORMAL,
+                    0..1,
+                    0..1,
+                    ChunkHeightOptions(20, -4),
+                    false,
+                    AW.codec
+                )
+            )
         }
-//            .thenAccept {
-            val time = (System.nanoTime() - timeNanos) / 1000000.0
-            pl.sendMessage(Component.text("Done in $time ms"))
-//        }
+
+        tell("Created world in $millis ms")
+
+        spigotPlayer.teleport(
+            Location(
+                world.bukkitWorld,
+                0.0,
+                100.0,
+                0.0
+            )
+        )
     }
 }

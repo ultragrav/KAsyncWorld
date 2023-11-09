@@ -5,7 +5,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.ultragrav.kasyncworld.scheduler.ParallelChunkQueue
 import net.ultragrav.kasyncworld.world.chunk.queue.ChunkQueue
-import net.ultragrav.kasyncworld.world.chunk.serialization.ChunkCodec
+import net.ultragrav.kasyncworld.world.chunk.codec.ChunkCodec
+import net.ultragrav.kasyncworld.world.chunk.codec.impl.AWChunkCodec_v1
 import net.ultragrav.kasyncworld.world.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.contract.AsyncChunkFactory
 import net.ultragrav.kasyncworld.world.contract.AsyncWorld
@@ -36,30 +37,12 @@ object AW : AWApi {
 
     override lateinit var chunkQueue: ChunkQueue
 
-    override val codec: ChunkCodec
-        get() = object : ChunkCodec {
-            override val id: String
-                get() = "null"
-            override val version: Int
-                get() = 0
+    override val codec: ChunkCodec = AWChunkCodec_v1()
 
-            override fun earlierVersion(): ChunkCodec? {
-                return null
-            }
+    override val inMemoryWorldProvider: IMWorldProvider = PaperIMWorldProvider()
 
-            override fun encode(chunk: AsyncChunk): ByteArray {
-                throw UnsupportedOperationException("Cannot encode chunk")
-            }
-
-            override fun decode(data: ByteBuffer, factory: AsyncChunkFactory): AsyncChunk {
-                throw UnsupportedOperationException("Cannot decode chunk")
-            }
-        }
-
-    override val inMemoryWorldProvider = PaperIMWorldProvider()
-
-    override val editingChunkFactory = EditingChunkFactory()
-    override val storageChunkFactory = StorageChunkFactory()
+    override val editingChunkFactory: AsyncChunkFactory = EditingChunkFactory()
+    override val storageChunkFactory: AsyncChunkFactory = StorageChunkFactory()
 
     override fun initialize(plugin: Plugin) {
         chunkQueue = ParallelChunkQueue(plugin, chunkIO)

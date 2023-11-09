@@ -56,8 +56,15 @@ class IMServerLevel(
     null // Why warning?
 ) {
 
+    lateinit var cachedTaskScheduler: IMChunkTaskScheduler
+
+    init {
+        cachedTaskScheduler.chunkProvider = chunkProvider
+    }
+
     override fun createChunkTaskScheduler(): ChunkTaskScheduler {
-        return IMChunkTaskScheduler(chunkProvider, this, ChunkTaskScheduler.workerThreads)
+        cachedTaskScheduler = IMChunkTaskScheduler(this, ChunkTaskScheduler.workerThreads)
+        return cachedTaskScheduler
     }
 
     override fun save(progressListener: ProgressListener?, flush: Boolean, savingDisabled: Boolean) {}
