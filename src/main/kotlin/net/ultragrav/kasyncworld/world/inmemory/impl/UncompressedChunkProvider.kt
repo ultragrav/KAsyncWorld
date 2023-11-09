@@ -34,6 +34,7 @@ class UncompressedChunkProvider(
     override fun setChunks(chunkMap: Map<ChunkPos, CompressedAsyncChunk>) {
         chunks.clear()
         for ((pos, compressed) in chunkMap) {
+            if (pos.x !in boundsX || pos.z !in boundsZ) continue
             chunks[pos] = compressed.decompress(factory)
         }
     }

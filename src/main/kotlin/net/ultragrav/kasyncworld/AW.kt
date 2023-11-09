@@ -12,9 +12,11 @@ import net.ultragrav.kasyncworld.world.contract.AsyncWorld
 import net.ultragrav.kasyncworld.world.impl.SpigotAsyncWorld
 import net.ultragrav.kasyncworld.world.impl.factory.EditingChunkFactory
 import net.ultragrav.kasyncworld.world.impl.factory.StorageChunkFactory
+import net.ultragrav.kasyncworld.world.inmemory.IMWorldProvider
 import net.ultragrav.kasyncworld.world.inmemory.LocatedCompressedChunk
 import net.ultragrav.kasyncworld.world.inmemory.PackedWorld
 import net.ultragrav.kasyncworld.world.inmemory.SCompressedAsyncChunk
+import net.ultragrav.kasyncworld.world.inmemory.impl.PaperIMWorldProvider
 import net.ultragrav.kasyncworld.world.versionio.ChunkIO
 import net.ultragrav.kasyncworld.world.versionio.impl.NMSChunkIO
 import net.ultragrav.kserializer.json.JsonArray
@@ -53,6 +55,8 @@ object AW : AWApi {
                 throw UnsupportedOperationException("Cannot decode chunk")
             }
         }
+
+    override val inMemoryWorldProvider = PaperIMWorldProvider()
 
     override val editingChunkFactory = EditingChunkFactory()
     override val storageChunkFactory = StorageChunkFactory()

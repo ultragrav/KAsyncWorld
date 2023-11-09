@@ -7,6 +7,7 @@ import net.minecraft.server.MinecraftServer
 import net.minecraft.server.dedicated.DedicatedServer
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.Difficulty
+import net.minecraft.world.level.ChunkPos
 import net.minecraft.world.level.GameRules
 import net.minecraft.world.level.GameType
 import net.minecraft.world.level.LevelSettings
@@ -16,12 +17,13 @@ import net.minecraft.world.level.storage.PrimaryLevelData
 import net.ultragrav.kasyncworld.AW
 import net.ultragrav.kasyncworld.world.inmemory.*
 import net.ultragrav.kasyncworld.world.inmemory.impl.overrides.IMServerLevel
+import net.ultragrav.kasyncworld.world.inmemory.impl.overrides.PaperMemoryWorld
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.World.Environment
 import org.bukkit.event.world.WorldLoadEvent
 
-class PaperWorldProvider : WorldProvider {
+class PaperIMWorldProvider : IMWorldProvider {
 
     private fun createWorld(
         name: String,
@@ -131,6 +133,10 @@ class PaperWorldProvider : WorldProvider {
     }
 
     override fun createWorld(name: String, options: InMemoryWorldOptions, packed: PackedWorld): InMemoryWorld {
-        TODO()
+        val imw = createWorld(name, options)
+        imw.chunkProvider.setChunks(
+            packed.chunks.associateBy { ChunkPos(it.x, it.z) }.mapValues { it.value.chunk }
+        )
+        return imw
     }
 }

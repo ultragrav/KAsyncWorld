@@ -5,6 +5,7 @@ import net.ultragrav.kasyncworld.world.chunk.serialization.ChunkCodec
 import net.ultragrav.kasyncworld.world.contract.AsyncChunkFactory
 import net.ultragrav.kasyncworld.world.contract.AsyncWorld
 import net.ultragrav.kasyncworld.world.inmemory.PackedWorld
+import net.ultragrav.kasyncworld.world.inmemory.IMWorldProvider
 import net.ultragrav.kasyncworld.world.versionio.ChunkIO
 import org.bukkit.World
 import org.bukkit.plugin.Plugin
@@ -14,6 +15,7 @@ interface AWApi {
     val chunkQueue: ChunkQueue
     val chunkIO: ChunkIO
     val codec: ChunkCodec
+    val inMemoryWorldProvider: IMWorldProvider
 
     val editingChunkFactory: AsyncChunkFactory
     val storageChunkFactory: AsyncChunkFactory

@@ -32,7 +32,7 @@ class CompressedChunkProvider(
 
     override fun setChunks(chunkMap: Map<ChunkPos, CompressedAsyncChunk>) {
         chunks.clear()
-        chunks.putAll(chunkMap)
+        chunks.putAll(chunkMap.filterKeys { it.x in boundsX && it.z in boundsZ })
     }
 
     override fun getChunks(): Map<ChunkPos, CompressedAsyncChunk> {
