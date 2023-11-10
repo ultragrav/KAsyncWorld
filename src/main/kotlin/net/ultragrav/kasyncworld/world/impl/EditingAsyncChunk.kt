@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.levelgen.Heightmap
 import net.minecraft.world.level.material.Fluid
 import net.minecraft.world.ticks.SavedTick
+import net.ultragrav.kasyncworld.AW
 import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
 import net.ultragrav.kasyncworld.world.chunk.block.bit.BitStorage
 import net.ultragrav.kasyncworld.world.chunk.block.bit.NumberStorage
@@ -161,7 +162,7 @@ class EditingAsyncChunk(
         }
 
         override fun createPalette(): Palette<BlockState> {
-            return SimplePalette()
+            return SimplePalette(AW.globalBlockPalette)
         }
 
         override fun createIterationStrategy(): IterationStrategy {
@@ -185,7 +186,7 @@ class EditingAsyncChunk(
         }
 
         override fun createPalette(): Palette<Holder<Biome>> {
-            return SimplePalette()
+            return SimplePalette(AW.globalBiomePalette)
         }
 
         override fun createIterationStrategy(): IterationStrategy {
@@ -207,7 +208,7 @@ class EditingAsyncChunk(
         }
 
         override fun createPalette(): Palette<BlockState> {
-            return SimplePalette()
+            return SimplePalette(AW.globalBlockPalette)
         }
 
         override fun createIterationStrategy(): IterationStrategy {
@@ -231,7 +232,7 @@ class EditingAsyncChunk(
         }
 
         override fun createPalette(): Palette<Holder<Biome>> {
-            return SimplePalette()
+            return SimplePalette(AW.globalBiomePalette)
         }
 
         override fun createIterationStrategy(): IterationStrategy {

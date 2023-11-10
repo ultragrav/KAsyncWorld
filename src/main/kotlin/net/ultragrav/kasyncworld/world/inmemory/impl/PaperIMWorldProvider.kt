@@ -134,10 +134,31 @@ class PaperIMWorldProvider : IMWorldProvider {
     }
 
     override fun createWorld(name: String, options: InMemoryWorldOptions, packed: PackedWorld): InMemoryWorld {
-        val imw = createWorld(name, options)
-        imw.chunkProvider.setChunks(
+        val chunkProvider =
+            if (options.compressUnloadedChunks) {
+                CompressedChunkProvider(
+                    AW.storageChunkFactory,
+                    options.codec,
+                    options.chunkBoundsX,
+                    options.chunkBoundsZ
+                )
+            } else {
+                UncompressedChunkProvider(
+                    AW.storageChunkFactory,
+                    options.codec,
+                    options.chunkBoundsX,
+                    options.chunkBoundsZ
+                )
+            }
+
+        chunkProvider.setChunks(
             packed.chunks.associateBy { ChunkPos(it.x, it.z) }.mapValues { it.value.chunk }
         )
-        return imw
+
+        val serverLevel = createWorld(name, 123L, options.environment, chunkProvider)
+
+
+        return PaperMemoryWorld(serverLevel, name, options, chunkProvider)
+
     }
 }

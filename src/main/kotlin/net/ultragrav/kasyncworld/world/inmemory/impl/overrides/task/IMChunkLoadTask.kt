@@ -18,6 +18,7 @@ import net.minecraft.world.level.chunk.*
 import net.minecraft.world.level.levelgen.Heightmap
 import net.minecraft.world.level.material.Fluid
 import net.minecraft.world.ticks.ProtoChunkTicks
+import net.ultragrav.kasyncworld.AW
 import net.ultragrav.kasyncworld.world.chunk.block.storage.wrapped.MinecraftPalettedStorage
 import net.ultragrav.kasyncworld.world.chunk.block.storage.wrapped.WrappedPalettedContainer
 import net.ultragrav.kasyncworld.world.chunk.heightmap.AsyncHeightMap

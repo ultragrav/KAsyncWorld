@@ -3,14 +3,22 @@ package net.ultragrav.kasyncworld
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import net.minecraft.core.Holder
+import net.minecraft.core.registries.Registries
+import net.minecraft.server.MinecraftServer
+import net.minecraft.world.level.biome.Biome
+import net.minecraft.world.level.block.Block
+import net.minecraft.world.level.block.state.BlockState
 import net.ultragrav.kasyncworld.data.DataReader
 import net.ultragrav.kasyncworld.data.DataWriter
 import net.ultragrav.kasyncworld.data.GravSerializerRead
 import net.ultragrav.kasyncworld.data.GravSerializerWrite
 import net.ultragrav.kasyncworld.scheduler.ParallelChunkQueue
-import net.ultragrav.kasyncworld.world.chunk.queue.ChunkQueue
+import net.ultragrav.kasyncworld.world.chunk.block.palette.Palette
+import net.ultragrav.kasyncworld.world.chunk.block.palette.WrappedGlobalPalette
 import net.ultragrav.kasyncworld.world.chunk.codec.ChunkCodec
-import net.ultragrav.kasyncworld.world.chunk.codec.impl.AWChunkCodecV1
+import net.ultragrav.kasyncworld.world.chunk.codec.impl.AWChunkCodecV0
+import net.ultragrav.kasyncworld.world.chunk.queue.ChunkQueue
 import net.ultragrav.kasyncworld.world.contract.AsyncChunkFactory
 import net.ultragrav.kasyncworld.world.contract.AsyncWorld
 import net.ultragrav.kasyncworld.world.impl.SpigotAsyncWorld
@@ -39,12 +47,18 @@ object AW : AWApi {
 
     override lateinit var chunkQueue: ChunkQueue
 
-    override val codec: ChunkCodec = AWChunkCodecV1()
+    override val codec: ChunkCodec = AWChunkCodecV0()
 
     override val inMemoryWorldProvider: IMWorldProvider = PaperIMWorldProvider()
 
     override val editingChunkFactory: AsyncChunkFactory = EditingChunkFactory()
     override val storageChunkFactory: AsyncChunkFactory = StorageChunkFactory()
+
+    internal val globalBlockPalette: Palette<BlockState> =
+        WrappedGlobalPalette(Block.BLOCK_STATE_REGISTRY)
+
+    internal val globalBiomePalette: Palette<Holder<Biome>> =
+        WrappedGlobalPalette(MinecraftServer.getServer().registryAccess().registryOrThrow(Registries.BIOME).asHolderIdMap())
 
     override fun initialize(plugin: Plugin) {
         chunkQueue = ParallelChunkQueue(plugin, chunkIO)
@@ -124,7 +138,8 @@ object AW : AWApi {
             if (version > codec.version) throw IllegalArgumentException("Version mismatch: $version > ${codec.version}")
 
             var currentCodec = codec
-            while (version < currentCodec.version) currentCodec = currentCodec.earlierVersion() ?: throw IllegalArgumentException("Cannot find codec for version $version")
+            while (version < currentCodec.version) currentCodec = currentCodec.earlierVersion()
+                ?: throw IllegalArgumentException("Cannot find codec for version $version")
             require(version == currentCodec.version) { "Could not find version $version of codec ${currentCodec.id}" }
 
             val compressedChunk = SCompressedAsyncChunk(chunkBytes, currentCodec)

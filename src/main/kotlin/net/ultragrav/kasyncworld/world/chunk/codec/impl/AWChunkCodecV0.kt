@@ -10,10 +10,11 @@ import net.ultragrav.kasyncworld.deserializeNBT
 import net.ultragrav.kasyncworld.serializeNBT
 import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
 import net.ultragrav.kasyncworld.world.chunk.codec.ChunkCodec
+import net.ultragrav.kasyncworld.world.chunk.getSectionIndexMB
 import net.ultragrav.kasyncworld.world.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.contract.AsyncChunkFactory
 
-class AWChunkCodecV1 : ChunkCodec {
+class AWChunkCodecV0 : ChunkCodec {
 
     override val id: String
         get() = "aw"
@@ -93,9 +94,10 @@ class AWChunkCodecV1 : ChunkCodec {
         val sectionExists = (0 until numSections).map { reader.readBoolean() }
         sectionExists.forEachIndexed { index, exists ->
             if (exists) {
-                val section = chunk.getSection(index)
-                section?.blocks?.read(reader)
-                section?.biomes?.read(reader)
+                val section = chunk.createSection()
+                section.blocks.read(reader)
+                section.biomes.read(reader)
+                chunk.setSection(heightOptions.getSectionIndexMB(index), section)
             }
         }
 

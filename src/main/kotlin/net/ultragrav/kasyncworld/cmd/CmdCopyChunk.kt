@@ -16,12 +16,15 @@ class CmdCopyChunk : SpigotCommand() {
     override fun perform() {
         val time = measureNanoTime {
             val bukkitChunk = spigotPlayer.chunk
-            chunk = AW.chunkIO.readChunk(bukkitChunk, AW.createAsyncWorld(spigotPlayer.world, AsyncWorld.EditType.SPARSE), ChunkReadOptions())
+            val ch = AW.chunkIO.readChunk(bukkitChunk, AW.createAsyncWorld(spigotPlayer.world, AsyncWorld.EditType.SPARSE), ChunkReadOptions())
+            val writer = AW.createWriter()
+            AW.codec.encode(writer, ch)
+            chunk = writer.toByteArray()
         }
         sender.sendMessage("Copied chunk in ${time / 1000000}ms")
     }
 
     companion object {
-        var chunk: AsyncChunk? = null
+        var chunk: ByteArray? = null
     }
 }
