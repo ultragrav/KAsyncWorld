@@ -1,6 +1,5 @@
-package net.ultragrav.kasyncworld.world.versionio
+package net.ultragrav.kasyncworld.world.chunk.io
 
-import net.minecraft.world.level.chunk.LevelChunk
 import net.ultragrav.kasyncworld.world.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.contract.AsyncChunkFactory
 import org.bukkit.Chunk

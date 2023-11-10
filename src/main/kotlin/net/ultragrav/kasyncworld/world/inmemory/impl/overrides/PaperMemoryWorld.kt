@@ -6,7 +6,7 @@ import net.ultragrav.kasyncworld.world.inmemory.AsyncChunkProvider
 import net.ultragrav.kasyncworld.world.inmemory.InMemoryWorld
 import net.ultragrav.kasyncworld.world.inmemory.InMemoryWorldOptions
 import net.ultragrav.kasyncworld.world.inmemory.PackedWorld
-import net.ultragrav.kasyncworld.world.versionio.ChunkReadOptions
+import net.ultragrav.kasyncworld.world.chunk.io.ChunkReadOptions
 import org.bukkit.Bukkit
 import org.bukkit.World
 import kotlin.system.measureNanoTime
@@ -21,6 +21,10 @@ class PaperMemoryWorld(
     override val bukkitWorld: World
         get() = world.world
 
+    init {
+        AW.debug("World has dimension id: ${world.dimensionTypeId()} ${world.dimensionType()}")
+    }
+
     override fun unload(save: Boolean) {
         require(Bukkit.getWorld(world.uuid) != null) {
             "World $name is not loaded"
@@ -28,7 +32,7 @@ class PaperMemoryWorld(
         Bukkit.unloadWorld(bukkitWorld, save)
     }
 
-    override fun save(): PackedWorld {
+    override fun saveAndPack(): PackedWorld {
         bukkitWorld.loadedChunks
             .filter { it.x in chunkProvider.boundsX }
             .filter { it.z in chunkProvider.boundsZ }

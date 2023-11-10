@@ -4,6 +4,7 @@ import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.level.levelgen.Heightmap
 import net.minecraft.world.ticks.SavedTick
+import net.ultragrav.kasyncworld.AW
 import net.ultragrav.kasyncworld.data.DataReader
 import net.ultragrav.kasyncworld.data.DataWriter
 import net.ultragrav.kasyncworld.deserializeNBT
@@ -26,6 +27,8 @@ class AWChunkCodecV0 : ChunkCodec {
     override fun encode(writer: DataWriter, chunk: AsyncChunk) {
         writer.writeInt(chunk.heightOptions.numSections)
         writer.writeInt(chunk.heightOptions.minSection)
+
+        AW.debug("Writing chunk with height options: ${chunk.heightOptions}")
 
         // Section bit/boolean mask
         chunk.sections
@@ -87,6 +90,7 @@ class AWChunkCodecV0 : ChunkCodec {
     override fun decode(reader: DataReader, factory: AsyncChunkFactory): AsyncChunk {
         val numSections = reader.readInt()
         val minSection = reader.readInt()
+        AW.debug("Decoding chunk with height options num: $numSections, min: $minSection")
         val heightOptions = ChunkHeightOptions(numSections, minSection)
         val chunk = factory.createChunk(heightOptions)
 

@@ -2,9 +2,8 @@ package net.ultragrav.kasyncworld.cmd
 
 import net.ultragrav.command.platform.SpigotCommand
 import net.ultragrav.kasyncworld.AW
-import net.ultragrav.kasyncworld.world.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.contract.AsyncWorld
-import net.ultragrav.kasyncworld.world.versionio.ChunkReadOptions
+import net.ultragrav.kasyncworld.world.chunk.io.ChunkReadOptions
 import kotlin.system.measureNanoTime
 
 class CmdCopyChunk : SpigotCommand() {

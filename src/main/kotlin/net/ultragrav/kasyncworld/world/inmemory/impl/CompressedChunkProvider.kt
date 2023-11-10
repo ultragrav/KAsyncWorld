@@ -1,6 +1,7 @@
 package net.ultragrav.kasyncworld.world.inmemory.impl
 
 import net.minecraft.world.level.ChunkPos
+import net.ultragrav.kasyncworld.AW
 import net.ultragrav.kasyncworld.world.chunk.codec.ChunkCodec
 import net.ultragrav.kasyncworld.world.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.contract.AsyncChunkFactory
@@ -26,6 +27,7 @@ class CompressedChunkProvider(
 
     override fun storeChunk(x: Int, z: Int, chunk: AsyncChunk) {
         if (x !in boundsX || z !in boundsZ) return
+        AW.debug("Storing chunk $x $z")
         val compressed = SCompressedAsyncChunk(chunk, codec)
         chunks[ChunkPos(x, z)] = compressed
     }

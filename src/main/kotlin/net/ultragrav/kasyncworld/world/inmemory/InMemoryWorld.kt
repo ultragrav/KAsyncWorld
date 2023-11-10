@@ -13,5 +13,5 @@ interface InMemoryWorld {
 
     fun unload(save: Boolean)
 
-    fun save(): PackedWorld
+    fun saveAndPack(): PackedWorld
 }

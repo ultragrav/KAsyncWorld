@@ -5,7 +5,6 @@ import io.papermc.paper.chunk.system.poi.PoiChunk
 import io.papermc.paper.chunk.system.scheduling.ChunkProgressionTask
 import io.papermc.paper.chunk.system.scheduling.ChunkTaskScheduler
 import io.papermc.paper.chunk.system.scheduling.NewChunkHolder
-import io.papermc.paper.world.ChunkEntitySlices
 import net.minecraft.core.registries.Registries
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.ListTag
@@ -15,17 +14,16 @@ import net.minecraft.world.level.biome.Biomes
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.chunk.*
-import net.minecraft.world.level.levelgen.Heightmap
 import net.minecraft.world.level.material.Fluid
 import net.minecraft.world.ticks.ProtoChunkTicks
-import net.ultragrav.kasyncworld.AW
 import net.ultragrav.kasyncworld.world.chunk.block.storage.wrapped.MinecraftPalettedStorage
 import net.ultragrav.kasyncworld.world.chunk.block.storage.wrapped.WrappedPalettedContainer
 import net.ultragrav.kasyncworld.world.chunk.heightmap.AsyncHeightMap
 import net.ultragrav.kasyncworld.world.chunk.heightmap.wrapper.NMSHeightmapStateProvider
 import net.ultragrav.kasyncworld.world.chunk.heightmap.wrapper.NMSHeightmapStorageWrapper
 import net.ultragrav.kasyncworld.world.inmemory.AsyncChunkProvider
-import net.ultragrav.kasyncworld.world.versionio.impl.NMSChunkIO
+import net.ultragrav.kasyncworld.world.chunk.io.impl.NMSChunkIO
+import net.ultragrav.kasyncworld.world.inmemory.InMemoryWorldOptions
 
 class IMChunkLoadTask(
     scheduler: ChunkTaskScheduler,
@@ -33,6 +31,7 @@ class IMChunkLoadTask(
     val holder: NewChunkHolder,
     chunkX: Int,
     chunkZ: Int,
+    val worldOptions: InMemoryWorldOptions,
     private val chunkProvider: AsyncChunkProvider
 ) : ChunkProgressionTask(scheduler, world,
     chunkX,

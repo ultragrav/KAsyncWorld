@@ -2,8 +2,6 @@ package net.ultragrav.kasyncworld.world.impl
 
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.level.block.state.BlockState
-import net.minecraft.world.level.chunk.ChunkStatus
-import net.minecraft.world.level.chunk.LevelChunk
 import net.ultragrav.kasyncworld.AW
 import net.ultragrav.kasyncworld.getChunkKey
 import net.ultragrav.kasyncworld.getChunkX
@@ -11,10 +9,9 @@ import net.ultragrav.kasyncworld.getChunkZ
 import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
 import net.ultragrav.kasyncworld.world.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.contract.AsyncWorld
-import net.ultragrav.kasyncworld.world.versionio.ChunkWriteOptions
-import net.ultragrav.kasyncworld.world.versionio.HeightmapWriteType
+import net.ultragrav.kasyncworld.world.chunk.io.ChunkWriteOptions
+import net.ultragrav.kasyncworld.world.chunk.io.HeightmapWriteType
 import org.bukkit.World
-import org.bukkit.craftbukkit.v1_20_R2.CraftChunk
 import java.util.concurrent.CompletableFuture
 
 internal class SpigotAsyncWorld internal constructor(val world: World, val editType: AsyncWorld.EditType) : AsyncWorld {

@@ -2,8 +2,7 @@ package net.ultragrav.kasyncworld.cmd
 
 import net.ultragrav.command.platform.SpigotCommand
 import net.ultragrav.kasyncworld.AW
-import net.ultragrav.kasyncworld.world.contract.AsyncWorld
-import net.ultragrav.kasyncworld.world.versionio.ChunkWriteOptions
+import net.ultragrav.kasyncworld.world.chunk.io.ChunkWriteOptions
 import kotlin.system.measureNanoTime
 
 class CmdPasteChunk : SpigotCommand() {

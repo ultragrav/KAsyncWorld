@@ -17,7 +17,6 @@ import net.ultragrav.kasyncworld.world.contract.section.AsyncChunkSectionFactory
  */
 interface AsyncChunk : AsyncChunkSectionFactory, AsyncChunkAccess {
 
-    val heightOptions: ChunkHeightOptions
     val heightMaps: Map<Heightmap.Types, AsyncHeightMap>
     val blockEntities: Map<AWBlockPosition, CompoundTag> // Stored relative to chunk
     val sections: Array<AsyncChunkSection?>
@@ -27,11 +26,6 @@ interface AsyncChunk : AsyncChunkSectionFactory, AsyncChunkAccess {
     var fluidTicks: MutableList<SavedTick<Fluid>>
 
     var persistentData: CompoundTag
-
-    fun setSection(sectionIndexMinBased: Int, section: AsyncChunkSection?)
-    fun getSection(sectionIndexMinBased: Int): AsyncChunkSection?
-
-    fun clearSections()
 
     fun clone(): AsyncChunk
 }

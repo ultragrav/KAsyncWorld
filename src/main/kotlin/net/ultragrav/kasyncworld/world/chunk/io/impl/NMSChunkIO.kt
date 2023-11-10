@@ -1,4 +1,4 @@
-package net.ultragrav.kasyncworld.world.versionio.impl
+package net.ultragrav.kasyncworld.world.chunk.io.impl
 
 import ca.spottedleaf.starlight.common.light.StarLightEngine
 import io.papermc.paper.world.ChunkEntitySlices
@@ -27,10 +27,10 @@ import net.ultragrav.kasyncworld.world.chunk.heightmap.wrapper.NMSHeightmapStora
 import net.ultragrav.kasyncworld.world.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.contract.AsyncChunkFactory
 import net.ultragrav.kasyncworld.world.contract.section.AsyncChunkSection
-import net.ultragrav.kasyncworld.world.versionio.ChunkIO
-import net.ultragrav.kasyncworld.world.versionio.ChunkReadOptions
-import net.ultragrav.kasyncworld.world.versionio.ChunkWriteOptions
-import net.ultragrav.kasyncworld.world.versionio.HeightmapWriteType
+import net.ultragrav.kasyncworld.world.chunk.io.ChunkIO
+import net.ultragrav.kasyncworld.world.chunk.io.ChunkReadOptions
+import net.ultragrav.kasyncworld.world.chunk.io.ChunkWriteOptions
+import net.ultragrav.kasyncworld.world.chunk.io.HeightmapWriteType
 import org.bukkit.Chunk
 import org.bukkit.World
 import org.bukkit.craftbukkit.v1_20_R2.CraftWorld
@@ -337,9 +337,6 @@ class NMSChunkIO : ChunkIO {
             pos[0] = DoubleTag.valueOf(currX - (cx shl 4))
             pos[2] = DoubleTag.valueOf(currZ - (cz shl 4))
 
-            println("Relativized entity tag: $tag")
-            println("Was at $currX, $currZ")
-            println("Now at ${pos.getDouble(0)}, ${pos.getDouble(2)}")
             return tag
         }
 
@@ -347,7 +344,6 @@ class NMSChunkIO : ChunkIO {
             val pos = tag.getList("Pos", Tag.TAG_DOUBLE.toInt())
             val currX = pos.getDouble(0)
             val currZ = pos.getDouble(2)
-            println("Shifting entity coordinate $currX, $currZ by $cx, $cz to ${currX + (cx shl 4)}, ${currZ + (cz shl 4)}")
             pos[0] = DoubleTag.valueOf(currX + (cx shl 4))
             pos[2] = DoubleTag.valueOf(currZ + (cz shl 4))
             return tag

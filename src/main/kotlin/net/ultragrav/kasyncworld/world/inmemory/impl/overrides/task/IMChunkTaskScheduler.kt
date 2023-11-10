@@ -12,8 +12,9 @@ import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.chunk.ChunkAccess
 import net.minecraft.world.level.chunk.ChunkStatus
 import net.ultragrav.kasyncworld.world.inmemory.AsyncChunkProvider
+import net.ultragrav.kasyncworld.world.inmemory.InMemoryWorldOptions
 
-class IMChunkTaskScheduler(world: ServerLevel, workers: PrioritisedThreadPool?) :
+class IMChunkTaskScheduler(world: ServerLevel, val worldOptions: InMemoryWorldOptions, workers: PrioritisedThreadPool?) :
     ChunkTaskScheduler(
         world,
         workers
@@ -45,7 +46,7 @@ class IMChunkTaskScheduler(world: ServerLevel, workers: PrioritisedThreadPool?) 
         toStatus: ChunkStatus, initialPriority: PrioritisedExecutor.Priority?
     ): ChunkProgressionTask {
         if (toStatus === ChunkStatus.EMPTY) {
-            return IMChunkLoadTask(this, world, chunkHolder, chunkX, chunkZ, chunkProvider)
+            return IMChunkLoadTask(this, world, chunkHolder, chunkX, chunkZ, worldOptions, chunkProvider)
         }
         return super.createTask(chunkX, chunkZ, chunk, chunkHolder, neighbours, toStatus, initialPriority)
     }

@@ -1,36 +1,37 @@
 package net.ultragrav.kasyncworld.cmd
 
-import kotlinx.coroutines.*
-import net.kyori.adventure.text.Component
-import net.minecraft.world.level.block.Blocks
+import net.minecraft.world.level.biome.Biomes
 import net.ultragrav.command.platform.SpigotCommand
 import net.ultragrav.kasyncworld.AW
-import net.ultragrav.kasyncworld.editSync
 import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
-import net.ultragrav.kasyncworld.world.contract.AsyncChunk
-import net.ultragrav.kasyncworld.world.contract.AsyncWorld
+import net.ultragrav.kasyncworld.world.chunk.io.ChunkReadOptions
 import net.ultragrav.kasyncworld.world.inmemory.*
-import net.ultragrav.kasyncworld.world.versionio.ChunkReadOptions
 import org.bukkit.Location
 import org.bukkit.World
+import org.bukkit.block.Biome
 import java.util.*
-import kotlin.system.measureNanoTime
 import kotlin.system.measureTimeMillis
 
 class CmdTest : SpigotCommand() {
+
+    companion object {
+        var currWorld: InMemoryWorld? = null
+    }
+
     init {
         addAlias("test")
     }
 
     override fun perform() {
 
-        val world: InMemoryWorld
-
         // Copy chunk they're in
         val bukkitChunk = spigotPlayer.chunk
 
         // Save chunks up to 3 away
         val chunkList = mutableListOf<LocatedCompressedChunk>()
+
+        val netherBiome = AW.globalBiomePalette.listIds().map { AW.globalBiomePalette.getState(it) }
+            .first { it.`is`(Biomes.CRIMSON_FOREST) }
 
         val saveChunksMillis = measureTimeMillis {
             for (dx in 0..3) {
@@ -45,6 +46,12 @@ class CmdTest : SpigotCommand() {
                         AW.storageChunkFactory,
                         ChunkReadOptions()
                     )
+                    chunk.sections.filterNotNull()
+                        .forEach { c ->
+                            for (i in 0 until c.biomes.size) {
+                                c.biomes.set(i, netherBiome)
+                            }
+                        }
                     val compressed = SCompressedAsyncChunk(chunk, AW.codec)
                     chunkList.add(LocatedCompressedChunk(dx, dz, compressed))
                 }
@@ -55,13 +62,13 @@ class CmdTest : SpigotCommand() {
 
         val millis = measureTimeMillis {
 
-            world = AW.inMemoryWorldProvider.createWorld(
+            currWorld = AW.inMemoryWorldProvider.createWorld(
                 "Test-World-${UUID.randomUUID()}",
                 InMemoryWorldOptions(
+                    0..3,
+                    0..3,
                     World.Environment.NORMAL,
-                    0..3,
-                    0..3,
-                    ChunkHeightOptions(20, -4),
+                    Biome.PLAINS,
                     true,
                     AW.codec
                 ),
@@ -74,7 +81,7 @@ class CmdTest : SpigotCommand() {
 
         spigotPlayer.teleport(
             Location(
-                world.bukkitWorld,
+                currWorld!!.bukkitWorld,
                 0.0,
                 100.0,
                 0.0

@@ -17,6 +17,7 @@ import net.minecraft.world.level.levelgen.PatrolSpawner
 import net.minecraft.world.level.levelgen.PhantomSpawner
 import net.minecraft.world.level.storage.PrimaryLevelData
 import net.ultragrav.kasyncworld.world.inmemory.AsyncChunkProvider
+import net.ultragrav.kasyncworld.world.inmemory.InMemoryWorldOptions
 import net.ultragrav.kasyncworld.world.inmemory.impl.overrides.task.IMChunkTaskScheduler
 import org.bukkit.World
 import org.bukkit.generator.BiomeProvider
@@ -32,6 +33,7 @@ class IMServerLevel(
     seed: Long,
     env: World.Environment,
     gen: ChunkGenerator?,
+    val worldOptions: InMemoryWorldOptions,
 ) : ServerLevel(
     MinecraftServer.getServer(),
     MinecraftServer.getServer().executor,
@@ -63,7 +65,7 @@ class IMServerLevel(
     }
 
     override fun createChunkTaskScheduler(): ChunkTaskScheduler {
-        cachedTaskScheduler = IMChunkTaskScheduler(this, ChunkTaskScheduler.workerThreads)
+        cachedTaskScheduler = IMChunkTaskScheduler(this, worldOptions, ChunkTaskScheduler.workerThreads)
         return cachedTaskScheduler
     }
 

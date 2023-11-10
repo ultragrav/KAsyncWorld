@@ -27,6 +27,7 @@ class PaperIMWorldProvider : IMWorldProvider {
 
     private fun createWorld(
         name: String,
+        options: InMemoryWorldOptions,
         seed: Long,
         environment: Environment,
         chunkProvider: AsyncChunkProvider
@@ -68,6 +69,7 @@ class PaperIMWorldProvider : IMWorldProvider {
         val lifecycle = baked.lifecycle().add(mcServer.worldLoader.datapackWorldgen.allRegistriesLifecycle())
 
         val levelData = PrimaryLevelData(levelSettings, worldOptions, baked.specialWorldProperty, lifecycle)
+        levelData.customDimensions = levelStemRegistry
         levelData.checkName(name)
         levelData.setModdedInfo(mcServer.serverModName, mcServer.moddedStatus.shouldReportAsModified())
 
@@ -89,7 +91,8 @@ class PaperIMWorldProvider : IMWorldProvider {
             levelStem,
             seed,
             environment,
-            null
+            null,
+            options
         )
 
         if (Bukkit.getServer().getWorld(name) == null) {
@@ -100,7 +103,7 @@ class PaperIMWorldProvider : IMWorldProvider {
         mcServer.initWorld(serverLevel, levelData, levelData, worldOptions)
 
         serverLevel.keepSpawnInMemory = false
-        serverLevel.kasyncDebug = true
+        serverLevel.kasyncDebug = false
         serverLevel.setSpawnSettings(true, true)
         mcServer.prepareLevels(serverLevel.chunkSource.chunkMap.progressListener, serverLevel)
 
@@ -128,7 +131,7 @@ class PaperIMWorldProvider : IMWorldProvider {
                 )
             }
 
-        val serverLevel = createWorld(name, 123L, options.environment, chunkProvider)
+        val serverLevel = createWorld(name, options, 123L, options.environment, chunkProvider)
 
         return PaperMemoryWorld(serverLevel, name, options, chunkProvider)
     }
@@ -155,7 +158,7 @@ class PaperIMWorldProvider : IMWorldProvider {
             packed.chunks.associateBy { ChunkPos(it.x, it.z) }.mapValues { it.value.chunk }
         )
 
-        val serverLevel = createWorld(name, 123L, options.environment, chunkProvider)
+        val serverLevel = createWorld(name, options, 123L, options.environment, chunkProvider)
 
 
         return PaperMemoryWorld(serverLevel, name, options, chunkProvider)

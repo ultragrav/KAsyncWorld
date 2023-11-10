@@ -1,4 +1,4 @@
-package net.ultragrav.kasyncworld.world.versionio
+package net.ultragrav.kasyncworld.world.chunk.io
 
 data class ChunkWriteOptions(
     val appendEntities: Boolean = false,

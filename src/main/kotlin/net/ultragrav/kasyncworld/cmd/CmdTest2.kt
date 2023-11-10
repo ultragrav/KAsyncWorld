@@ -1,11 +1,14 @@
 package net.ultragrav.kasyncworld.cmd
 
-import net.minecraft.world.level.block.Blocks
 import net.ultragrav.command.platform.SpigotCommand
 import net.ultragrav.kasyncworld.AW
-import net.ultragrav.kasyncworld.world.chunk.getSectionIndexMB
-import net.ultragrav.kasyncworld.world.contract.AsyncChunk
-import net.ultragrav.kasyncworld.world.contract.AsyncWorld
+import net.ultragrav.kasyncworld.world.inmemory.InMemoryWorldOptions
+import net.ultragrav.kasyncworld.world.inmemory.PackedWorld
+import org.bukkit.Bukkit
+import org.bukkit.Location
+import org.bukkit.World
+import org.bukkit.block.Biome
+import kotlin.system.measureTimeMillis
 
 class CmdTest2 : SpigotCommand() {
     init {
@@ -13,32 +16,39 @@ class CmdTest2 : SpigotCommand() {
     }
 
     override fun perform() {
-        val pos = spigotPlayer.location.toVector().toBlockVector()
-        val sender = sender
-        val nanoTime = System.nanoTime()
-        AW.editAsync(spigotPlayer.world, AsyncWorld.EditType.SPARSE) {
-            val cx = pos.blockX shr 4
-            val cz = pos.blockZ shr 4
-            for (dx in -8..8) {
-                for (dz in -8..8) {
-                    val chunkX = cx + dx
-                    val chunkZ = cz + dz
-                    val chunk = getChunk(chunkX, chunkZ)
-                    clearChunk(chunk)
-                }
-            }
-        }.thenAccept {
-            val time = (System.nanoTime() - nanoTime) / 1000000.0
-            sender.sendMessage("Done in $time ms")
+        val imw = CmdTest.currWorld ?: return
+
+        spigotPlayer.teleport(Location(Bukkit.getWorld("World"), 0.0, 80.0, 0.0))
+
+        val packed = PackedWorld(listOf())
+        val ms = measureTimeMillis {
+            imw.unload(false)
+            imw.saveAndPack()
         }
+
+        tell("Saved in $ms ms")
+
+        CmdTest.currWorld = AW.inMemoryWorldProvider.createWorld(
+            "Test-World-${System.currentTimeMillis()}",
+            InMemoryWorldOptions(
+                0..3,
+                0..3,
+                World.Environment.NETHER,
+                Biome.CRIMSON_FOREST,
+                true,
+                AW.codec
+            ),
+            packed
+        )
+
+        val location = Location(
+            CmdTest.currWorld!!.bukkitWorld,
+            0.0,
+            80.0,
+            0.0
+        )
+
+        spigotPlayer.teleport(location)
     }
 
-    fun clearChunk(chunk: AsyncChunk) {
-        chunk.sections.map {
-            chunk.createSection()
-        }.forEachIndexed { index, it ->
-            it.blocks.iterationStrategy.setAll()
-            chunk.setSection(chunk.heightOptions.getSectionIndexMB(index), it)
-        }
-    }
 }

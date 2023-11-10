@@ -29,8 +29,8 @@ import net.ultragrav.kasyncworld.world.inmemory.LocatedCompressedChunk
 import net.ultragrav.kasyncworld.world.inmemory.PackedWorld
 import net.ultragrav.kasyncworld.world.inmemory.SCompressedAsyncChunk
 import net.ultragrav.kasyncworld.world.inmemory.impl.PaperIMWorldProvider
-import net.ultragrav.kasyncworld.world.versionio.ChunkIO
-import net.ultragrav.kasyncworld.world.versionio.impl.NMSChunkIO
+import net.ultragrav.kasyncworld.world.chunk.io.ChunkIO
+import net.ultragrav.kasyncworld.world.chunk.io.impl.NMSChunkIO
 import net.ultragrav.kserializer.json.JsonArray
 import net.ultragrav.kserializer.json.JsonObject
 import net.ultragrav.serializer.GravSerializer
