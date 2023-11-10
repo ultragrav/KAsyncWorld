@@ -113,7 +113,7 @@ object AW : AWApi {
             chunkJson["codec"] = codec.id
             chunkJson["version"] = codec.version
             chunkJson["data"] = chunk.chunk.bytes
-            array.add(chunkJson)
+            array.addObject(chunkJson)
         }
         json["chunks"] = array
         return json.toByteArray()

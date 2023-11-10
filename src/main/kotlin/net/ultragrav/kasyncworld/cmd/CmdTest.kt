@@ -60,6 +60,9 @@ class CmdTest : SpigotCommand() {
 
         val packed = PackedWorld(chunkList)
 
+        val serializedPacked = AW.serializePackedWorld(packed)
+        val deserializedPacked = AW.deserializePackedWorld(serializedPacked, AW.codec)
+
         val millis = measureTimeMillis {
 
             currWorld = AW.inMemoryWorldProvider.createWorld(
@@ -72,7 +75,7 @@ class CmdTest : SpigotCommand() {
                     true,
                     AW.codec
                 ),
-                packed
+                deserializedPacked
             )
         }
 
