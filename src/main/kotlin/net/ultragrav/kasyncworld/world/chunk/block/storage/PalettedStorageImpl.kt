@@ -1,9 +1,15 @@
 package net.ultragrav.kasyncworld.world.chunk.block.storage
 
+import net.ultragrav.kasyncworld.data.DataReader
+import net.ultragrav.kasyncworld.data.DataWriter
+import net.ultragrav.kasyncworld.world.chunk.block.bit.BitStorage
+
 class PalettedStorageImpl<T>(
     private val config: PalettedStorageImplConfig<T>,
     initialBits: Int = 4
 ) : PalettedStorage<T> {
+
+    override val size = config.size
 
     var storage = config.createStorage(initialBits)
         private set
@@ -45,7 +51,7 @@ class PalettedStorageImpl<T>(
     override fun set(index: Int, type: T) {
         val num = palette.getId(type)
         while (storage.isTooBig(num)) {
-            upsize()
+            resize()
         }
 
         val existing = storage.get(index)
@@ -71,16 +77,20 @@ class PalettedStorageImpl<T>(
         return clone
     }
 
-    private fun upsize(newSize: Int = storage.bits + 1) {
-        val newStorage = config.createStorage(newSize)
-        for (i in 0 until storage.size) {
-            newStorage.set(i, storage.get(i))
+    private fun resize(newBits: Int = storage.bits + 1, copy: Boolean = true) {
+        val newStorage = config.createStorage(newBits)
+        if (copy) {
+            for (i in 0 until storage.size) {
+                newStorage.set(i, storage.get(i))
+            }
         }
         storage = newStorage
 
-        val newCounts = config.createCounter(newSize)
-        for (i in counts.types()) {
-            newCounts.set(i, counts.get(i))
+        val newCounts = config.createCounter(newBits)
+        if (copy) {
+            for (i in counts.types()) {
+                newCounts.set(i, counts.get(i))
+            }
         }
         counts = newCounts
     }
@@ -94,5 +104,66 @@ class PalettedStorageImpl<T>(
 
     override fun indexIterator(): Iterator<Int> {
         return iterationStrategy.iterator()
+    }
+
+    override fun write(output: DataWriter) {
+
+        // Write the number of bits we're using per entry
+        output.writeInt(storage.bits)
+
+        // Write the number of entries
+        output.writeInt(storage.size)
+
+        // Write the palette according to global palette
+        val globalPalette = palette.globalPalette()
+        val ids = palette.listIds()
+        output.writeInt(ids.size)
+        ids.forEach { localId ->
+            val globalId = globalPalette.getId(palette.getState(localId))
+            output.writeInt(localId)
+            output.writeInt(globalId)
+
+            // We will write counts here too because it's convenient
+            output.writeInt(counts.get(localId))
+        }
+
+        // Write the storage
+        val longs = storage.raw()
+        output.writeLongArray(longs)
+    }
+
+    override fun read(input: DataReader) {
+        val bits = input.readInt()
+        val size = input.readInt()
+        require(size == config.size) { "Size mismatch, expected ${config.size} but got $size" }
+        resize(bits, false)
+
+        // Clear palette
+        palette = config.createPalette()
+        val globalPalette = palette.globalPalette()
+
+        val encodedIdToLocalId = mutableMapOf<Int, Int>()
+
+        // Read the palette
+        val paletteSize = input.readInt()
+        repeat(paletteSize) {
+            val encodedId = input.readInt()
+            val globalId = input.readInt()
+            val count = input.readInt()
+            val localId = palette.getId(globalPalette.getState(globalId))
+            encodedIdToLocalId[encodedId] = globalId
+            counts.set(localId, count)
+        }
+
+        // Read the storage, this will be a bit different from the writing
+        // since we need to convert to our own local palette's ids
+        val longs = input.readLongArray()
+        val bitStorage = BitStorage(size, bits)
+        bitStorage.useRaw(longs)
+        for (index in 0 until size) {
+            val encodedId = bitStorage.get(index)
+            val localId = encodedIdToLocalId[encodedId] ?: error("Unknown encoded id $encodedId")
+            storage.set(index, localId)
+        }
     }
 }

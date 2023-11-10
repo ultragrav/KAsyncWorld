@@ -1,6 +1,8 @@
 package net.ultragrav.kasyncworld.world.block.bit
 
+import net.ultragrav.kasyncworld.data.GravSerializerWrite
 import net.ultragrav.kasyncworld.world.chunk.block.bit.BitStorage
+import net.ultragrav.serializer.GravSerializer
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
@@ -20,5 +22,4 @@ class BitStorageTest {
         for (i in 0 until 4096) { storage.set(i, i) }
         for (i in 0 until 4096) { assertEquals(i, storage.get(i)) }
     }
-
 }

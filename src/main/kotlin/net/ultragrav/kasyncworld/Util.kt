@@ -1,5 +1,12 @@
 package net.ultragrav.kasyncworld
 
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.nbt.NbtIo
+import net.ultragrav.serializer.compressors.StandardCompressor
+import java.io.ByteArrayOutputStream
+import java.io.DataInputStream
+import java.io.DataOutputStream
+
 fun getChunkKey(x: Int, z: Int): Long {
     return (x.toLong() and 0xFFFFFFFFL) or ((z.toLong() and 0xFFFFFFFFL) shl 32)
 }
@@ -14,4 +21,26 @@ fun getChunkZ(key: Long): Int {
 
 fun ceilLog2(num: Int): Int {
     return 32 - Integer.numberOfLeadingZeros(num - 1)
+}
+
+internal fun stdCompress(arr: ByteArray): ByteArray {
+    return StandardCompressor.instance.compress(arr)
+}
+
+internal fun stdDecompress(arr: ByteArray): ByteArray {
+    return StandardCompressor.instance.decompress(arr)
+}
+
+internal fun serializeNBT(tag: CompoundTag): ByteArray {
+    val bos = ByteArrayOutputStream()
+    val dos = DataOutputStream(bos)
+    NbtIo.write(tag, dos)
+    dos.close()
+    return bos.toByteArray()
+}
+
+internal fun deserializeNBT(arr: ByteArray): CompoundTag {
+    val bis = arr.inputStream()
+    val dis = DataInputStream(bis)
+    return NbtIo.read(dis)
 }

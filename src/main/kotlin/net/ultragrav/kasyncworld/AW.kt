@@ -3,11 +3,14 @@ package net.ultragrav.kasyncworld
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import net.ultragrav.kasyncworld.data.DataReader
+import net.ultragrav.kasyncworld.data.DataWriter
+import net.ultragrav.kasyncworld.data.GravSerializerRead
+import net.ultragrav.kasyncworld.data.GravSerializerWrite
 import net.ultragrav.kasyncworld.scheduler.ParallelChunkQueue
 import net.ultragrav.kasyncworld.world.chunk.queue.ChunkQueue
 import net.ultragrav.kasyncworld.world.chunk.codec.ChunkCodec
-import net.ultragrav.kasyncworld.world.chunk.codec.impl.AWChunkCodec_v1
-import net.ultragrav.kasyncworld.world.contract.AsyncChunk
+import net.ultragrav.kasyncworld.world.chunk.codec.impl.AWChunkCodecV1
 import net.ultragrav.kasyncworld.world.contract.AsyncChunkFactory
 import net.ultragrav.kasyncworld.world.contract.AsyncWorld
 import net.ultragrav.kasyncworld.world.impl.SpigotAsyncWorld
@@ -26,7 +29,6 @@ import net.ultragrav.serializer.GravSerializer
 import org.bukkit.Bukkit
 import org.bukkit.World
 import org.bukkit.plugin.Plugin
-import java.nio.ByteBuffer
 import java.util.concurrent.CompletableFuture
 
 object AW : AWApi {
@@ -37,7 +39,7 @@ object AW : AWApi {
 
     override lateinit var chunkQueue: ChunkQueue
 
-    override val codec: ChunkCodec = AWChunkCodec_v1()
+    override val codec: ChunkCodec = AWChunkCodecV1()
 
     override val inMemoryWorldProvider: IMWorldProvider = PaperIMWorldProvider()
 
@@ -51,6 +53,21 @@ object AW : AWApi {
 
     override fun createAsyncWorld(world: World, editType: AsyncWorld.EditType): AsyncWorld {
         return SpigotAsyncWorld(world, editType)
+    }
+
+    override fun createReader(bytes: ByteArray): DataReader {
+        if (bytes.isEmpty()) return GravSerializerRead(GravSerializer(bytes))
+        val firstByte = bytes[0] // Will be 0 if GravSerializer
+        require(firstByte.toInt() == 0) { "Haven't implemented non-grav serializer writer yet!" }
+        val ser = GravSerializer(bytes)
+        ser.readByte() // Skip first byte
+        return GravSerializerRead(ser)
+    }
+
+    override fun createWriter(): DataWriter {
+        val writer = GravSerializerWrite(GravSerializer())
+        writer.writeByte(0) // Write first byte as 0 to indicate grav serializer
+        return writer
     }
 
     fun editAsync(world: World, editType: AsyncWorld.EditType, job: AsyncWorld.() -> Unit): CompletableFuture<Void> {

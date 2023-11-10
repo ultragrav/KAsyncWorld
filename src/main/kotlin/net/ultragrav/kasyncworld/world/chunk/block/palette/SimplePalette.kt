@@ -28,6 +28,10 @@ class SimplePalette<T>(private val globalPalette: Palette<T>? = null) : Palette<
         return idToBlockDataMap.containsKey(id)
     }
 
+    override fun listIds(): Set<Int> {
+        return idToBlockDataMap.keys
+    }
+
     override fun globalPalette(): Palette<T> = globalPalette ?: this
 
     override fun clone(): Palette<T> {

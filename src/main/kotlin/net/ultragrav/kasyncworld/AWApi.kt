@@ -1,5 +1,7 @@
 package net.ultragrav.kasyncworld
 
+import net.ultragrav.kasyncworld.data.DataReader
+import net.ultragrav.kasyncworld.data.DataWriter
 import net.ultragrav.kasyncworld.world.chunk.queue.ChunkQueue
 import net.ultragrav.kasyncworld.world.chunk.codec.ChunkCodec
 import net.ultragrav.kasyncworld.world.contract.AsyncChunkFactory
@@ -22,6 +24,9 @@ interface AWApi {
     val storageChunkFactory: AsyncChunkFactory
 
     fun createAsyncWorld(world: World, editType: AsyncWorld.EditType): AsyncWorld
+
+    fun createReader(bytes: ByteArray): DataReader
+    fun createWriter(): DataWriter
 
     fun serializePackedWorld(packedWorld: PackedWorld): ByteArray
     fun deserializePackedWorld(data: ByteArray, codec: ChunkCodec = this.codec): PackedWorld

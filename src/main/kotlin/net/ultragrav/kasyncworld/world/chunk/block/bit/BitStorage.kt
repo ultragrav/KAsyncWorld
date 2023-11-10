@@ -11,7 +11,7 @@ class BitStorage(
 
     private val mask = (1L shl bits) - 1L
     private val elementsPerLong = 64 / bits
-    private val data = LongArray((size + elementsPerLong - 1) / elementsPerLong)
+    private var data = LongArray((size + elementsPerLong - 1) / elementsPerLong)
 
     override fun get(index: Int): Int {
         val longIndex = index / elementsPerLong
@@ -30,6 +30,11 @@ class BitStorage(
 
     override fun raw(): LongArray {
         return data
+    }
+
+    fun useRaw(raw: LongArray) {
+        require(raw.size == data.size) { "raw array must be same size as data array" }
+        this.data = raw
     }
 
     override fun clone(): NumberStorage {

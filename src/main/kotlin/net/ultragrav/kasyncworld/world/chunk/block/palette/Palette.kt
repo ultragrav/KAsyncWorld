@@ -6,6 +6,7 @@ interface Palette<T> {
     fun getState(id: Int): T
     fun isMapped(type: T): Boolean
     fun isMapped(id: Int): Boolean
+    fun listIds(): Set<Int>
     fun globalPalette(): Palette<T>
     fun clone(): Palette<T>
 }

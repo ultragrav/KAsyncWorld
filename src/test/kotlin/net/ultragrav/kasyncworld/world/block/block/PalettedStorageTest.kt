@@ -1,5 +1,7 @@
 package net.ultragrav.kasyncworld.world.block.block
 
+import net.ultragrav.kasyncworld.data.GravSerializerRead
+import net.ultragrav.kasyncworld.data.GravSerializerWrite
 import net.ultragrav.kasyncworld.world.chunk.block.storage.PalettedStorageImpl
 import net.ultragrav.kasyncworld.world.chunk.block.storage.PalettedStorageImplConfig
 import net.ultragrav.kasyncworld.world.chunk.block.iteration.IterationStrategy
@@ -10,6 +12,7 @@ import net.ultragrav.kasyncworld.world.chunk.block.count.TypeCounts
 import net.ultragrav.kasyncworld.world.chunk.block.iteration.LinkedChangeIteration
 import net.ultragrav.kasyncworld.world.chunk.block.palette.Palette
 import net.ultragrav.kasyncworld.world.chunk.block.palette.SimplePalette
+import net.ultragrav.serializer.GravSerializer
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
@@ -33,6 +36,7 @@ class PalettedStorageTest {
             override fun createPalette(): Palette<Any> {
                 val palette = SimplePalette<Any>()
                 palette.getId(defaultState)
+                palette.getId(STONE)
                 return palette
             }
 
@@ -85,4 +89,25 @@ class PalettedStorageTest {
         val actual = storage.map { it.subject }
         assertEquals(expected, actual)
     }
+
+    @Test
+    fun testReadWrite() {
+        val storage = createStorage()
+
+        for (i in 0 until storage.size) {
+            storage.set(i, if (i % 2 == 0) STONE else AIR)
+        }
+
+        val writer = GravSerializerWrite(GravSerializer())
+        storage.write(writer)
+
+        val reader = GravSerializerRead(GravSerializer(writer.toByteArray()))
+        val storage2 = createStorage()
+        storage2.read(reader)
+
+        for (i in 0 until storage.size) {
+            assertEquals(storage.get(i), storage2.get(i))
+        }
+    }
+
 }
