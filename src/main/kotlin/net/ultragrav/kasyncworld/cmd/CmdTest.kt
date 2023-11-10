@@ -68,7 +68,7 @@ class CmdTest : SpigotCommand() {
                     0..3,
                     0..3,
                     World.Environment.NORMAL,
-                    Biome.PLAINS,
+                    Biome.CRIMSON_FOREST,
                     true,
                     AW.codec
                 ),

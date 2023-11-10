@@ -14,12 +14,13 @@ import net.minecraft.world.level.chunk.ChunkStatus
 import net.ultragrav.kasyncworld.world.inmemory.AsyncChunkProvider
 import net.ultragrav.kasyncworld.world.inmemory.InMemoryWorldOptions
 
-class IMChunkTaskScheduler(world: ServerLevel, val worldOptions: InMemoryWorldOptions, workers: PrioritisedThreadPool?) :
+class IMChunkTaskScheduler(world: ServerLevel, workers: PrioritisedThreadPool?) :
     ChunkTaskScheduler(
         world,
         workers
     ) {
 
+    lateinit var worldOptions: InMemoryWorldOptions
     lateinit var chunkProvider: AsyncChunkProvider
 
     init {

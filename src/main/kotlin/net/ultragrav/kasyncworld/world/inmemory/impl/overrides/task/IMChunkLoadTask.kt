@@ -10,7 +10,6 @@ import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.ListTag
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.ChunkPos
-import net.minecraft.world.level.biome.Biomes
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.chunk.*
@@ -24,6 +23,7 @@ import net.ultragrav.kasyncworld.world.chunk.heightmap.wrapper.NMSHeightmapStora
 import net.ultragrav.kasyncworld.world.inmemory.AsyncChunkProvider
 import net.ultragrav.kasyncworld.world.chunk.io.impl.NMSChunkIO
 import net.ultragrav.kasyncworld.world.inmemory.InMemoryWorldOptions
+import org.bukkit.craftbukkit.v1_20_R2.block.CraftBiome
 
 class IMChunkLoadTask(
     scheduler: ChunkTaskScheduler,
@@ -67,6 +67,10 @@ class IMChunkLoadTask(
             complete(protoChunk, null)
         }
 
+        val defaultBiome = worldOptions.defaultBiome
+        val nmsDefaultBiome = CraftBiome.bukkitToMinecraft(defaultBiome)
+        val defaultBiomeHolder = biomesRegistry.wrapAsHolder(nmsDefaultBiome)
+
         val chunkSections = chunk.sections
             .map {
                 if (it == null) return@map null
@@ -79,7 +83,7 @@ class IMChunkLoadTask(
                     wrapper.wrapped
                 }
                 val nmsBiomes = if (biomes is MinecraftPalettedStorage) biomes.wrapped else {
-                    val container = PalettedContainer(biomesRegistry.asHolderIdMap(), biomesRegistry.getHolderOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES, null)
+                    val container = PalettedContainer(biomesRegistry.asHolderIdMap(), defaultBiomeHolder, PalettedContainer.Strategy.SECTION_BIOMES, null)
                     val wrapper = WrappedPalettedContainer(container)
                     biomes.applyTo(wrapper)
                     wrapper.wrapped

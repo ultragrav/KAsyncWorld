@@ -33,21 +33,23 @@ class PaperMemoryWorld(
     }
 
     override fun saveAndPack(): PackedWorld {
-        bukkitWorld.loadedChunks
-            .filter { it.x in chunkProvider.boundsX }
-            .filter { it.z in chunkProvider.boundsZ }
-            .forEach { bukkitChunk ->
-                val time = measureNanoTime {
-                    val readChunk = AW.chunkIO.readChunk(
-                        bukkitChunk,
-                        chunkProvider.factory,
-                        ChunkReadOptions()
-                    )
-                    chunkProvider.storeChunk(bukkitChunk.x, bukkitChunk.z, readChunk)
+        if (Bukkit.getWorld(bukkitWorld.uid) != null) {
+            bukkitWorld.loadedChunks
+                .filter { it.x in chunkProvider.boundsX }
+                .filter { it.z in chunkProvider.boundsZ }
+                .forEach { bukkitChunk ->
+                    val time = measureNanoTime {
+                        val readChunk = AW.chunkIO.readChunk(
+                            bukkitChunk,
+                            chunkProvider.factory,
+                            ChunkReadOptions()
+                        )
+                        chunkProvider.storeChunk(bukkitChunk.x, bukkitChunk.z, readChunk)
+                    }
+                    val millis = time / 1000000.0
+                    AW.debug("Saved chunk ${bukkitChunk.x} ${bukkitChunk.z} in $millis ms")
                 }
-                val millis = time / 1000000.0
-                AW.debug("Saved chunk ${bukkitChunk.x} ${bukkitChunk.z} in $millis ms")
-            }
+        }
         return PackedWorld(chunkProvider.getLocatedChunks())
     }
 

@@ -33,7 +33,7 @@ class IMServerLevel(
     seed: Long,
     env: World.Environment,
     gen: ChunkGenerator?,
-    val worldOptions: InMemoryWorldOptions,
+    worldOptions: InMemoryWorldOptions,
 ) : ServerLevel(
     MinecraftServer.getServer(),
     MinecraftServer.getServer().executor,
@@ -62,10 +62,11 @@ class IMServerLevel(
 
     init {
         cachedTaskScheduler.chunkProvider = chunkProvider
+        cachedTaskScheduler.worldOptions = worldOptions
     }
 
     override fun createChunkTaskScheduler(): ChunkTaskScheduler {
-        cachedTaskScheduler = IMChunkTaskScheduler(this, worldOptions, ChunkTaskScheduler.workerThreads)
+        cachedTaskScheduler = IMChunkTaskScheduler(this, ChunkTaskScheduler.workerThreads)
         return cachedTaskScheduler
     }
 
