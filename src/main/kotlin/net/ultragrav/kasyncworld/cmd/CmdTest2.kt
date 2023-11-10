@@ -22,7 +22,7 @@ class CmdTest2 : SpigotCommand() {
 
         val packed = PackedWorld(listOf())
         val ms = measureTimeMillis {
-            imw.unload(false)
+            imw.unload(true)
             imw.saveAndPack()
         }
 

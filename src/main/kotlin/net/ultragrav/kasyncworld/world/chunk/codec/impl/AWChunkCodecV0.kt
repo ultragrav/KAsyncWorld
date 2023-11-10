@@ -28,8 +28,6 @@ class AWChunkCodecV0 : ChunkCodec {
         writer.writeInt(chunk.heightOptions.numSections)
         writer.writeInt(chunk.heightOptions.minSection)
 
-        AW.debug("Writing chunk with height options: ${chunk.heightOptions}")
-
         // Section bit/boolean mask
         chunk.sections
             .map { it != null }
@@ -90,7 +88,7 @@ class AWChunkCodecV0 : ChunkCodec {
     override fun decode(reader: DataReader, factory: AsyncChunkFactory): AsyncChunk {
         val numSections = reader.readInt()
         val minSection = reader.readInt()
-        AW.debug("Decoding chunk with height options num: $numSections, min: $minSection")
+
         val heightOptions = ChunkHeightOptions(numSections, minSection)
         val chunk = factory.createChunk(heightOptions)
 

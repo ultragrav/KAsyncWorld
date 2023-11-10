@@ -31,6 +31,7 @@ import net.ultragrav.kasyncworld.world.chunk.heightmap.AsyncHeightMap
 import net.ultragrav.kasyncworld.world.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.contract.AsyncWorld
 import net.ultragrav.kasyncworld.world.contract.section.AsyncChunkSection
+import org.bukkit.craftbukkit.v1_20_R2.block.CraftBiome
 
 class StorageAsyncChunk(override val heightOptions: ChunkHeightOptions) : AsyncChunk {
 
@@ -68,6 +69,17 @@ class StorageAsyncChunk(override val heightOptions: ChunkHeightOptions) : AsyncC
         val section = getSection((y shr 4))
             ?: return Blocks.AIR.defaultBlockState()
         return section.getBlock(x, y and 15, z)
+    }
+
+    override fun getBiome(x: Int, y: Int, z: Int): org.bukkit.block.Biome {
+        val section = getSection(y shr 2) ?: return org.bukkit.block.Biome.PLAINS
+        val holder = section.getBiome(x, y and 3, z)
+        return CraftBiome.minecraftHolderToBukkit(holder)
+    }
+
+    override fun setBiome(x: Int, y: Int, z: Int, biome: org.bukkit.block.Biome) {
+        val section = getOrMakeSection(y shr 2)
+        section.setBiome(x, y and 3, z, CraftBiome.bukkitToMinecraftHolder(biome))
     }
 
     override fun getHeightMap(type: Heightmap.Types): AsyncHeightMap {
