@@ -1,7 +1,7 @@
 package net.ultragrav.kasyncworld.world.chunk.block.iteration
 
 /**
- * Iterates over indices in some order.
+ * Iterates over some or all of a set of indices.
  */
 interface IterationStrategy : Iterable<Int> {
 

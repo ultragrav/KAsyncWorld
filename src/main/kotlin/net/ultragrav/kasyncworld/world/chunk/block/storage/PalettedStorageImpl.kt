@@ -130,6 +130,12 @@ class PalettedStorageImpl<T>(
         // Write the storage
         val longs = storage.raw()
         output.writeLongArray(longs)
+
+        // Iteration data (Order is not preserved)
+        val indexingBitStorage = BitStorage(storage.size, 1)
+        indexIterator().forEach { indexingBitStorage.set(it, 1) }
+        val indexingLongs = indexingBitStorage.raw()
+        output.writeLongArray(indexingLongs)
     }
 
     override fun read(input: DataReader) {
@@ -166,6 +172,17 @@ class PalettedStorageImpl<T>(
             val encodedId = bitStorage.get(index)
             val localId = encodedIdToLocalId[encodedId] ?: error("Unknown encoded id $encodedId")
             storage.set(index, localId)
+        }
+
+        // Read iteration data
+        val indexingLongs = input.readLongArray()
+        val indexingBitStorage = BitStorage(size, 1)
+        indexingBitStorage.useRaw(indexingLongs)
+        iterationStrategy = config.createIterationStrategy()
+        for (index in 0 until size) {
+            if (indexingBitStorage.get(index) == 1) {
+                iterationStrategy.set(index)
+            }
         }
     }
 }
