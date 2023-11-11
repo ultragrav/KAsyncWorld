@@ -22,6 +22,7 @@ dependencies {
     paperweightDevelopmentBundle("net.midnightsky.satellite:dev-bundle:1.0-SNAPSHOT")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation("net.ultragrav:Commands:1.5.3")
 
     testImplementation(kotlin("test"))
     implementation("net.ultragrav:KSerializer:1.1.0")

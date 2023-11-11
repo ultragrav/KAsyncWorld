@@ -7,7 +7,7 @@ import java.util.concurrent.CompletableFuture
 
 interface ChunkQueue {
     fun start()
-    fun stop()
+    fun close()
     fun enqueue(
         x: Int,
         z: Int,

@@ -41,7 +41,7 @@ import java.util.concurrent.CompletableFuture
 
 object AW : AWApi {
 
-    val debug = false
+    val debug = true
 
     override val chunkIO: ChunkIO = NMSChunkIO()
 

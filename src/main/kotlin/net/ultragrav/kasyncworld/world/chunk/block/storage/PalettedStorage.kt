@@ -14,8 +14,8 @@ interface PalettedStorage<T> : Iterable<Indexed<T>> {
     val fastCountsAndTypesSupported: Boolean
     fun count(type: T): Int
     fun types(): Set<T>
-    fun get(index: Int): T
-    fun set(index: Int, type: T)
+    operator fun get(index: Int): T
+    operator fun set(index: Int, type: T)
     fun unset(index: Int)
     fun clone(): PalettedStorage<T>
     fun indexIterator(): Iterator<Int>

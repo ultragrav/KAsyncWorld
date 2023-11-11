@@ -1,6 +1,7 @@
 package net.ultragrav.kasyncworld.scheduler
 
 import kotlinx.coroutines.*
+import net.ultragrav.kasyncworld.AW
 import net.ultragrav.kasyncworld.world.chunk.queue.ChunkQueue
 import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.chunk.io.ChunkIO
@@ -9,11 +10,16 @@ import org.bukkit.Bukkit
 import org.bukkit.World
 import org.bukkit.plugin.Plugin
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.Executors
+import kotlin.system.measureTimeMillis
 
 
 class ParallelChunkQueue(val plugin: Plugin, val io: ChunkIO) : ChunkQueue {
 
-    val batchSize = 16
+    val processors = Runtime.getRuntime().availableProcessors()
+    val batchSize = processors * 2
+    val dispatcher = Executors.newFixedThreadPool(processors)
+        .asCoroutineDispatcher()
 
     private data class EnqueuedChunk(
         val x: Int,
@@ -29,12 +35,30 @@ class ParallelChunkQueue(val plugin: Plugin, val io: ChunkIO) : ChunkQueue {
     private var taskId = -1
 
     override fun start() {
-        taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::processNextBatch, 0, 1)
+        taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::process, 0, 1)
     }
 
-    override fun stop() {
+    override fun close() {
         if (taskId == -1) return
         Bukkit.getScheduler().cancelTask(taskId)
+        dispatcher.close()
+    }
+
+    private fun process() {
+        val time = System.currentTimeMillis()
+        fun elapsed() = System.currentTimeMillis() - time
+        fun isNotEmpty() = synchronized(this) { queue.isNotEmpty() }
+        if (!isNotEmpty()) return
+
+        while (elapsed() < 25 && isNotEmpty()) {
+
+            val timingMillis = measureTimeMillis {
+                processNextBatch()
+            }
+
+            AW.debug("Processed batch of $batchSize chunks in ${timingMillis}ms")
+        }
+        AW.debug("Finished processing for this tick in ${elapsed()}ms")
     }
 
     override fun enqueue(
@@ -78,7 +102,7 @@ class ParallelChunkQueue(val plugin: Plugin, val io: ChunkIO) : ChunkQueue {
                 val bukkitChunk = job.world.getChunkAt(job.x, job.z)
                 val chunk = job.chunk
                 launch {
-                    withContext(Dispatchers.IO) {
+                    withContext(dispatcher) {
                         io.writeChunk(bukkitChunk, chunk, job.writeOptions.copy(sendPackets = false))
                     }
                     io.sendPackets(bukkitChunk.world, job.x, job.z)
