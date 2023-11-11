@@ -3,6 +3,7 @@ package net.ultragrav.kasyncworld.world.chunk.io.impl
 import ca.spottedleaf.starlight.common.light.StarLightEngine
 import io.papermc.paper.world.ChunkEntitySlices
 import net.minecraft.core.BlockPos
+import net.minecraft.core.Holder
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.DoubleTag
@@ -12,9 +13,11 @@ import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.level.ChunkPos
+import net.minecraft.world.level.biome.Biome
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.chunk.ChunkAccess
 import net.minecraft.world.level.chunk.LevelChunkSection
+import net.minecraft.world.level.chunk.PalettedContainer
 import net.minecraft.world.ticks.ProtoChunkTicks
 import net.minecraft.world.ticks.SavedTick
 import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
@@ -182,7 +185,7 @@ class NMSChunkIO : ChunkIO {
         section.blocks.applyTo(wrappedStates)
 
         // Biomes
-        val wrappedBiomes = WrappedPalettedContainer(nmsSection.biomes)
+        val wrappedBiomes = WrappedPalettedContainer(nmsSection.biomes as PalettedContainer<Holder<Biome>>)
         section.biomes.applyTo(wrappedBiomes)
     }
 
@@ -357,7 +360,7 @@ class NMSChunkIO : ChunkIO {
             }
 
             // Biomes
-            val wrappedBiomes = WrappedPalettedContainer(section.biomes)
+            val wrappedBiomes = WrappedPalettedContainer(section.biomes as PalettedContainer<Holder<Biome>>)
             wrappedBiomes.applyTo(async.biomes)
         }
     }

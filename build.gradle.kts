@@ -5,10 +5,11 @@ plugins {
     kotlin("jvm") version "1.8.21"
     id("io.papermc.paperweight.userdev") version "1.5.0"
     id("com.github.johnrengelman.shadow") version "7.1.2"
+    `maven-publish`
 }
 
 group = "net.ultragrav"
-version = "1.0-SNAPSHOT"
+version = "1.0.0"
 
 repositories {
     mavenCentral()
@@ -38,4 +39,12 @@ tasks.named<ShadowJar>("shadowJar") {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "17"
+}
+
+publishing {
+    publications {
+        register("mavenJava", MavenPublication::class) {
+            from(components["java"])
+        }
+    }
 }

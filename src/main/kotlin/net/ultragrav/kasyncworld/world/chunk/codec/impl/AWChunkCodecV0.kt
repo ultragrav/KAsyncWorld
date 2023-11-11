@@ -27,7 +27,7 @@ class AWChunkCodecV0 : ChunkCodec {
         writer.writeInt(chunk.heightOptions.numSections)
         writer.writeInt(chunk.heightOptions.minSection)
 
-        // Section bit/boolean mask
+        // Section mask
         chunk.sections
             .map { it != null }
             .forEach { writer.writeBoolean(it) }
