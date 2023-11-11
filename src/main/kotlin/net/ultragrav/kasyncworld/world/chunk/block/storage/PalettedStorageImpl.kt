@@ -17,7 +17,7 @@ class PalettedStorageImpl<T>(
 
     override val fastCountsAndTypesSupported = true
 
-    private var counts = config.createCounter(initialBits)
+    var counts = config.createCounter(initialBits)
 
     init {
         val defaultId = palette.getId(config.defaultState)
@@ -180,6 +180,13 @@ class PalettedStorageImpl<T>(
             if (indexingBitStorage.get(index) == 1) {
                 iterationStrategy.set(index)
             }
+        }
+    }
+
+    fun recount() {
+        counts = config.createCounter(storage.bits)
+        for (i in 0 until storage.size) {
+            counts.increment(storage.get(i))
         }
     }
 }

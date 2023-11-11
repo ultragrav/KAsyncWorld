@@ -385,6 +385,9 @@ class NMSChunkIO : ChunkIO {
                     // Transfer longs
                     val raw = section.states.data.storage.raw.copyOf()
                     storage.useRaw(raw)
+
+                    // Recount
+                    blocks.recount()
                 } else {
                     // Slower algo
                     val wrappedStates = WrappedPalettedContainer(section.states)

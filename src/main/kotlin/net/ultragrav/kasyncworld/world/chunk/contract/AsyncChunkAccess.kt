@@ -43,6 +43,9 @@ interface AsyncChunkAccess {
 
     fun getBlockData(x: Int, y: Int, z: Int): BlockData = getBlock(x, y, z).createCraftBlockData()
 
+    fun hasBlock(state: BlockState): Boolean
+    fun hasBlockData(blockData: BlockData): Boolean = hasBlock((blockData as CraftBlockData).state)
+
     /**
      * Sets the biome at the given coordinates to a given biome.
      * Valid ranges for x, z are 0-3

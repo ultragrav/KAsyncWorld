@@ -52,7 +52,7 @@ class CmdTest : SpigotCommand() {
                     chunk.sections.filterNotNull()
                         .forEach { c ->
                             for (i in 0 until c.biomes.size) {
-                                c.biomes.set(i, netherBiome)
+                                c.biomes[i] = netherBiome
                             }
                         }
                     val compressed = SCompressedAsyncChunk(chunk, AW.codec)
@@ -62,9 +62,6 @@ class CmdTest : SpigotCommand() {
         }
 
         val packed = PackedWorld(chunkList)
-
-        val serializedPacked = AW.serializePackedWorld(packed)
-        val deserializedPacked = AW.deserializePackedWorld(serializedPacked, AW.codec)
 
         val millis = measureTimeMillis {
 
@@ -78,7 +75,7 @@ class CmdTest : SpigotCommand() {
                     true,
                     AW.codec
                 ),
-                deserializedPacked
+                packed
             )
         }
 

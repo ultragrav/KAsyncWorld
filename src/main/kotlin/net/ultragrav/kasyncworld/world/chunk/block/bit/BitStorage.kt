@@ -14,6 +14,7 @@ class BitStorage(
     private var data = LongArray((size + elementsPerLong - 1) / elementsPerLong)
 
     override fun get(index: Int): Int {
+        if (index < 0 || index >= size) throw IndexOutOfBoundsException("index: $index, size: $size")
         val longIndex = index / elementsPerLong
         val bitIndex = index % elementsPerLong
         val shift = bitIndex * bits
@@ -21,6 +22,7 @@ class BitStorage(
     }
 
     override fun set(index: Int, value: Int) {
+        if (index < 0 || index >= size) throw IndexOutOfBoundsException("index: $index, size: $size")
         val longIndex = index / elementsPerLong
         val bitIndex = index % elementsPerLong
         val shift = bitIndex * bits

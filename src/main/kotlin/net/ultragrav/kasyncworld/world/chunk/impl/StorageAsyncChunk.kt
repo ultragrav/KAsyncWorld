@@ -70,6 +70,11 @@ class StorageAsyncChunk(override val heightOptions: ChunkHeightOptions) : AsyncC
         return section.getBlock(x, y and 15, z)
     }
 
+    override fun hasBlock(state: BlockState): Boolean {
+        return sections.filterNotNull()
+            .any { state in it.blocks }
+    }
+
     override fun getBiome(x: Int, y: Int, z: Int): org.bukkit.block.Biome {
         val section = getSection(y shr 2) ?: return org.bukkit.block.Biome.PLAINS
         val holder = section.getBiome(x, y and 3, z)
