@@ -7,6 +7,8 @@ import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
 import net.ultragrav.kasyncworld.world.chunk.heightmap.AsyncHeightMap
 import net.ultragrav.kasyncworld.world.chunk.contract.section.AsyncChunkSection
 import org.bukkit.block.Biome
+import org.bukkit.block.data.BlockData
+import org.bukkit.craftbukkit.v1_20_R2.block.data.CraftBlockData
 
 /**
  * Facilitates some sort of method of accessing and changing the data
@@ -23,6 +25,8 @@ interface AsyncChunkAccess {
      */
     fun setBlock(x: Int, y: Int, z: Int, block: BlockState)
 
+    fun setBlock(x: Int, y: Int, z: Int, blockData: BlockData) = setBlock(x, y, z, (blockData as CraftBlockData).state)
+
     /**
      * Unsets a block at the given coordinates.
      * Valid ranges for x, z are 0-15
@@ -36,6 +40,8 @@ interface AsyncChunkAccess {
      * Valid ranges for y are given by [heightOptions]
      */
     fun getBlock(x: Int, y: Int, z: Int): BlockState
+
+    fun getBlockData(x: Int, y: Int, z: Int): BlockData = getBlock(x, y, z).createCraftBlockData()
 
     /**
      * Sets the biome at the given coordinates to a given biome.

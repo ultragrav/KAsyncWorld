@@ -5,6 +5,8 @@ import net.minecraft.world.level.block.state.BlockState
 import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
 import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunkFactory
+import org.bukkit.block.data.BlockData
+import org.bukkit.craftbukkit.v1_20_R2.block.data.CraftBlockData
 import java.util.concurrent.CompletableFuture
 
 interface AsyncWorld : AsyncChunkFactory {
@@ -16,6 +18,8 @@ interface AsyncWorld : AsyncChunkFactory {
      * a state that requires a tile entity, the tile entity will be set as well.
      */
     fun setBlock(x: Int, y: Int, z: Int, block: BlockState)
+
+    fun setBlock(x: Int, y: Int, z: Int, blockData: BlockData) = setBlock(x, y, z, (blockData as CraftBlockData).state)
 
     /**
      * Set the tile entity at the given coordinates. If the block at the given

@@ -36,6 +36,8 @@ import net.ultragrav.kserializer.json.JsonObject
 import net.ultragrav.serializer.GravSerializer
 import org.bukkit.Bukkit
 import org.bukkit.World
+import org.bukkit.block.data.BlockData
+import org.bukkit.craftbukkit.v1_20_R2.block.data.CraftBlockData
 import org.bukkit.plugin.Plugin
 import java.util.concurrent.CompletableFuture
 
