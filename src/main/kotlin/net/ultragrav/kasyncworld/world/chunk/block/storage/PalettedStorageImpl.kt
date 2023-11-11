@@ -5,18 +5,15 @@ import net.ultragrav.kasyncworld.data.DataWriter
 import net.ultragrav.kasyncworld.world.chunk.block.bit.BitStorage
 
 class PalettedStorageImpl<T>(
-    private val config: PalettedStorageImplConfig<T>,
+    val config: PalettedStorageImplConfig<T>,
     initialBits: Int = 4
 ) : PalettedStorage<T> {
 
     override val size = config.size
 
     var storage = config.createStorage(initialBits)
-        private set
     var palette = config.createPalette()
-        private set
     override var iterationStrategy = config.createIterationStrategy()
-        private set
 
     override val fastCountsAndTypesSupported = true
 

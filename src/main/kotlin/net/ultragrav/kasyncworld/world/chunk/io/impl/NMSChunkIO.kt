@@ -15,13 +15,16 @@ import net.minecraft.world.entity.EntityType
 import net.minecraft.world.level.ChunkPos
 import net.minecraft.world.level.biome.Biome
 import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.chunk.ChunkAccess
 import net.minecraft.world.level.chunk.LevelChunkSection
 import net.minecraft.world.level.chunk.PalettedContainer
 import net.minecraft.world.ticks.ProtoChunkTicks
 import net.minecraft.world.ticks.SavedTick
 import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
+import net.ultragrav.kasyncworld.world.chunk.block.bit.BitStorage
 import net.ultragrav.kasyncworld.world.chunk.block.position.AWBlockPosition
+import net.ultragrav.kasyncworld.world.chunk.block.storage.PalettedStorageImpl
 import net.ultragrav.kasyncworld.world.chunk.block.storage.wrapped.WrappedPalettedContainer
 import net.ultragrav.kasyncworld.world.chunk.getSectionIndexMB
 import net.ultragrav.kasyncworld.world.chunk.heightmap.AsyncHeightMap
@@ -361,8 +364,32 @@ class NMSChunkIO : ChunkIO {
         private fun readSection(async: AsyncChunkSection, section: LevelChunkSection) {
             // Blocks
             if (!section.hasOnlyAir()) {
-                val wrappedStates = WrappedPalettedContainer(section.states)
-                wrappedStates.applyTo(async.blocks)
+                val blocks = async.blocks
+                if (blocks is PalettedStorageImpl<BlockState> && blocks.storage is BitStorage) {
+                    // Fast algo
+                    val bits = section.states.data.storage.bits
+                    blocks.palette = blocks.config.createPalette()
+                    blocks.storage = blocks.config.createStorage(bits)
+                    blocks.iterationStrategy = blocks.config.createIterationStrategy()
+                    blocks.iterationStrategy.setAll()
+
+                    val storage = blocks.storage as BitStorage
+
+                    // Transfer palette
+                    (0 until section.states.data.palette.size)
+                        .forEach {
+                            val state = section.states.data.palette.valueFor(it)
+                            blocks.palette.getId(state)
+                        }
+
+                    // Transfer longs
+                    val raw = section.states.data.storage.raw.copyOf()
+                    storage.useRaw(raw)
+                } else {
+                    // Slower algo
+                    val wrappedStates = WrappedPalettedContainer(section.states)
+                    wrappedStates.applyTo(async.blocks)
+                }
             }
 
             // Biomes
