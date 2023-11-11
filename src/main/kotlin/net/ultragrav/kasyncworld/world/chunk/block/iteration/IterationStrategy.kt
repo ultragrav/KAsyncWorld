@@ -7,6 +7,11 @@ interface IterationStrategy : Iterable<Int> {
 
     val size: Int
 
+    /**
+     * Count of indices that will be iterated over.
+     */
+    val count: Int
+
     fun set(index: Int)
     fun unset(index: Int)
 

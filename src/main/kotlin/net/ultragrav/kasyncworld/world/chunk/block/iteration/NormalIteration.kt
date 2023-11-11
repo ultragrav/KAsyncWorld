@@ -2,6 +2,8 @@ package net.ultragrav.kasyncworld.world.chunk.block.iteration
 
 class NormalIteration(override val size: Int) : IterationStrategy {
 
+    override val count = size
+
     override fun set(index: Int) {}
     override fun unset(index: Int) {}
 
