@@ -95,7 +95,8 @@ class PalettedStorageTest {
         val storage = createStorage()
 
         for (i in 0 until storage.size) {
-            storage.set(i, if (i % 2 == 0) STONE else AIR)
+            if (i == 10) continue
+            storage[i] = if (i % 2 == 0) STONE else AIR
         }
 
         val writer = GravSerializerWrite(GravSerializer())
@@ -106,7 +107,16 @@ class PalettedStorageTest {
         storage2.read(reader)
 
         for (i in 0 until storage.size) {
-            assertEquals(storage.get(i), storage2.get(i))
+            assertEquals(storage[i], storage2[i])
+        }
+
+        val seen = BooleanArray(storage2.size)
+        storage2.indexIterator().forEach {
+            seen[it] = true
+        }
+
+        for (i in 0 until storage.size) {
+            assertEquals(seen[i], i in storage.iterationStrategy)
         }
     }
 
