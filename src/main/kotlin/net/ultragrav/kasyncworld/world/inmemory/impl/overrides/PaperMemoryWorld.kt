@@ -2,10 +2,10 @@ package net.ultragrav.kasyncworld.world.inmemory.impl.overrides
 
 import net.minecraft.server.level.ServerLevel
 import net.ultragrav.kasyncworld.AW
-import net.ultragrav.kasyncworld.world.inmemory.AsyncChunkProvider
+import net.ultragrav.kasyncworld.world.inmemory.chunk.AsyncChunkProvider
 import net.ultragrav.kasyncworld.world.inmemory.InMemoryWorld
 import net.ultragrav.kasyncworld.world.inmemory.InMemoryWorldOptions
-import net.ultragrav.kasyncworld.world.inmemory.PackedWorld
+import net.ultragrav.kasyncworld.world.inmemory.pack.PackedWorld
 import net.ultragrav.kasyncworld.world.chunk.io.ChunkReadOptions
 import org.bukkit.Bukkit
 import org.bukkit.World

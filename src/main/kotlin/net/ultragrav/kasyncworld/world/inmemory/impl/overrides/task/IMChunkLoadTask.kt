@@ -20,7 +20,7 @@ import net.ultragrav.kasyncworld.world.chunk.block.storage.wrapped.WrappedPalett
 import net.ultragrav.kasyncworld.world.chunk.heightmap.AsyncHeightMap
 import net.ultragrav.kasyncworld.world.chunk.heightmap.wrapper.NMSHeightmapStateProvider
 import net.ultragrav.kasyncworld.world.chunk.heightmap.wrapper.NMSHeightmapStorageWrapper
-import net.ultragrav.kasyncworld.world.inmemory.AsyncChunkProvider
+import net.ultragrav.kasyncworld.world.inmemory.chunk.AsyncChunkProvider
 import net.ultragrav.kasyncworld.world.chunk.io.impl.NMSChunkIO
 import net.ultragrav.kasyncworld.world.inmemory.InMemoryWorldOptions
 import org.bukkit.craftbukkit.v1_20_R2.block.CraftBiome

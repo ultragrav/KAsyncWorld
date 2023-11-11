@@ -1,4 +1,4 @@
-package net.ultragrav.kasyncworld.world.inmemory
+package net.ultragrav.kasyncworld.world.inmemory.chunk
 
 import net.ultragrav.kasyncworld.world.chunk.codec.ChunkCodec
 import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunk

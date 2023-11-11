@@ -1,4 +1,4 @@
-package net.ultragrav.kasyncworld.world.inmemory
+package net.ultragrav.kasyncworld.world.inmemory.chunk
 
 import net.ultragrav.kasyncworld.AW
 import net.ultragrav.kasyncworld.stdCompress

@@ -1,9 +1,10 @@
-package net.ultragrav.kasyncworld.world.inmemory
+package net.ultragrav.kasyncworld.world.inmemory.chunk
 
 import net.minecraft.world.level.ChunkPos
 import net.ultragrav.kasyncworld.world.chunk.codec.ChunkCodec
 import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunkFactory
+import net.ultragrav.kasyncworld.world.inmemory.pack.LocatedCompressedChunk
 
 interface AsyncChunkProvider {
     val codec: ChunkCodec

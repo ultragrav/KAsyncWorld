@@ -6,7 +6,7 @@ import net.ultragrav.kasyncworld.world.chunk.queue.ChunkQueue
 import net.ultragrav.kasyncworld.world.chunk.codec.ChunkCodec
 import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunkFactory
 import net.ultragrav.kasyncworld.world.contract.AsyncWorld
-import net.ultragrav.kasyncworld.world.inmemory.PackedWorld
+import net.ultragrav.kasyncworld.world.inmemory.pack.PackedWorld
 import net.ultragrav.kasyncworld.world.inmemory.IMWorldProvider
 import net.ultragrav.kasyncworld.world.chunk.io.ChunkIO
 import org.bukkit.World

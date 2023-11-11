@@ -11,7 +11,7 @@ import io.papermc.paper.util.CoordinateUtils
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.chunk.ChunkAccess
 import net.minecraft.world.level.chunk.ChunkStatus
-import net.ultragrav.kasyncworld.world.inmemory.AsyncChunkProvider
+import net.ultragrav.kasyncworld.world.inmemory.chunk.AsyncChunkProvider
 import net.ultragrav.kasyncworld.world.inmemory.InMemoryWorldOptions
 
 class IMChunkTaskScheduler(world: ServerLevel, workers: PrioritisedThreadPool?) :

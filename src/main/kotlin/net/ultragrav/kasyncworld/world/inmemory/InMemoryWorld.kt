@@ -1,5 +1,7 @@
 package net.ultragrav.kasyncworld.world.inmemory
 
+import net.ultragrav.kasyncworld.world.inmemory.chunk.AsyncChunkProvider
+import net.ultragrav.kasyncworld.world.inmemory.pack.PackedWorld
 import org.bukkit.World
 
 interface InMemoryWorld {

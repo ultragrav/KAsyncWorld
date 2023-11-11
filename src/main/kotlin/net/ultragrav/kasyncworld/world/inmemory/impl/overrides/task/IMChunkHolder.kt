@@ -9,9 +9,8 @@ import io.papermc.paper.world.ChunkEntitySlices
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.chunk.ChunkAccess
-import net.ultragrav.kasyncworld.AW
 import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
-import net.ultragrav.kasyncworld.world.inmemory.AsyncChunkProvider
+import net.ultragrav.kasyncworld.world.inmemory.chunk.AsyncChunkProvider
 import net.ultragrav.kasyncworld.world.chunk.io.ChunkReadOptions
 import net.ultragrav.kasyncworld.world.chunk.io.impl.NMSChunkIO
 import java.util.function.Consumer
