@@ -83,7 +83,13 @@ class NMSChunkIO : ChunkIO {
                     val isTileSet =
                         AWBlockPosition(pos.x, pos.y, pos.z) in chunk.blockEntities
                     if (!wasBlockSet && !isTileSet) return@forEach
-                    nms.removeBlockEntity(pos)
+                    nms.removeBlockEntity(
+                        BlockPos(
+                            pos.x + (cx shl 4),
+                            pos.y,
+                            pos.z + (cz shl 4)
+                        )
+                    )
                 }
 
             // Add new ones
