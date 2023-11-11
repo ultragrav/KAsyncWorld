@@ -19,7 +19,7 @@ interface AsyncWorld : AsyncChunkFactory {
      */
     fun setBlock(x: Int, y: Int, z: Int, block: BlockState)
 
-    fun setBlock(x: Int, y: Int, z: Int, blockData: BlockData) = setBlock(x, y, z, (blockData as CraftBlockData).state)
+    fun setBlockData(x: Int, y: Int, z: Int, blockData: BlockData) = setBlock(x, y, z, (blockData as CraftBlockData).state)
 
     /**
      * Set the tile entity at the given coordinates. If the block at the given

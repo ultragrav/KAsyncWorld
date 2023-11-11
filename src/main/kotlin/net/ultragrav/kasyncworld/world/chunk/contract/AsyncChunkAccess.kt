@@ -25,7 +25,7 @@ interface AsyncChunkAccess {
      */
     fun setBlock(x: Int, y: Int, z: Int, block: BlockState)
 
-    fun setBlock(x: Int, y: Int, z: Int, blockData: BlockData) = setBlock(x, y, z, (blockData as CraftBlockData).state)
+    fun setBlockData(x: Int, y: Int, z: Int, blockData: BlockData) = setBlock(x, y, z, (blockData as CraftBlockData).state)
 
     /**
      * Unsets a block at the given coordinates.

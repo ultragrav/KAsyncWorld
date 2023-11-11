@@ -14,7 +14,7 @@ import net.ultragrav.kasyncworld.world.chunk.contract.section.AsyncChunkSectionF
  * A simple representation of a chunk. This representation is not
  * thread safe so access to this chunk should be managed appropriately.
  */
-interface AsyncChunk : AsyncChunkSectionFactory, AsyncChunkAccess {
+interface AsyncChunk : AsyncChunkAccess, AsyncChunkSectionFactory {
 
     val heightMaps: Map<Heightmap.Types, AsyncHeightMap>
     val blockEntities: Map<AWBlockPosition, CompoundTag> // Stored relative to chunk
