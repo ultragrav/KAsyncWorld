@@ -4,9 +4,8 @@ import net.ultragrav.kasyncworld.AW
 import net.ultragrav.kasyncworld.stdCompress
 import net.ultragrav.kasyncworld.stdDecompress
 import net.ultragrav.kasyncworld.world.chunk.codec.ChunkCodec
-import net.ultragrav.kasyncworld.world.contract.AsyncChunk
-import net.ultragrav.kasyncworld.world.contract.AsyncChunkFactory
-import java.util.*
+import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunk
+import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunkFactory
 
 class SCompressedAsyncChunk(override val bytes: ByteArray, override val codec: ChunkCodec) : CompressedAsyncChunk {
 

@@ -4,7 +4,7 @@ import net.ultragrav.kasyncworld.data.DataReader
 import net.ultragrav.kasyncworld.data.DataWriter
 import net.ultragrav.kasyncworld.world.chunk.queue.ChunkQueue
 import net.ultragrav.kasyncworld.world.chunk.codec.ChunkCodec
-import net.ultragrav.kasyncworld.world.contract.AsyncChunkFactory
+import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunkFactory
 import net.ultragrav.kasyncworld.world.contract.AsyncWorld
 import net.ultragrav.kasyncworld.world.inmemory.PackedWorld
 import net.ultragrav.kasyncworld.world.inmemory.IMWorldProvider

@@ -1,4 +1,4 @@
-package net.ultragrav.kasyncworld.world.contract.section
+package net.ultragrav.kasyncworld.world.chunk.contract.section
 
 import net.minecraft.core.Holder
 import net.minecraft.world.level.biome.Biome

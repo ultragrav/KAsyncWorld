@@ -1,6 +1,6 @@
 package net.ultragrav.kasyncworld.world.chunk.queue
 
-import net.ultragrav.kasyncworld.world.contract.AsyncChunk
+import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.chunk.io.ChunkWriteOptions
 import org.bukkit.World
 import java.util.concurrent.CompletableFuture

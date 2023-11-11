@@ -3,8 +3,8 @@ package net.ultragrav.kasyncworld.world.inmemory.impl
 import net.minecraft.world.level.ChunkPos
 import net.ultragrav.kasyncworld.AW
 import net.ultragrav.kasyncworld.world.chunk.codec.ChunkCodec
-import net.ultragrav.kasyncworld.world.contract.AsyncChunk
-import net.ultragrav.kasyncworld.world.contract.AsyncChunkFactory
+import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunk
+import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunkFactory
 import net.ultragrav.kasyncworld.world.inmemory.AsyncChunkProvider
 import net.ultragrav.kasyncworld.world.inmemory.CompressedAsyncChunk
 import net.ultragrav.kasyncworld.world.inmemory.LocatedCompressedChunk

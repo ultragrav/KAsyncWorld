@@ -24,9 +24,9 @@ import net.ultragrav.kasyncworld.world.chunk.getSectionIndexMB
 import net.ultragrav.kasyncworld.world.chunk.heightmap.AsyncHeightMap
 import net.ultragrav.kasyncworld.world.chunk.heightmap.wrapper.NMSHeightmapStateProvider
 import net.ultragrav.kasyncworld.world.chunk.heightmap.wrapper.NMSHeightmapStorageWrapper
-import net.ultragrav.kasyncworld.world.contract.AsyncChunk
-import net.ultragrav.kasyncworld.world.contract.AsyncChunkFactory
-import net.ultragrav.kasyncworld.world.contract.section.AsyncChunkSection
+import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunk
+import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunkFactory
+import net.ultragrav.kasyncworld.world.chunk.contract.section.AsyncChunkSection
 import net.ultragrav.kasyncworld.world.chunk.io.ChunkIO
 import net.ultragrav.kasyncworld.world.chunk.io.ChunkReadOptions
 import net.ultragrav.kasyncworld.world.chunk.io.ChunkWriteOptions

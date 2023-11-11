@@ -1,7 +1,7 @@
 package net.ultragrav.kasyncworld.world.chunk.io
 
-import net.ultragrav.kasyncworld.world.contract.AsyncChunk
-import net.ultragrav.kasyncworld.world.contract.AsyncChunkFactory
+import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunk
+import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunkFactory
 import org.bukkit.Chunk
 import org.bukkit.World
 

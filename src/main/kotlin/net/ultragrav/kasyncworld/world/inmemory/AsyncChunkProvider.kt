@@ -2,8 +2,8 @@ package net.ultragrav.kasyncworld.world.inmemory
 
 import net.minecraft.world.level.ChunkPos
 import net.ultragrav.kasyncworld.world.chunk.codec.ChunkCodec
-import net.ultragrav.kasyncworld.world.contract.AsyncChunk
-import net.ultragrav.kasyncworld.world.contract.AsyncChunkFactory
+import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunk
+import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunkFactory
 
 interface AsyncChunkProvider {
     val codec: ChunkCodec

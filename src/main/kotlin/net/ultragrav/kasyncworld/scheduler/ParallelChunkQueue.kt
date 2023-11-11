@@ -2,7 +2,7 @@ package net.ultragrav.kasyncworld.scheduler
 
 import kotlinx.coroutines.*
 import net.ultragrav.kasyncworld.world.chunk.queue.ChunkQueue
-import net.ultragrav.kasyncworld.world.contract.AsyncChunk
+import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.chunk.io.ChunkIO
 import net.ultragrav.kasyncworld.world.chunk.io.ChunkWriteOptions
 import org.bukkit.Bukkit

@@ -4,7 +4,6 @@ import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.level.levelgen.Heightmap
 import net.minecraft.world.ticks.SavedTick
-import net.ultragrav.kasyncworld.AW
 import net.ultragrav.kasyncworld.data.DataReader
 import net.ultragrav.kasyncworld.data.DataWriter
 import net.ultragrav.kasyncworld.deserializeNBT
@@ -12,8 +11,8 @@ import net.ultragrav.kasyncworld.serializeNBT
 import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
 import net.ultragrav.kasyncworld.world.chunk.codec.ChunkCodec
 import net.ultragrav.kasyncworld.world.chunk.getSectionIndexMB
-import net.ultragrav.kasyncworld.world.contract.AsyncChunk
-import net.ultragrav.kasyncworld.world.contract.AsyncChunkFactory
+import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunk
+import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunkFactory
 
 class AWChunkCodecV0 : ChunkCodec {
 

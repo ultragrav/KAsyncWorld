@@ -1,4 +1,4 @@
-package net.ultragrav.kasyncworld.world.contract
+package net.ultragrav.kasyncworld.world.chunk.contract
 
 import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
 

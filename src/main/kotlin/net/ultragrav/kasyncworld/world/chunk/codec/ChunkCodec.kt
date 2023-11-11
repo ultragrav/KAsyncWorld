@@ -2,9 +2,8 @@ package net.ultragrav.kasyncworld.world.chunk.codec
 
 import net.ultragrav.kasyncworld.data.DataReader
 import net.ultragrav.kasyncworld.data.DataWriter
-import net.ultragrav.kasyncworld.world.contract.AsyncChunk
-import net.ultragrav.kasyncworld.world.contract.AsyncChunkFactory
-import java.nio.ByteBuffer
+import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunk
+import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunkFactory
 
 interface ChunkCodec {
     val id: String

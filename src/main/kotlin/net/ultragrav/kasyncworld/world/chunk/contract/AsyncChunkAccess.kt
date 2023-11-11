@@ -1,11 +1,11 @@
-package net.ultragrav.kasyncworld.world.contract
+package net.ultragrav.kasyncworld.world.chunk.contract
 
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.levelgen.Heightmap
 import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
 import net.ultragrav.kasyncworld.world.chunk.heightmap.AsyncHeightMap
-import net.ultragrav.kasyncworld.world.contract.section.AsyncChunkSection
+import net.ultragrav.kasyncworld.world.chunk.contract.section.AsyncChunkSection
 import org.bukkit.block.Biome
 
 /**

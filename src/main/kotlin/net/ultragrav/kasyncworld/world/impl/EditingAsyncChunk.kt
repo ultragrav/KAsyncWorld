@@ -10,7 +10,6 @@ import net.minecraft.world.level.biome.Biomes
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.EntityBlock
-import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.levelgen.Heightmap
 import net.minecraft.world.level.material.Fluid
@@ -30,9 +29,9 @@ import net.ultragrav.kasyncworld.world.chunk.block.position.AWBlockPosition
 import net.ultragrav.kasyncworld.world.chunk.block.storage.PalettedStorageImpl
 import net.ultragrav.kasyncworld.world.chunk.block.storage.PalettedStorageImplConfig
 import net.ultragrav.kasyncworld.world.chunk.heightmap.AsyncHeightMap
-import net.ultragrav.kasyncworld.world.contract.AsyncChunk
+import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.contract.AsyncWorld
-import net.ultragrav.kasyncworld.world.contract.section.AsyncChunkSection
+import net.ultragrav.kasyncworld.world.chunk.contract.section.AsyncChunkSection
 import org.bukkit.craftbukkit.v1_20_R2.block.CraftBiome
 
 class EditingAsyncChunk(

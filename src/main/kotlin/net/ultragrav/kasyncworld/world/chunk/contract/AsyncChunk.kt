@@ -1,15 +1,14 @@
-package net.ultragrav.kasyncworld.world.contract
+package net.ultragrav.kasyncworld.world.chunk.contract
 
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.levelgen.Heightmap
 import net.minecraft.world.level.material.Fluid
 import net.minecraft.world.ticks.SavedTick
-import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
 import net.ultragrav.kasyncworld.world.chunk.block.position.AWBlockPosition
 import net.ultragrav.kasyncworld.world.chunk.heightmap.AsyncHeightMap
-import net.ultragrav.kasyncworld.world.contract.section.AsyncChunkSection
-import net.ultragrav.kasyncworld.world.contract.section.AsyncChunkSectionFactory
+import net.ultragrav.kasyncworld.world.chunk.contract.section.AsyncChunkSection
+import net.ultragrav.kasyncworld.world.chunk.contract.section.AsyncChunkSectionFactory
 
 /**
  * A simple representation of a chunk. This representation is not

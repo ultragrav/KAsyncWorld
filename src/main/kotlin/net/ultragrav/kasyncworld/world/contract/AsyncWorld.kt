@@ -3,6 +3,8 @@ package net.ultragrav.kasyncworld.world.contract
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.level.block.state.BlockState
 import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
+import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunk
+import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunkFactory
 import java.util.concurrent.CompletableFuture
 
 interface AsyncWorld : AsyncChunkFactory {

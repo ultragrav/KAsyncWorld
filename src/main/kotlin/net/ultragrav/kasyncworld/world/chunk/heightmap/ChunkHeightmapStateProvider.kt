@@ -1,7 +1,7 @@
 package net.ultragrav.kasyncworld.world.chunk.heightmap
 
 import net.minecraft.world.level.block.state.BlockState
-import net.ultragrav.kasyncworld.world.contract.AsyncChunk
+import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunk
 import java.util.function.Predicate
 
 class ChunkHeightmapStateProvider(private val chunk: AsyncChunk) : HeightmapStateProvider {

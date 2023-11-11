@@ -19,7 +19,7 @@ import net.ultragrav.kasyncworld.world.chunk.block.palette.WrappedGlobalPalette
 import net.ultragrav.kasyncworld.world.chunk.codec.ChunkCodec
 import net.ultragrav.kasyncworld.world.chunk.codec.impl.AWChunkCodecV0
 import net.ultragrav.kasyncworld.world.chunk.queue.ChunkQueue
-import net.ultragrav.kasyncworld.world.contract.AsyncChunkFactory
+import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunkFactory
 import net.ultragrav.kasyncworld.world.contract.AsyncWorld
 import net.ultragrav.kasyncworld.world.impl.SpigotAsyncWorld
 import net.ultragrav.kasyncworld.world.impl.factory.EditingChunkFactory

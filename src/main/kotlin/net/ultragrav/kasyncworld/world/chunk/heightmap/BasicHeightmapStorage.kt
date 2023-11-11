@@ -3,7 +3,7 @@ package net.ultragrav.kasyncworld.world.chunk.heightmap
 import net.ultragrav.kasyncworld.ceilLog2
 import net.ultragrav.kasyncworld.world.chunk.block.bit.BitStorage
 import net.ultragrav.kasyncworld.world.chunk.block.bit.NumberStorage
-import net.ultragrav.kasyncworld.world.contract.AsyncChunk
+import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunk
 
 class BasicHeightmapStorage(val chunk: AsyncChunk) : HeightmapStorage {
     override val heightOptions = chunk.heightOptions

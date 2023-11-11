@@ -1,8 +1,8 @@
 package net.ultragrav.kasyncworld.world.inmemory
 
 import net.ultragrav.kasyncworld.world.chunk.codec.ChunkCodec
-import net.ultragrav.kasyncworld.world.contract.AsyncChunk
-import net.ultragrav.kasyncworld.world.contract.AsyncChunkFactory
+import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunk
+import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunkFactory
 
 interface CompressedAsyncChunk {
     val bytes: ByteArray

@@ -2,7 +2,7 @@ package net.ultragrav.kasyncworld.world.chunk.heightmap
 
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.levelgen.Heightmap
-import net.ultragrav.kasyncworld.world.contract.AsyncChunk
+import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunk
 
 class AsyncHeightMap(
     val type: Heightmap.Types,
