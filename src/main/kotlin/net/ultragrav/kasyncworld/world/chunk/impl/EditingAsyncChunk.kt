@@ -1,4 +1,4 @@
-package net.ultragrav.kasyncworld.world.impl
+package net.ultragrav.kasyncworld.world.chunk.impl
 
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Holder

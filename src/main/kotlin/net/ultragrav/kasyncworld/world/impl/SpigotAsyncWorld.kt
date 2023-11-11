@@ -8,6 +8,7 @@ import net.ultragrav.kasyncworld.getChunkX
 import net.ultragrav.kasyncworld.getChunkZ
 import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
 import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunk
+import net.ultragrav.kasyncworld.world.chunk.impl.EditingAsyncChunk
 import net.ultragrav.kasyncworld.world.contract.AsyncWorld
 import net.ultragrav.kasyncworld.world.chunk.io.ChunkWriteOptions
 import net.ultragrav.kasyncworld.world.chunk.io.HeightmapWriteType

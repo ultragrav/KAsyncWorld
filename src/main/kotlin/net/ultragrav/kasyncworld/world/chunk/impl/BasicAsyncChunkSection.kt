@@ -1,4 +1,4 @@
-package net.ultragrav.kasyncworld.world.impl
+package net.ultragrav.kasyncworld.world.chunk.impl
 
 import net.minecraft.core.Holder
 import net.minecraft.world.level.biome.Biome

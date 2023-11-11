@@ -22,8 +22,8 @@ import net.ultragrav.kasyncworld.world.chunk.queue.ChunkQueue
 import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunkFactory
 import net.ultragrav.kasyncworld.world.contract.AsyncWorld
 import net.ultragrav.kasyncworld.world.impl.SpigotAsyncWorld
-import net.ultragrav.kasyncworld.world.impl.factory.EditingChunkFactory
-import net.ultragrav.kasyncworld.world.impl.factory.StorageChunkFactory
+import net.ultragrav.kasyncworld.world.chunk.impl.EditingChunkFactory
+import net.ultragrav.kasyncworld.world.chunk.impl.StorageChunkFactory
 import net.ultragrav.kasyncworld.world.inmemory.IMWorldProvider
 import net.ultragrav.kasyncworld.world.inmemory.LocatedCompressedChunk
 import net.ultragrav.kasyncworld.world.inmemory.PackedWorld
