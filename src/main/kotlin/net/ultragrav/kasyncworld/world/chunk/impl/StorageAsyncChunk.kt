@@ -70,7 +70,13 @@ class StorageAsyncChunk(override val heightOptions: ChunkHeightOptions) : AsyncC
         return section.getBlock(x, y and 15, z)
     }
 
-    override fun hasBlock(state: BlockState): Boolean {
+    override fun types(): Set<BlockState> {
+        return sections.filterNotNull()
+            .flatMap { it.blocks.types() }
+            .toSet()
+    }
+
+    override fun contains(state: BlockState): Boolean {
         return sections.filterNotNull()
             .any { state in it.blocks }
     }
