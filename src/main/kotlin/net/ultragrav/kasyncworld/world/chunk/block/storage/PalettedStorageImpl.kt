@@ -143,7 +143,12 @@ class PalettedStorageImpl<T>(
 
         // Clear palette
         palette = config.createPalette()
-        palette.getId(config.defaultState)
+        // We don't need to worry about the default state
+        // there is the possibility this read storage will
+        // not contain an entry for the default state, but
+        // this means the default state exists nowhere in the
+        // storage and if unset is called on it, it will be
+        // added to the palette anyway.
 
         // New counts
         counts = config.createCounter(bits)
@@ -154,6 +159,10 @@ class PalettedStorageImpl<T>(
 
         // Read the palette
         val paletteSize = input.readInt()
+        if (paletteSize > 1 shl bits) {
+            error("Palette size $paletteSize is too big for $bits bits")
+        }
+
         repeat(paletteSize) {
             val encodedId = input.readInt()
             val globalId = input.readInt()

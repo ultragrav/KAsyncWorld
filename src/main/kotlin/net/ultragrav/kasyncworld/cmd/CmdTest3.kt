@@ -12,31 +12,12 @@ class CmdTest3 : SpigotCommand() {
     }
 
     override fun perform() {
-        val world = spigotPlayer.world
+        val world = CmdTest.currWorld!!
 
-        var total = 0
         val time = measureTimeMillis {
-            for (dcx in 0..3) {
-                for (dcz in 0..3) {
-                    val cx = spigotPlayer.chunk.x + dcx
-                    val cz = spigotPlayer.chunk.z + dcz
-                    val bc = world.getChunkAt(cx, cz)
-                    val chunk = AW.chunkIO.readChunk(bc, AW.storageChunkFactory, ChunkReadOptions())
-                    val logTypes = chunk.types()
-                        .filter { Tag.LOGS.isTagged(it.bukkitMaterial) }
-                    if (logTypes.isEmpty()) continue
-                    val count = chunk.sections
-                        .filterNotNull()
-                        .sumOf { section ->
-                            logTypes.sumOf {
-                                section.blocks.count(it)
-                            }
-                        }
-                    total += count
-                }
-            }
+            world.saveAndPack()
         }
 
-        spigotPlayer.sendMessage("Found $total logs in ${time}ms")
+        spigotPlayer.sendMessage("Saved and packed in $time ms")
     }
 }
