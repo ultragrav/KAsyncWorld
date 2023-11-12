@@ -145,6 +145,9 @@ class PalettedStorageImpl<T>(
         palette = config.createPalette()
         palette.getId(config.defaultState)
 
+        // New counts
+        counts = config.createCounter(bits)
+
         val globalPalette = palette.globalPalette()
 
         val encodedIdToLocalId = mutableMapOf<Int, Int>()
