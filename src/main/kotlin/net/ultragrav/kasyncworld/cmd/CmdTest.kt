@@ -35,8 +35,8 @@ class CmdTest : SpigotCommand() {
             .first { it.`is`(Biomes.CRIMSON_FOREST) }
 
         val saveChunksMillis = measureTimeMillis {
-            for (dx in 0..1) {
-                for (dz in 0..1) {
+            for (dx in 0..5) {
+                for (dz in 0..5) {
                     val cx = bukkitChunk.x + dx
                     val cz = bukkitChunk.z + dz
                     val chunk = AW.chunkIO.readChunk(
@@ -66,8 +66,8 @@ class CmdTest : SpigotCommand() {
             currWorld = AW.inMemoryWorldProvider.createWorld(
                 "Test-World-${UUID.randomUUID()}",
                 InMemoryWorldOptions(
-                    0..1,
-                    0..1,
+                    0..5,
+                    0..5,
                     World.Environment.NORMAL,
                     Biome.CRIMSON_FOREST,
                     AW.compressedCodec

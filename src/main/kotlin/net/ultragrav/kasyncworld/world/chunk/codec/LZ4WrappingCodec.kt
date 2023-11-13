@@ -38,6 +38,6 @@ class LZ4WrappingCodec(private val child: ChunkCodec) : ChunkCodec {
     }
 
     companion object {
-        private val factory = LZ4Factory.fastestJavaInstance()
+        val factory = LZ4Factory.fastestJavaInstance()
     }
 }

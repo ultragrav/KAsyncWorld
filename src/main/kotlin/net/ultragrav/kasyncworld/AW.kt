@@ -18,6 +18,7 @@ import net.ultragrav.kasyncworld.world.chunk.block.palette.Palette
 import net.ultragrav.kasyncworld.world.chunk.block.palette.WrappedGlobalPalette
 import net.ultragrav.kasyncworld.world.chunk.codec.ChunkCodec
 import net.ultragrav.kasyncworld.world.chunk.codec.impl.AWChunkCodecV0
+import net.ultragrav.kasyncworld.world.chunk.codec.impl.AWChunkCodecV1
 import net.ultragrav.kasyncworld.world.chunk.queue.ChunkQueue
 import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunkFactory
 import net.ultragrav.kasyncworld.world.contract.AsyncWorld
@@ -46,7 +47,7 @@ object AW : AWApi {
 
     override lateinit var chunkQueue: ChunkQueue
 
-    override val codec: ChunkCodec = AWChunkCodecV0()
+    override val codec: ChunkCodec = AWChunkCodecV1()
 
     override val inMemoryWorldProvider: IMWorldProvider = PaperIMWorldProvider()
 
