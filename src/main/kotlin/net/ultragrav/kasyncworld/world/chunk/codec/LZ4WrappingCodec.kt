@@ -19,18 +19,20 @@ class LZ4WrappingCodec(private val child: ChunkCodec) : ChunkCodec {
     }
 
     override fun encode(writer: DataWriter, chunk: AsyncChunk) {
+        val compressor = factory.fastCompressor()
         val childWriter = AW.createWriter()
         child.encode(childWriter, chunk)
         val bytes = childWriter.toByteArray()
-        val compressor = factory.fastCompressor()
         val compressed = compressor.compress(bytes)
+        writer.writeInt(bytes.size)
         writer.writeByteArray(compressed)
     }
 
     override fun decode(reader: DataReader, factory: AsyncChunkFactory): AsyncChunk {
-        val bytes = reader.readByteArray()
         val decompressor = LZ4WrappingCodec.factory.fastDecompressor()
-        val decompressed = decompressor.decompress(bytes, bytes.size * 10)
+        val decompressedSize = reader.readInt()
+        val bytes = reader.readByteArray()
+        val decompressed = decompressor.decompress(bytes, decompressedSize)
         val childReader = AW.createReader(decompressed)
         return child.decode(childReader, factory)
     }
