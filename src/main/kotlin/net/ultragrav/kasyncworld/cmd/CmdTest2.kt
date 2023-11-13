@@ -25,6 +25,7 @@ class CmdTest2 : SpigotCommand() {
         val plChunkX = pl.location.chunk.x
         val plChunkZ = pl.location.chunk.z
 
+        val timeMs = System.currentTimeMillis()
         AW.editAsync(spigotPlayer.world, AsyncWorld.EditType.DENSE) {
             val state = Blocks.AIR.defaultBlockState()
             for (dx in -radius..radius) {
@@ -42,7 +43,8 @@ class CmdTest2 : SpigotCommand() {
                 }
             }
         }.thenAccept {
-            pl.sendMessage(Component.text("Done!"))
+            val timeMs2 = System.currentTimeMillis()
+            pl.sendMessage(Component.text("Done in ${timeMs2 - timeMs}ms"))
         }
     }
 

@@ -5,16 +5,15 @@ import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.levelgen.Heightmap
 import net.minecraft.world.ticks.SavedTick
-import net.ultragrav.kasyncworld.AW
 import net.ultragrav.kasyncworld.data.DataReader
 import net.ultragrav.kasyncworld.data.DataWriter
 import net.ultragrav.kasyncworld.deserializeNBT
 import net.ultragrav.kasyncworld.serializeNBT
 import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
 import net.ultragrav.kasyncworld.world.chunk.codec.ChunkCodec
-import net.ultragrav.kasyncworld.world.chunk.getSectionIndexMB
 import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunkFactory
+import net.ultragrav.kasyncworld.world.chunk.getSectionIndexMB
 import org.bukkit.block.Biome
 import org.bukkit.craftbukkit.v1_20_R2.block.CraftBiome
 
@@ -45,8 +44,10 @@ class AWChunkCodecV1 : ChunkCodec {
             val blocks = section.blocks
             val biomes = section.biomes
 
-            val blocksEmpty = blocks.count(Blocks.AIR.defaultBlockState()) == blocks.size
-            val biomesEmpty = biomes.count(CraftBiome.bukkitToMinecraftHolder(Biome.PLAINS)) == biomes.size
+            val blocksEmpty = blocks.count(Blocks.AIR.defaultBlockState()) == blocks.size &&
+                    blocks.iterationStrategy.count == blocks.size
+            val biomesEmpty = biomes.count(CraftBiome.bukkitToMinecraftHolder(Biome.PLAINS)) == biomes.size &&
+                    biomes.iterationStrategy.count == biomes.size
 
             writer.writeBoolean(blocksEmpty)
             writer.writeBoolean(biomesEmpty)
@@ -116,7 +117,9 @@ class AWChunkCodecV1 : ChunkCodec {
                 val biomesEmpty = reader.readBoolean()
 
                 if (!blocksEmpty) section.blocks.read(reader)
+                else section.blocks.iterationStrategy.setAll()
                 if (!biomesEmpty) section.biomes.read(reader)
+                else section.biomes.iterationStrategy.setAll()
                 chunk.setSection(heightOptions.getSectionIndexMB(index), section)
             }
         }

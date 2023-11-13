@@ -31,12 +31,11 @@ class CmdTest : SpigotCommand() {
         // Save chunks up to 3 away
         val chunkList = mutableListOf<EncodedAsyncChunk>()
 
-        val netherBiome = AW.globalBiomePalette.listIds().map { AW.globalBiomePalette.getState(it) }
-            .first { it.`is`(Biomes.CRIMSON_FOREST) }
+        currWorld?.unload(false)
 
         val saveChunksMillis = measureTimeMillis {
-            for (dx in 0..5) {
-                for (dz in 0..5) {
+            for (dx in 0..3) {
+                for (dz in 0..3) {
                     val cx = bukkitChunk.x + dx
                     val cz = bukkitChunk.z + dz
                     val chunk = AW.chunkIO.readChunk(
@@ -47,12 +46,6 @@ class CmdTest : SpigotCommand() {
                         AW.storageChunkFactory,
                         ChunkReadOptions()
                     )
-                    chunk.sections.filterNotNull()
-                        .forEach { c ->
-                            for (i in 0 until c.biomes.size) {
-                                c.biomes[i] = netherBiome
-                            }
-                        }
                     val encoded = EncodedAsyncChunk.fromChunk(AW.codec, chunk, dx, dz)
                     chunkList.add(encoded)
                 }
@@ -66,10 +59,10 @@ class CmdTest : SpigotCommand() {
             currWorld = AW.inMemoryWorldProvider.createWorld(
                 "Test-World-${UUID.randomUUID()}",
                 InMemoryWorldOptions(
-                    0..5,
-                    0..5,
+                    0..3,
+                    0..3,
                     World.Environment.NORMAL,
-                    Biome.CRIMSON_FOREST,
+                    Biome.PLAINS,
                     AW.compressedCodec
                 ),
                 packed
