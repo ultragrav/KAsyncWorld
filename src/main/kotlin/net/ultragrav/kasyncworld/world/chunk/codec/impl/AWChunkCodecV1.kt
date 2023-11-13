@@ -117,9 +117,17 @@ class AWChunkCodecV1 : ChunkCodec {
                 val biomesEmpty = reader.readBoolean()
 
                 if (!blocksEmpty) section.blocks.read(reader)
-                else section.blocks.iterationStrategy.setAll()
+                else if (section.blocks.count(Blocks.AIR.defaultBlockState()) != section.blocks.size) {
+                    section.blocks.fill(Blocks.AIR.defaultBlockState())
+                } else {
+                    section.blocks.iterationStrategy.setAll()
+                }
                 if (!biomesEmpty) section.biomes.read(reader)
-                else section.biomes.iterationStrategy.setAll()
+                else if (section.biomes.count(CraftBiome.bukkitToMinecraftHolder(Biome.PLAINS)) != section.biomes.size) {
+                    section.biomes.fill(CraftBiome.bukkitToMinecraftHolder(Biome.PLAINS))
+                } else {
+                    section.biomes.iterationStrategy.setAll()
+                }
                 chunk.setSection(heightOptions.getSectionIndexMB(index), section)
             }
         }

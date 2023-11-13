@@ -37,4 +37,10 @@ interface PalettedStorage<T> : Iterable<Indexed<T>> {
             other[i] = this[i]
         }
     }
+
+    fun fill(type: T) {
+        for (i in 0 until size) {
+            this[i] = type
+        }
+    }
 }
