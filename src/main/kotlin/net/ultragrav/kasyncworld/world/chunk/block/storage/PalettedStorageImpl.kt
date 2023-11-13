@@ -129,10 +129,14 @@ class PalettedStorageImpl<T>(
         output.writeLongArray(longs)
 
         // Iteration data (Order is not preserved)
-        val indexingBitStorage = BitStorage(storage.size, 1)
-        indexIterator().forEach { indexingBitStorage.set(it, 1) }
-        val indexingLongs = indexingBitStorage.raw()
-        output.writeLongArray(indexingLongs)
+        val allFilled = iterationStrategy.count == iterationStrategy.size
+        output.writeBoolean(allFilled)
+        if (!allFilled) {
+            val indexingBitStorage = BitStorage(storage.size, 1)
+            indexIterator().forEach { indexingBitStorage.set(it, 1) }
+            val indexingLongs = indexingBitStorage.raw()
+            output.writeLongArray(indexingLongs)
+        }
     }
 
     override fun read(input: DataReader) {
@@ -184,13 +188,19 @@ class PalettedStorageImpl<T>(
         }
 
         // Read iteration data
-        val indexingLongs = input.readLongArray()
-        val indexingBitStorage = BitStorage(size, 1)
-        indexingBitStorage.useRaw(indexingLongs)
-        iterationStrategy = config.createIterationStrategy()
-        for (index in 0 until size) {
-            if (indexingBitStorage.get(index) == 1) {
-                iterationStrategy.set(index)
+        val allFilled = input.readBoolean()
+        if (allFilled) {
+            iterationStrategy = config.createIterationStrategy()
+            iterationStrategy.setAll()
+        } else {
+            val indexingLongs = input.readLongArray()
+            val indexingBitStorage = BitStorage(size, 1)
+            indexingBitStorage.useRaw(indexingLongs)
+            iterationStrategy = config.createIterationStrategy()
+            for (index in 0 until size) {
+                if (indexingBitStorage.get(index) == 1) {
+                    iterationStrategy.set(index)
+                }
             }
         }
     }
