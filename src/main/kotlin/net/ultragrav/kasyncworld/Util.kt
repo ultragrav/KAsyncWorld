@@ -6,6 +6,7 @@ import net.ultragrav.serializer.compressors.StandardCompressor
 import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
 import java.io.DataOutputStream
+import java.util.zip.Deflater
 
 fun getChunkKey(x: Int, z: Int): Long {
     return (x.toLong() and 0xFFFFFFFFL) or ((z.toLong() and 0xFFFFFFFFL) shl 32)
@@ -21,14 +22,6 @@ fun getChunkZ(key: Long): Int {
 
 fun ceilLog2(num: Int): Int {
     return 32 - Integer.numberOfLeadingZeros(num - 1)
-}
-
-internal fun stdCompress(arr: ByteArray): ByteArray {
-    return StandardCompressor.instance.compress(arr)
-}
-
-internal fun stdDecompress(arr: ByteArray): ByteArray {
-    return StandardCompressor.instance.decompress(arr)
 }
 
 internal fun serializeNBT(tag: CompoundTag): ByteArray {

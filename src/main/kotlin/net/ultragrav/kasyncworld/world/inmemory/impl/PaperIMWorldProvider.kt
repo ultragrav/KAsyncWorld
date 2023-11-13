@@ -116,22 +116,12 @@ class PaperIMWorldProvider : IMWorldProvider {
 
     override fun createWorld(name: String, options: InMemoryWorldOptions): InMemoryWorld {
 
-        val chunkProvider =
-            if (options.compressUnloadedChunks) {
-                CompressedChunkProvider(
-                    AW.storageChunkFactory,
-                    options.codec,
-                    options.chunkBoundsX,
-                    options.chunkBoundsZ
-                )
-            } else {
-                UncompressedChunkProvider(
-                    AW.storageChunkFactory,
-                    options.codec,
-                    options.chunkBoundsX,
-                    options.chunkBoundsZ
-                )
-            }
+        val chunkProvider = BasicChunkProvider(
+            AW.storageChunkFactory,
+            options.codec,
+            options.chunkBoundsX,
+            options.chunkBoundsZ
+        )
 
         val serverLevel = createWorld(name, options, 123L, options.environment, chunkProvider)
 
@@ -139,26 +129,14 @@ class PaperIMWorldProvider : IMWorldProvider {
     }
 
     override fun createWorld(name: String, options: InMemoryWorldOptions, packed: PackedWorld): InMemoryWorld {
-        val chunkProvider =
-            if (options.compressUnloadedChunks) {
-                CompressedChunkProvider(
-                    AW.storageChunkFactory,
-                    options.codec,
-                    options.chunkBoundsX,
-                    options.chunkBoundsZ
-                )
-            } else {
-                UncompressedChunkProvider(
-                    AW.storageChunkFactory,
-                    options.codec,
-                    options.chunkBoundsX,
-                    options.chunkBoundsZ
-                )
-            }
-
-        chunkProvider.setChunks(
-            packed.chunks.associateBy { ChunkPos(it.x, it.z) }.mapValues { it.value.chunk }
+        val chunkProvider = BasicChunkProvider(
+            AW.storageChunkFactory,
+            options.codec,
+            options.chunkBoundsX,
+            options.chunkBoundsZ
         )
+
+        chunkProvider.setChunks(packed.chunks)
 
         val serverLevel = createWorld(name, options, 123L, options.environment, chunkProvider)
 

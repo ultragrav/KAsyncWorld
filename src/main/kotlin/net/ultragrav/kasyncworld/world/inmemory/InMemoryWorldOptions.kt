@@ -11,6 +11,5 @@ data class InMemoryWorldOptions(
     val chunkBoundsZ: IntRange,
     val environment: Environment,
     val defaultBiome: Biome = Biome.PLAINS,
-    val compressUnloadedChunks: Boolean = true,
     val codec: ChunkCodec = AW.codec
 )

@@ -26,6 +26,8 @@ dependencies {
 
     testImplementation(kotlin("test"))
     implementation("net.ultragrav:KSerializer:1.1.0")
+    implementation("org.lz4:lz4-java:1.8.0")
+
 }
 
 tasks.test {

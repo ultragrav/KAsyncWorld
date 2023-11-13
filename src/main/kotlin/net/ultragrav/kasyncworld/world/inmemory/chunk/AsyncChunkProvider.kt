@@ -4,7 +4,6 @@ import net.minecraft.world.level.ChunkPos
 import net.ultragrav.kasyncworld.world.chunk.codec.ChunkCodec
 import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunkFactory
-import net.ultragrav.kasyncworld.world.inmemory.pack.LocatedCompressedChunk
 
 interface AsyncChunkProvider {
     val codec: ChunkCodec
@@ -13,7 +12,6 @@ interface AsyncChunkProvider {
     val boundsZ: IntRange
     fun loadChunk(x: Int, z: Int): AsyncChunk?
     fun storeChunk(x: Int, z: Int, chunk: AsyncChunk)
-    fun setChunks(chunkMap: Map<ChunkPos, CompressedAsyncChunk>)
-    fun getChunks(): Map<ChunkPos, CompressedAsyncChunk>
-    fun getLocatedChunks(): List<LocatedCompressedChunk>
+    fun setChunks(chunkMap: List<EncodedAsyncChunk>)
+    fun getChunks(): List<EncodedAsyncChunk>
 }

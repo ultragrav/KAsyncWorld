@@ -50,7 +50,7 @@ class PaperMemoryWorld(
                     AW.debug("Saved chunk ${bukkitChunk.x} ${bukkitChunk.z} in $millis ms")
                 }
         }
-        return PackedWorld(chunkProvider.getLocatedChunks())
+        return PackedWorld(chunkProvider.getChunks())
     }
 
 }

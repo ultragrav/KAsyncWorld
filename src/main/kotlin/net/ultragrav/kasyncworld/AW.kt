@@ -25,19 +25,16 @@ import net.ultragrav.kasyncworld.world.impl.SpigotAsyncWorld
 import net.ultragrav.kasyncworld.world.chunk.impl.EditingChunkFactory
 import net.ultragrav.kasyncworld.world.chunk.impl.StorageChunkFactory
 import net.ultragrav.kasyncworld.world.inmemory.IMWorldProvider
-import net.ultragrav.kasyncworld.world.inmemory.pack.LocatedCompressedChunk
 import net.ultragrav.kasyncworld.world.inmemory.pack.PackedWorld
-import net.ultragrav.kasyncworld.world.inmemory.chunk.SCompressedAsyncChunk
 import net.ultragrav.kasyncworld.world.inmemory.impl.PaperIMWorldProvider
 import net.ultragrav.kasyncworld.world.chunk.io.ChunkIO
 import net.ultragrav.kasyncworld.world.chunk.io.impl.NMSChunkIO
+import net.ultragrav.kasyncworld.world.inmemory.chunk.EncodedAsyncChunk
 import net.ultragrav.kserializer.json.JsonArray
 import net.ultragrav.kserializer.json.JsonObject
 import net.ultragrav.serializer.GravSerializer
 import org.bukkit.Bukkit
 import org.bukkit.World
-import org.bukkit.block.data.BlockData
-import org.bukkit.craftbukkit.v1_20_R2.block.data.CraftBlockData
 import org.bukkit.plugin.Plugin
 import java.util.concurrent.CompletableFuture
 
@@ -111,28 +108,30 @@ object AW : AWApi {
             val chunkJson = JsonObject()
             chunkJson["x"] = chunk.x
             chunkJson["z"] = chunk.z
-            val codec = chunk.chunk.codec
+            val codec = chunk.codec
             chunkJson["codec"] = codec.id
             chunkJson["version"] = codec.version
-            chunkJson["data"] = chunk.chunk.bytes
+            chunkJson["data"] = chunk.data
             array.addObject(chunkJson)
         }
         json["chunks"] = array
         return json.toByteArray()
     }
 
-    override fun deserializePackedWorld(data: ByteArray, codec: ChunkCodec): PackedWorld {
+    override fun deserializePackedWorld(data: ByteArray, codecProvider: (String) -> ChunkCodec): PackedWorld {
         val json = JsonObject.deserialize(GravSerializer(data))
 
-        val chunks = mutableListOf<LocatedCompressedChunk>()
+        val chunks = mutableListOf<EncodedAsyncChunk>()
         val array = json.getArray("chunks")
         val size = array.size
         for (i in 0 until size) {
             val chunkJson = array.getObject(i)
             val x = chunkJson.getNumber("x").toInt()
             val z = chunkJson.getNumber("z").toInt()
-            val isCorrectCodec = chunkJson.getString("codec") == codec.id
-            if (!isCorrectCodec) throw IllegalArgumentException("Codec mismatch: ${chunkJson.getString("codec")} != ${codec.id}")
+            val codecId = chunkJson.getString("codec")
+            val codec = codecProvider(codecId)
+            val isCorrectCodec = codecId == codec.id
+            if (!isCorrectCodec) throw IllegalArgumentException("Codec mismatch! Expected $codecId but got ${codec.id}!")
 
             val version = chunkJson.getNumber("version").toInt()
             val chunkBytes = chunkJson.getBinary("data").value
@@ -144,8 +143,8 @@ object AW : AWApi {
                 ?: throw IllegalArgumentException("Cannot find codec for version $version")
             require(version == currentCodec.version) { "Could not find version $version of codec ${currentCodec.id}" }
 
-            val compressedChunk = SCompressedAsyncChunk(chunkBytes, currentCodec)
-            chunks.add(LocatedCompressedChunk(x, z, compressedChunk))
+            val encoded = EncodedAsyncChunk(x, z, chunkBytes, codec)
+            chunks.add(encoded)
         }
 
         return PackedWorld(chunks)

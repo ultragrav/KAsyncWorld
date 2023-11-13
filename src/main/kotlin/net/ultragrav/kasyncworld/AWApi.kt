@@ -1,9 +1,11 @@
 package net.ultragrav.kasyncworld
 
+import com.mojang.serialization.Compressable
 import net.ultragrav.kasyncworld.data.DataReader
 import net.ultragrav.kasyncworld.data.DataWriter
 import net.ultragrav.kasyncworld.world.chunk.queue.ChunkQueue
 import net.ultragrav.kasyncworld.world.chunk.codec.ChunkCodec
+import net.ultragrav.kasyncworld.world.chunk.codec.LZ4WrappingCodec
 import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunkFactory
 import net.ultragrav.kasyncworld.world.contract.AsyncWorld
 import net.ultragrav.kasyncworld.world.inmemory.pack.PackedWorld
@@ -18,6 +20,7 @@ interface AWApi {
     val chunkQueue: ChunkQueue
     val chunkIO: ChunkIO
     val codec: ChunkCodec
+    val compressedCodec get() = LZ4WrappingCodec(codec)
     val inMemoryWorldProvider: IMWorldProvider
 
     val editingChunkFactory: AsyncChunkFactory
@@ -29,5 +32,5 @@ interface AWApi {
     fun createWriter(): DataWriter
 
     fun serializePackedWorld(packedWorld: PackedWorld): ByteArray
-    fun deserializePackedWorld(data: ByteArray, codec: ChunkCodec = this.codec): PackedWorld
+    fun deserializePackedWorld(data: ByteArray, codecProvider: (String) -> ChunkCodec = { codec }): PackedWorld
 }

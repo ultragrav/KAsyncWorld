@@ -3,11 +3,9 @@ package net.ultragrav.kasyncworld.cmd
 import net.minecraft.world.level.biome.Biomes
 import net.ultragrav.command.platform.SpigotCommand
 import net.ultragrav.kasyncworld.AW
-import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
 import net.ultragrav.kasyncworld.world.chunk.io.ChunkReadOptions
 import net.ultragrav.kasyncworld.world.inmemory.*
-import net.ultragrav.kasyncworld.world.inmemory.chunk.SCompressedAsyncChunk
-import net.ultragrav.kasyncworld.world.inmemory.pack.LocatedCompressedChunk
+import net.ultragrav.kasyncworld.world.inmemory.chunk.EncodedAsyncChunk
 import net.ultragrav.kasyncworld.world.inmemory.pack.PackedWorld
 import org.bukkit.Location
 import org.bukkit.World
@@ -31,14 +29,14 @@ class CmdTest : SpigotCommand() {
         val bukkitChunk = spigotPlayer.chunk
 
         // Save chunks up to 3 away
-        val chunkList = mutableListOf<LocatedCompressedChunk>()
+        val chunkList = mutableListOf<EncodedAsyncChunk>()
 
         val netherBiome = AW.globalBiomePalette.listIds().map { AW.globalBiomePalette.getState(it) }
             .first { it.`is`(Biomes.CRIMSON_FOREST) }
 
         val saveChunksMillis = measureTimeMillis {
-            for (dx in 0..3) {
-                for (dz in 0..3) {
+            for (dx in 0..1) {
+                for (dz in 0..1) {
                     val cx = bukkitChunk.x + dx
                     val cz = bukkitChunk.z + dz
                     val chunk = AW.chunkIO.readChunk(
@@ -55,8 +53,8 @@ class CmdTest : SpigotCommand() {
                                 c.biomes[i] = netherBiome
                             }
                         }
-                    val compressed = SCompressedAsyncChunk(chunk, AW.codec)
-                    chunkList.add(LocatedCompressedChunk(dx, dz, compressed))
+                    val encoded = EncodedAsyncChunk.fromChunk(AW.codec, chunk, dx, dz)
+                    chunkList.add(encoded)
                 }
             }
         }
@@ -68,12 +66,11 @@ class CmdTest : SpigotCommand() {
             currWorld = AW.inMemoryWorldProvider.createWorld(
                 "Test-World-${UUID.randomUUID()}",
                 InMemoryWorldOptions(
-                    0..3,
-                    0..3,
+                    0..1,
+                    0..1,
                     World.Environment.NORMAL,
                     Biome.CRIMSON_FOREST,
-                    true,
-                    AW.codec
+                    AW.compressedCodec
                 ),
                 packed
             )
