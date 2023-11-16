@@ -122,12 +122,14 @@ class AWChunkCodecV1 : ChunkCodec {
                 } else {
                     section.blocks.iterationStrategy.setAll()
                 }
+
                 if (!biomesEmpty) section.biomes.read(reader)
                 else if (section.biomes.count(CraftBiome.bukkitToMinecraftHolder(Biome.PLAINS)) != section.biomes.size) {
                     section.biomes.fill(CraftBiome.bukkitToMinecraftHolder(Biome.PLAINS))
                 } else {
                     section.biomes.iterationStrategy.setAll()
                 }
+
                 chunk.setSection(heightOptions.getSectionIndexMB(index), section)
             }
         }
