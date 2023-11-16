@@ -9,7 +9,7 @@ import org.bukkit.block.structure.Mirror
 import org.bukkit.block.structure.StructureRotation
 import org.bukkit.inventory.ItemStack
 
-class EmptyBlockData(material: Material) : BlockData {
+class EmptyBlockData(@JvmField val material: Material) : BlockData {
 
     override fun clone(): BlockData {
         return this
