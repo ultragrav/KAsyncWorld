@@ -47,9 +47,9 @@ object AW : AWApi {
 
     override lateinit var chunkQueue: ChunkQueue
 
-    override val codec: ChunkCodec = AWChunkCodecV1()
+    override val codec: ChunkCodec = AWChunkCodecV1
 
-    override val inMemoryWorldProvider: IMWorldProvider = PaperIMWorldProvider()
+    override val inMemoryWorldProvider: IMWorldProvider = PaperIMWorldProvider
 
     override val editingChunkFactory: AsyncChunkFactory = EditingChunkFactory()
     override val storageChunkFactory: AsyncChunkFactory = StorageChunkFactory()

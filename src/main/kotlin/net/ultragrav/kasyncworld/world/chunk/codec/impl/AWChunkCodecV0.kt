@@ -14,7 +14,7 @@ import net.ultragrav.kasyncworld.world.chunk.getSectionIndexMB
 import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunkFactory
 
-class AWChunkCodecV0 : ChunkCodec {
+object AWChunkCodecV0 : ChunkCodec {
 
     override val id: String
         get() = "aw"
