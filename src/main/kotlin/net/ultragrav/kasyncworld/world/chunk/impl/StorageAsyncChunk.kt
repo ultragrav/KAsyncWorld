@@ -170,7 +170,7 @@ class StorageAsyncChunk(override val heightOptions: ChunkHeightOptions) : AsyncC
     override fun createSection(): AsyncChunkSection {
         val blocks = PalettedStorageImpl(object : PalettedStorageImplConfig<BlockState> {
             override val size: Int = 4096
-            override val defaultState: BlockState =Blocks.AIR.defaultBlockState()
+            override val defaultState: BlockState = Blocks.AIR.defaultBlockState()
 
             override fun createStorage(bits: Int): NumberStorage {
                 return BitStorage(size, bits)
