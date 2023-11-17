@@ -376,7 +376,7 @@ class NMSChunkIO : ChunkIO {
                     val storage = blocks.storage as BitStorage
 
                     // Transfer palette
-                    (0 until section.states.data.palette.size)
+                    (0..<section.states.data.palette.size)
                         .forEach {
                             val state = section.states.data.palette.valueFor(it)
                             blocks.palette.getId(state)

@@ -31,12 +31,10 @@ class CmdTest3 : SpigotCommand() {
         spigotPlayer.sendMessage("Serialized in $packSerializationMs ms")
         spigotPlayer.sendMessage("Size: ${packBytes.size} bytes")
 
-        val compressionMs = measureTimeMillis {
-            val compressed = LZ4Factory.fastestJavaInstance().fastCompressor()
-                .compress(packBytes)
-            spigotPlayer.sendMessage("Compressed size: ${compressed.size} bytes")
+        val packDeserializationMs = measureTimeMillis {
+            AW.deserializePackedWorld(packBytes) { AW.compressedCodec }
         }
-        spigotPlayer.sendMessage("Compressed in $compressionMs ms")
 
+        spigotPlayer.sendMessage("Deserialized in $packDeserializationMs ms")
     }
 }
