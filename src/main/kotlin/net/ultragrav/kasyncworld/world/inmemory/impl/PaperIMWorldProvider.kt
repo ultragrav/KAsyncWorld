@@ -25,7 +25,7 @@ import org.bukkit.NamespacedKey
 import org.bukkit.World.Environment
 import org.bukkit.event.world.WorldLoadEvent
 
-class PaperIMWorldProvider : IMWorldProvider {
+object PaperIMWorldProvider : IMWorldProvider {
 
     private fun createWorld(
         name: String,

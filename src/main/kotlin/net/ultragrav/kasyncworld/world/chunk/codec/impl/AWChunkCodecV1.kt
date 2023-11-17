@@ -21,14 +21,14 @@ import org.bukkit.craftbukkit.v1_20_R2.block.CraftBiome
  * This codec improves on the previous version by adding flags
  * so that we don't have to serialize empty sections.
  */
-class AWChunkCodecV1 : ChunkCodec {
+object AWChunkCodecV1 : ChunkCodec {
 
     override val id: String
         get() = "aw"
     override val version: Int
         get() = 1
 
-    override fun earlierVersion() = AWChunkCodecV0()
+    override fun earlierVersion() = AWChunkCodecV0
 
     override fun encode(writer: DataWriter, chunk: AsyncChunk) {
         writer.writeInt(chunk.heightOptions.numSections)
