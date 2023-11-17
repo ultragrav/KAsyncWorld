@@ -116,6 +116,10 @@ class PaperIMWorldProvider : IMWorldProvider {
 
     override fun createWorld(name: String, options: InMemoryWorldOptions): InMemoryWorld {
 
+        check(Bukkit.isPrimaryThread()) {
+            "Worlds must be created on the main thread"
+        }
+
         val chunkProvider = BasicChunkProvider(
             AW.storageChunkFactory,
             options.codec,
@@ -129,6 +133,11 @@ class PaperIMWorldProvider : IMWorldProvider {
     }
 
     override fun createWorld(name: String, options: InMemoryWorldOptions, packed: PackedWorld): InMemoryWorld {
+
+        check(Bukkit.isPrimaryThread()) {
+            "Worlds must be created on the main thread"
+        }
+
         val chunkProvider = BasicChunkProvider(
             AW.storageChunkFactory,
             options.codec,

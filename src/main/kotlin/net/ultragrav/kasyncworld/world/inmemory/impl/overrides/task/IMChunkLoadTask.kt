@@ -42,7 +42,7 @@ class IMChunkLoadTask(
 
     override fun isScheduled(): Boolean = scheduled
 
-    override fun getTargetStatus(): ChunkStatus = ChunkStatus.EMPTY
+    override fun getTargetStatus(): ChunkStatus = ChunkStatus.FULL
 
     override fun schedule() {
         if (scheduled) throw IllegalStateException("Already scheduled")
@@ -62,7 +62,7 @@ class IMChunkLoadTask(
                 null
             )
 
-            protoChunk.status = ChunkStatus.FULL
+            protoChunk.status = ChunkStatus.INITIALIZE_LIGHT.parent
 
             complete(protoChunk, null)
         }
