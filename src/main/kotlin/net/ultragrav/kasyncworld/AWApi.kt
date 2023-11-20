@@ -32,5 +32,11 @@ interface AWApi {
     fun createWriter(): DataWriter
 
     fun serializePackedWorld(packedWorld: PackedWorld): ByteArray
-    fun deserializePackedWorld(data: ByteArray, codecProvider: (String) -> ChunkCodec = { codec }): PackedWorld
+    fun deserializePackedWorld(data: ByteArray, codecProvider: (String) -> ChunkCodec = {
+        when (it) {
+            codec.id -> codec
+            compressedCodec.id -> compressedCodec
+            else -> throw IllegalArgumentException("Unknown codec id: $it")
+        }
+    }): PackedWorld
 }
