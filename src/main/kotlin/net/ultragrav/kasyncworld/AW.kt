@@ -17,20 +17,19 @@ import net.ultragrav.kasyncworld.scheduler.ParallelChunkQueue
 import net.ultragrav.kasyncworld.world.chunk.block.palette.Palette
 import net.ultragrav.kasyncworld.world.chunk.block.palette.WrappedGlobalPalette
 import net.ultragrav.kasyncworld.world.chunk.codec.ChunkCodec
-import net.ultragrav.kasyncworld.world.chunk.codec.impl.AWChunkCodecV0
 import net.ultragrav.kasyncworld.world.chunk.codec.impl.AWChunkCodecV1
-import net.ultragrav.kasyncworld.world.chunk.queue.ChunkQueue
 import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunkFactory
-import net.ultragrav.kasyncworld.world.contract.AsyncWorld
-import net.ultragrav.kasyncworld.world.impl.SpigotAsyncWorld
 import net.ultragrav.kasyncworld.world.chunk.impl.EditingChunkFactory
 import net.ultragrav.kasyncworld.world.chunk.impl.StorageChunkFactory
-import net.ultragrav.kasyncworld.world.inmemory.IMWorldProvider
-import net.ultragrav.kasyncworld.world.inmemory.pack.PackedWorld
-import net.ultragrav.kasyncworld.world.inmemory.impl.PaperIMWorldProvider
 import net.ultragrav.kasyncworld.world.chunk.io.ChunkIO
 import net.ultragrav.kasyncworld.world.chunk.io.impl.NMSChunkIO
+import net.ultragrav.kasyncworld.world.chunk.queue.ChunkQueue
+import net.ultragrav.kasyncworld.world.contract.AsyncWorld
+import net.ultragrav.kasyncworld.world.impl.SpigotAsyncWorld
+import net.ultragrav.kasyncworld.world.inmemory.IMWorldProvider
 import net.ultragrav.kasyncworld.world.inmemory.chunk.EncodedAsyncChunk
+import net.ultragrav.kasyncworld.world.inmemory.impl.PaperIMWorldProvider
+import net.ultragrav.kasyncworld.world.inmemory.pack.PackedWorld
 import net.ultragrav.kserializer.json.JsonArray
 import net.ultragrav.kserializer.json.JsonObject
 import net.ultragrav.serializer.GravSerializer
@@ -58,7 +57,9 @@ object AW : AWApi {
         WrappedGlobalPalette(Block.BLOCK_STATE_REGISTRY)
 
     internal val globalBiomePalette: Palette<Holder<Biome>> =
-        WrappedGlobalPalette(MinecraftServer.getServer().registryAccess().registryOrThrow(Registries.BIOME).asHolderIdMap())
+        WrappedGlobalPalette(
+            MinecraftServer.getServer().registryAccess().registryOrThrow(Registries.BIOME).asHolderIdMap()
+        )
 
     override fun initialize(plugin: Plugin) {
         chunkQueue = ParallelChunkQueue(plugin, chunkIO)
@@ -70,10 +71,10 @@ object AW : AWApi {
     }
 
     override fun createReader(bytes: ByteArray): DataReader {
-        if (bytes.isEmpty()) return GravSerializerRead(GravSerializer(bytes))
+        if (bytes.isEmpty()) return GravSerializerRead(GravSerializer(bytes, false))
         val firstByte = bytes[0] // Will be 0 if GravSerializer
         require(firstByte.toInt() == 0) { "Haven't implemented non-grav serializer writer yet!" }
-        val ser = GravSerializer(bytes)
+        val ser = GravSerializer(bytes, false)
         ser.readByte() // Skip first byte
         return GravSerializerRead(ser)
     }
@@ -120,12 +121,12 @@ object AW : AWApi {
     }
 
     override fun deserializePackedWorld(data: ByteArray, codecProvider: (String) -> ChunkCodec): PackedWorld {
-        val json = JsonObject.deserialize(GravSerializer(data))
+        val json = JsonObject.deserialize(GravSerializer(data, false))
 
         val chunks = mutableListOf<EncodedAsyncChunk>()
         val array = json.getArray("chunks")
         val size = array.size
-        for (i in 0 until size) {
+        for (i in 0..<size) {
             val chunkJson = array.getObject(i)
             val x = chunkJson.getNumber("x").toInt()
             val z = chunkJson.getNumber("z").toInt()

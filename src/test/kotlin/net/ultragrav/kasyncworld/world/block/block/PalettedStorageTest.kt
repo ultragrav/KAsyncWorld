@@ -102,7 +102,7 @@ class PalettedStorageTest {
         val writer = GravSerializerWrite(GravSerializer())
         storage.write(writer)
 
-        val reader = GravSerializerRead(GravSerializer(writer.toByteArray()))
+        val reader = GravSerializerRead(GravSerializer(writer.toByteArray(), false))
         val storage2 = createStorage()
         storage2.read(reader)
 
