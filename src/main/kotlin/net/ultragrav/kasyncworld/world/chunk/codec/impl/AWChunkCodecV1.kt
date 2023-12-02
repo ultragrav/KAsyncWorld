@@ -178,7 +178,7 @@ object AWChunkCodecV1 : ChunkCodec {
         val heightMapCount = reader.readInt()
         repeat(heightMapCount) {
             val typeOrdinal = reader.readInt()
-            val type = Heightmap.Types.values()[typeOrdinal]
+            val type = Heightmap.Types.entries[typeOrdinal]
             val heightMap = chunk.getHeightMap(type)
             for (x in 0..15) {
                 for (z in 0..15) {
