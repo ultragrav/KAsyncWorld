@@ -23,7 +23,7 @@ class PalettedStorageImpl<T>(
         val defaultId = palette.getId(config.defaultState)
         counts.set(defaultId, config.size)
         if (defaultId != 0) {
-            (0 until config.size).forEach { storage.set(it, defaultId) }
+            (0..<config.size).forEach { storage.set(it, defaultId) }
         }
     }
 
@@ -77,7 +77,7 @@ class PalettedStorageImpl<T>(
     private fun resize(newBits: Int = storage.bits + 1, copy: Boolean = true) {
         val newStorage = config.createStorage(newBits)
         if (copy) {
-            for (i in 0 until storage.size) {
+            for (i in 0..<storage.size) {
                 newStorage.set(i, storage.get(i))
             }
         }
@@ -207,7 +207,7 @@ class PalettedStorageImpl<T>(
 
     fun recount() {
         counts = config.createCounter(storage.bits)
-        for (i in 0 until storage.size) {
+        for (i in 0..<storage.size) {
             counts.increment(storage.get(i))
         }
     }

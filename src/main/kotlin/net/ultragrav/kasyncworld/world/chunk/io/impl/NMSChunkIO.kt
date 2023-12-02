@@ -26,13 +26,13 @@ import net.ultragrav.kasyncworld.world.chunk.block.bit.BitStorage
 import net.ultragrav.kasyncworld.world.chunk.block.position.AWBlockPosition
 import net.ultragrav.kasyncworld.world.chunk.block.storage.PalettedStorageImpl
 import net.ultragrav.kasyncworld.world.chunk.block.storage.wrapped.WrappedPalettedContainer
+import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunk
+import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunkFactory
+import net.ultragrav.kasyncworld.world.chunk.contract.section.AsyncChunkSection
 import net.ultragrav.kasyncworld.world.chunk.getSectionIndexMB
 import net.ultragrav.kasyncworld.world.chunk.heightmap.AsyncHeightMap
 import net.ultragrav.kasyncworld.world.chunk.heightmap.wrapper.NMSHeightmapStateProvider
 import net.ultragrav.kasyncworld.world.chunk.heightmap.wrapper.NMSHeightmapStorageWrapper
-import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunk
-import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunkFactory
-import net.ultragrav.kasyncworld.world.chunk.contract.section.AsyncChunkSection
 import net.ultragrav.kasyncworld.world.chunk.io.ChunkIO
 import net.ultragrav.kasyncworld.world.chunk.io.ChunkReadOptions
 import net.ultragrav.kasyncworld.world.chunk.io.ChunkWriteOptions
@@ -238,11 +238,11 @@ class NMSChunkIO : ChunkIO {
             val cz = nms.locZ
 
             // Sections (Blocks)
-            if (options.readBlocksAndBiomes) {
-                for (i in 0 until nms.sectionsCount) {
+            if (options.readBlocks || options.readBiomes) {
+                for (i in 0..<nms.sectionsCount) {
                     val nmsSection = nms.sections[i] ?: continue
                     val section = chunk.createSection()
-                    readSection(section, nmsSection)
+                    readSection(section, nmsSection, options.readBlocks, options.readBiomes)
                     chunk.setSection(chunk.heightOptions.getSectionIndexMB(i), section)
                 }
             }
@@ -361,9 +361,9 @@ class NMSChunkIO : ChunkIO {
             return tag
         }
 
-        private fun readSection(async: AsyncChunkSection, section: LevelChunkSection) {
+        private fun readSection(async: AsyncChunkSection, section: LevelChunkSection, readBlocks: Boolean, readBiomes: Boolean) {
             // Blocks
-            if (!section.hasOnlyAir()) {
+            if (readBlocks && !section.hasOnlyAir()) {
                 val blocks = async.blocks
                 if (blocks is PalettedStorageImpl<BlockState> && blocks.storage is BitStorage) {
                     // Fast algo
@@ -395,9 +395,11 @@ class NMSChunkIO : ChunkIO {
                 }
             }
 
-            // Biomes
-            val wrappedBiomes = WrappedPalettedContainer(section.biomes as PalettedContainer<Holder<Biome>>)
-            wrappedBiomes.applyTo(async.biomes)
+            if (readBiomes) {
+                // Biomes
+                val wrappedBiomes = WrappedPalettedContainer(section.biomes as PalettedContainer<Holder<Biome>>)
+                wrappedBiomes.applyTo(async.biomes)
+            }
         }
     }
 }
