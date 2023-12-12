@@ -26,7 +26,6 @@ import org.bukkit.World.Environment
 import org.bukkit.event.world.WorldLoadEvent
 
 object PaperIMWorldProvider : IMWorldProvider {
-
     private fun createWorld(
         name: String,
         options: InMemoryWorldOptions,
