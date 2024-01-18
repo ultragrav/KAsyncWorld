@@ -63,8 +63,9 @@ class PalettedStorageImpl<T>(
     }
 
     override fun unset(index: Int) {
-        set(index, config.defaultState)
+        this[index] = config.defaultState
         iterationStrategy.unset(index)
+        counts.decrement(defaultId)
     }
 
     override fun clone(): PalettedStorageImpl<T> {
