@@ -17,11 +17,12 @@ class PalettedStorageImpl<T>(
 
     override val fastCountsAndTypesSupported = true
 
-    var counts = config.createCounter(initialBits)
+    private var counts = config.createCounter(initialBits)
+
+    private val defaultId get() = palette.getId(config.defaultState)
 
     init {
-        val defaultId = palette.getId(config.defaultState)
-        counts.set(defaultId, config.size)
+        counts.set(defaultId, iterationStrategy.count)
         if (defaultId != 0) {
             (0..<config.size).forEach { storage.set(it, defaultId) }
         }
@@ -88,6 +89,8 @@ class PalettedStorageImpl<T>(
             for (i in counts.types()) {
                 newCounts.set(i, counts.get(i))
             }
+        } else {
+            newCounts.set(defaultId, iterationStrategy.count)
         }
         counts = newCounts
     }
@@ -181,7 +184,7 @@ class PalettedStorageImpl<T>(
         val longs = input.readLongArray()
         val bitStorage = BitStorage(size, bits)
         bitStorage.useRaw(longs)
-        for (index in 0 until size) {
+        for (index in 0..<size) {
             val encodedId = bitStorage.get(index)
             val localId = encodedIdToLocalId[encodedId] ?: error("Unknown encoded id $encodedId")
             storage.set(index, localId)
@@ -197,7 +200,7 @@ class PalettedStorageImpl<T>(
             val indexingBitStorage = BitStorage(size, 1)
             indexingBitStorage.useRaw(indexingLongs)
             iterationStrategy = config.createIterationStrategy()
-            for (index in 0 until size) {
+            for (index in 0..<size) {
                 if (indexingBitStorage.get(index) == 1) {
                     iterationStrategy.set(index)
                 }
@@ -207,7 +210,7 @@ class PalettedStorageImpl<T>(
 
     fun recount() {
         counts = config.createCounter(storage.bits)
-        for (i in 0..<storage.size) {
+        for (i in iterationStrategy.iterator()) {
             counts.increment(storage.get(i))
         }
     }

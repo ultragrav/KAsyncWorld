@@ -35,8 +35,7 @@ import org.bukkit.craftbukkit.v1_20_R2.block.CraftBiome
 class StorageAsyncChunk(override val heightOptions: ChunkHeightOptions) : AsyncChunk {
 
     override val sections: Array<AsyncChunkSection?> = arrayOfNulls(heightOptions.numSections)
-    override val heightMaps: MutableMap<Heightmap.Types, AsyncHeightMap> = Heightmap.Types
-        .values()
+    override val heightMaps: MutableMap<Heightmap.Types, AsyncHeightMap> = Heightmap.Types.entries
         .associateWith { AsyncHeightMap(it, this) }
         .toMutableMap()
 
