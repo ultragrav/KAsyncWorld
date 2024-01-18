@@ -115,7 +115,7 @@ class PalettedStorageTest {
             seen[it] = true
         }
 
-        for (i in 0 until storage.size) {
+        for (i in 0..<storage.size) {
             assertEquals(seen[i], i in storage.iterationStrategy)
         }
     }
@@ -128,6 +128,12 @@ class PalettedStorageTest {
         storage[0] = STONE
         assertEquals(1, storage.count(STONE))
         assertEquals(0, storage.count(AIR))
+        storage[1] = STONE
+        assertEquals(2, storage.count(STONE))
+        assertEquals(0, storage.count(AIR))
+        storage[0] = AIR
+        assertEquals(1, storage.count(STONE))
+        assertEquals(1, storage.count(AIR))
     }
 
 }
