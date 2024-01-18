@@ -19,7 +19,7 @@ repositories {
 
 dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
-    paperweightDevelopmentBundle("net.midnightsky.satellite:dev-bundle:1.0-SNAPSHOT")
+    paperweightDevelopmentBundle("net.midnightsky.satellite:dev-bundle:1.20.2")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("net.ultragrav:Commands:1.5.3")
