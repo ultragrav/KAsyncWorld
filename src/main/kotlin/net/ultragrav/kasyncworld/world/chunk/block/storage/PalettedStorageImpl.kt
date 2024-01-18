@@ -53,11 +53,12 @@ class PalettedStorageImpl<T>(
         }
 
         val existing = storage.get(index)
-        counts.decrement(existing)
+        if (index in iterationStrategy) {
+            counts.decrement(existing)
+        }
 
         storage.set(index, num)
         counts.increment(num)
-
         iterationStrategy.set(index)
     }
 

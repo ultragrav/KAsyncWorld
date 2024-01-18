@@ -68,16 +68,16 @@ class PalettedStorageTest {
     operator fun iterator() {
         val storage = createStorage()
 
-        storage.set(0, STONE)
-        storage.set(1, STONE)
-        storage.set(2, STONE)
-        storage.set(9, STONE)
-        storage.set(10, STONE)
-        storage.set(11, STONE)
-        storage.set(20, STONE)
-        storage.set(19, STONE)
-        storage.set(18, STONE)
-        storage.set(16, AIR)
+        storage[0] = STONE
+        storage[1] = STONE
+        storage[2] = STONE
+        storage[9] = STONE
+        storage[10] = STONE
+        storage[11] = STONE
+        storage[20] = STONE
+        storage[19] = STONE
+        storage[18] = STONE
+        storage[16] = AIR
 
         val expected = listOf(
             STONE, STONE, STONE,
@@ -118,6 +118,16 @@ class PalettedStorageTest {
         for (i in 0 until storage.size) {
             assertEquals(seen[i], i in storage.iterationStrategy)
         }
+    }
+
+    @Test
+    fun testCounts() {
+        val storage = createStorage()
+        assertEquals(0, storage.count(AIR))
+        assertEquals(0, storage.count(STONE))
+        storage[0] = STONE
+        assertEquals(1, storage.count(STONE))
+        assertEquals(0, storage.count(AIR))
     }
 
 }
