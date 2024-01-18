@@ -51,17 +51,17 @@ class PalettedStorageTest {
     @Test
     fun testGetset() {
         val storage = createStorage()
-        storage.set(0, STONE)
-        assert(storage.get(0) == STONE)
-        assert(storage.get(1) == AIR)
+        storage[0] = STONE
+        assert(storage[0] == STONE)
+        assert(storage[1] == AIR)
     }
 
     @Test
     fun unset() {
         val storage = createStorage()
-        storage.set(0, STONE)
+        storage[0] = STONE
         storage.unset(0)
-        assert(storage.get(0) == AIR)
+        assert(storage[0] == AIR)
     }
 
     @Test

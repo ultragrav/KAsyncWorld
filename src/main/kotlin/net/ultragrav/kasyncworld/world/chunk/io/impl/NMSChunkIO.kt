@@ -240,6 +240,8 @@ class NMSChunkIO : ChunkIO {
             // Sections (Blocks)
             if (options.readBlocks || options.readBiomes) {
                 for (i in 0..<nms.sectionsCount) {
+                    val sectionIndexMB = chunk.heightOptions.getSectionIndexMB(i)
+                    if (sectionIndexMB !in options.sectionMask) continue
                     val nmsSection = nms.sections[i] ?: continue
                     val section = chunk.createSection()
                     readSection(section, nmsSection, options.readBlocks, options.readBiomes)
@@ -250,6 +252,7 @@ class NMSChunkIO : ChunkIO {
             // Block Entities
             if (options.readBlockEntities) {
                 nms.blockEntities.mapValues { it.value.saveWithFullMetadata() }
+                    .filterKeys { it.y shr 4 in options.sectionMask }
                     .forEach { (pos, ent) -> chunk.setBlockEntity(pos.x and 0xF, pos.y, pos.z and 0xF, ent) }
             }
 
@@ -258,6 +261,7 @@ class NMSChunkIO : ChunkIO {
                 entityChunk?.chunkEntities
                     ?.map { it as CraftEntity }
                     ?.map { it.handle }
+                    ?.filter { it.blockPosition().y shr 4 in options.sectionMask }
                     ?.filter { it.shouldBeSaved() }
                     ?.mapNotNull {
                         val tag = CompoundTag()
@@ -294,10 +298,12 @@ class NMSChunkIO : ChunkIO {
                 }, ChunkPos(cx, cz))
 
                 chunk.blockTicks = blockTicks.scheduledTicks()
-                    .map { relativizeTick(it) }
+                    .filter { it.pos.y shr 4 in options.sectionMask }
+                    .map { relativeTick(it) }
                     .toMutableList()
                 chunk.fluidTicks = fluidTicks.scheduledTicks()
-                    .map { relativizeTick(it) }
+                    .filter { it.pos.y shr 4 in options.sectionMask }
+                    .map { relativeTick(it) }
                     .toMutableList()
             }
 
@@ -322,7 +328,7 @@ class NMSChunkIO : ChunkIO {
             }
         }
 
-        fun <T> relativizeTick(tick: SavedTick<T>): SavedTick<T> {
+        private fun <T> relativeTick(tick: SavedTick<T>): SavedTick<T> {
             return SavedTick(
                 tick.type,
                 BlockPos(tick.pos.x and 0xF, tick.pos.y, tick.pos.z and 0xF),
@@ -348,7 +354,6 @@ class NMSChunkIO : ChunkIO {
             val currZ = pos.getDouble(2)
             pos[0] = DoubleTag.valueOf(currX - (cx shl 4))
             pos[2] = DoubleTag.valueOf(currZ - (cz shl 4))
-
             return tag
         }
 

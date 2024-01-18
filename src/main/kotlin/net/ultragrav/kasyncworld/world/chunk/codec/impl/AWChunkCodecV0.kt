@@ -92,7 +92,7 @@ object AWChunkCodecV0 : ChunkCodec {
         val chunk = factory.createChunk(heightOptions)
 
         // Read sections
-        val sectionExists = (0 until numSections).map { reader.readBoolean() }
+        val sectionExists = (0..<numSections).map { reader.readBoolean() }
         sectionExists.forEachIndexed { index, exists ->
             if (exists) {
                 val section = chunk.createSection()
