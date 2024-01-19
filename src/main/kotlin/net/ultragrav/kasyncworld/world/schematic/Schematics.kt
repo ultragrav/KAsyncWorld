@@ -2,7 +2,9 @@ package net.ultragrav.kasyncworld.world.schematic
 
 import net.minecraft.world.level.ChunkPos
 import net.minecraft.world.phys.Vec3
-import net.ultragrav.kasyncworld.*
+import net.ultragrav.kasyncworld.AW
+import net.ultragrav.kasyncworld.entityPosition
+import net.ultragrav.kasyncworld.setEntityPosition
 import net.ultragrav.kasyncworld.shape.CuboidRegion
 import net.ultragrav.kasyncworld.shape.ShapedRegion
 import net.ultragrav.kasyncworld.world.chunk.block.position.AWBlockPosition
@@ -13,7 +15,7 @@ import net.ultragrav.kasyncworld.world.contract.AsyncWorld
 import net.ultragrav.kasyncworld.world.schematic.impl.SchematicImplV0
 import org.bukkit.World
 
-object Schematics : SchematicsApi{
+object Schematics : SchematicsApi {
     override fun paste(schematic: Schematic, world: AsyncWorld, x: Int, y: Int, z: Int) {
 
         fun convertToChunkRelative(vec: Vec3): Pair<AsyncChunk, Vec3> {
@@ -66,15 +68,24 @@ object Schematics : SchematicsApi{
     override fun save(world: World, region: ShapedRegion): Schematic {
         val schematic = SchematicImplV0(region.boundingBox.dimensions)
         val opts = ChunkReadOptions(
-            readBlocks = false,
+            readBiomes = false,
             readPersistentContainer = false,
             readHeightmaps = false,
             readLight = false,
             readTicks = false,
         )
         val aw = importBlocks(world, region.boundingBox, opts)
+        val bx = region.boundingBox.min.x
+        val by = region.boundingBox.min.y
+        val bz = region.boundingBox.min.z
         region.forEach { (x, y, z) ->
-            schematic.setBlock(x, y, z, aw.getBlock(x, y, z))
+            val block = aw.getBlock(x, y, z)
+            schematic.setBlock(
+                x - bx,
+                y - by,
+                z - bz,
+                block
+            )
         }
         return schematic
     }
@@ -132,7 +143,8 @@ object Schematics : SchematicsApi{
         val codecId = reader.readString()
         val codecVersion = reader.readInt()
         require(codecId == codec.id) { "Unsupported codec $codecId" }
-        while (codec.version != codecVersion) codec = codec.earlierVersion() ?: error("Unsupported codec version $codecVersion")
+        while (codec.version != codecVersion) codec =
+            codec.earlierVersion() ?: error("Unsupported codec version $codecVersion")
 
         val dimX = reader.readInt()
         val dimY = reader.readInt()

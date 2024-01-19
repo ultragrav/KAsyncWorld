@@ -49,8 +49,8 @@ internal class SchematicImplV0(override val dimensions: Dimensions) : Schematic 
                 val bx = pos.x shl 4
                 val bz = pos.z shl 4
                 chunk.sections.asSequence()
-                    .filterNotNull()
                     .flatMapIndexed { index, section ->
+                        if (section == null) return@flatMapIndexed emptySequence<PositionedBlock>()
                         // sectionY should always be same as index?
                         // just in case:
                         val sectionY = chunk.heightOptions.getSectionIndexMB(index)
