@@ -1,6 +1,7 @@
 package net.ultragrav.kasyncworld.world.impl
 
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.state.BlockState
 import net.ultragrav.kasyncworld.AW
 import net.ultragrav.kasyncworld.getChunkKey
@@ -72,6 +73,14 @@ internal class SpigotAsyncWorld internal constructor(val world: World, val editT
             chunkMap[key] = chunk
             chunk
         }
+    }
+
+    override fun getBlock(x: Int, y: Int, z: Int): BlockState {
+        if (y !in heightOptions.buildableYRange) return Blocks.AIR.defaultBlockState()
+        val chunkX = x shr 4
+        val chunkZ = z shr 4
+        val chunk = getChunk(chunkX, chunkZ)
+        return chunk.getBlock(x and 15, y, z and 15)
     }
 
     override fun flush(): CompletableFuture<Void> {

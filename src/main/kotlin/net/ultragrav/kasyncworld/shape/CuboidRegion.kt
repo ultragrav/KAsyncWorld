@@ -1,6 +1,7 @@
 package net.ultragrav.kasyncworld.shape
 
 import net.ultragrav.kasyncworld.world.chunk.block.position.AWBlockPosition
+import net.ultragrav.kasyncworld.world.schematic.Dimensions
 
 class CuboidRegion(p1: AWBlockPosition, p2: AWBlockPosition) : ShapedRegion {
 
@@ -16,13 +17,39 @@ class CuboidRegion(p1: AWBlockPosition, p2: AWBlockPosition) : ShapedRegion {
         z = maxOf(p1.z, p2.z)
     )
 
+    val dimensions = Dimensions(
+        x = max.x - min.x + 1,
+        y = max.y - min.y + 1,
+        z = max.z - min.z + 1
+    )
+
+    override val boundingBox = this
+
     override fun contains(x: Int, y: Int, z: Int): Boolean {
         return x in min.x..max.x && y in min.y..max.y && z in min.z..max.z
     }
 
-    override fun intersects(region: CuboidRegion): Boolean {
-        return region.min.x <= max.x && region.max.x >= min.x &&
-                region.min.y <= max.y && region.max.y >= min.y &&
-                region.min.z <= max.z && region.max.z >= min.z
+    override fun iterator(): Iterator<AWBlockPosition> {
+        return object : Iterator<AWBlockPosition> {
+            var x = min.x
+            var y = min.y
+            var z = min.z
+
+            override fun hasNext(): Boolean {
+                return x <= max.x && y <= max.y && z <= max.z
+            }
+
+            override fun next(): AWBlockPosition {
+                val pos = AWBlockPosition(x, y, z)
+                if (++x > max.x) {
+                    x = min.x
+                    if (++y > max.y) {
+                        y = min.y
+                        ++z
+                    }
+                }
+                return pos
+            }
+        }
     }
 }

@@ -1,7 +1,12 @@
 package net.ultragrav.kasyncworld
 
+import net.minecraft.core.Vec3i
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.nbt.DoubleTag
 import net.minecraft.nbt.NbtIo
+import net.minecraft.nbt.Tag
+import net.minecraft.world.phys.Vec3
+import net.ultragrav.kasyncworld.world.chunk.block.position.AWBlockPosition
 import net.ultragrav.serializer.compressors.StandardCompressor
 import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
@@ -36,4 +41,27 @@ internal fun deserializeNBT(arr: ByteArray): CompoundTag {
     val bis = arr.inputStream()
     val dis = DataInputStream(bis)
     return NbtIo.read(dis)
+}
+
+fun CompoundTag.entityPosition(): Vec3 {
+    val pos = this.getList("Pos", Tag.TAG_DOUBLE.toInt())
+    val x = pos.getDouble(0)
+    val y = pos.getDouble(1)
+    val z = pos.getDouble(2)
+    return Vec3(x, y, z)
+}
+
+fun CompoundTag.setEntityPosition(position: Vec3) {
+    val pos = this.getList("Pos", Tag.TAG_DOUBLE.toInt())
+    pos[0] = DoubleTag.valueOf(position.x)
+    pos[1] = DoubleTag.valueOf(position.y)
+    pos[2] = DoubleTag.valueOf(position.z)
+}
+
+fun Vec3.floor(): Vec3i {
+    return Vec3i(this.x.toInt(), this.y.toInt(), this.z.toInt())
+}
+
+fun Vec3i.toAWBlockPos(): AWBlockPosition {
+    return AWBlockPosition(this.x, this.y, this.z)
 }

@@ -51,6 +51,10 @@ interface AsyncWorld : AsyncChunkFactory {
      */
     fun getChunk(cx: Int, cz: Int): AsyncChunk
 
+    fun getBlock(x: Int, y: Int, z: Int): BlockState
+
+    fun getBlockData(x: Int, y: Int, z: Int): BlockData = getBlock(x, y, z).let { CraftBlockData.fromData(it) }
+
     /**
      * Pushes all changes to the world. This method returns a future that completes
      * when all current changes have been pushed to the world.
