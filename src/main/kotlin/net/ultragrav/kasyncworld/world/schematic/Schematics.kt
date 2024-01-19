@@ -78,6 +78,7 @@ object Schematics : SchematicsApi {
         val bx = region.boundingBox.min.x
         val by = region.boundingBox.min.y
         val bz = region.boundingBox.min.z
+
         region.forEach { (x, y, z) ->
             val block = aw.getBlock(x, y, z)
             schematic.setBlock(
@@ -87,6 +88,9 @@ object Schematics : SchematicsApi {
                 block
             )
         }
+
+        // TODO entities and block entities
+
         return schematic
     }
 

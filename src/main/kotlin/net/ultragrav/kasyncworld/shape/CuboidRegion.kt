@@ -23,10 +23,29 @@ class CuboidRegion(p1: AWBlockPosition, p2: AWBlockPosition) : ShapedRegion {
         z = max.z - min.z + 1
     )
 
+    constructor(dimensions: Dimensions) : this(
+        AWBlockPosition(0, 0, 0),
+        AWBlockPosition(dimensions.x - 1, dimensions.y - 1, dimensions.z - 1)
+    )
+
     override val boundingBox = this
 
     override fun contains(x: Int, y: Int, z: Int): Boolean {
         return x in min.x..max.x && y in min.y..max.y && z in min.z..max.z
+    }
+
+    operator fun plus(pos: AWBlockPosition): CuboidRegion {
+        return CuboidRegion(
+            AWBlockPosition(min.x + pos.x, min.y + pos.y, min.z + pos.z),
+            AWBlockPosition(max.x + pos.x, max.y + pos.y, max.z + pos.z)
+        )
+    }
+
+    operator fun minus(pos: AWBlockPosition): CuboidRegion {
+        return CuboidRegion(
+            AWBlockPosition(min.x - pos.x, min.y - pos.y, min.z - pos.z),
+            AWBlockPosition(max.x - pos.x, max.y - pos.y, max.z - pos.z)
+        )
     }
 
     override fun iterator(): Iterator<AWBlockPosition> {

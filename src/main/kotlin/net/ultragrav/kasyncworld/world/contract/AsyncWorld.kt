@@ -2,6 +2,7 @@ package net.ultragrav.kasyncworld.world.contract
 
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.level.block.state.BlockState
+import net.ultragrav.kasyncworld.shape.ShapedRegion
 import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
 import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunkFactory
@@ -54,6 +55,10 @@ interface AsyncWorld : AsyncChunkFactory {
     fun getBlock(x: Int, y: Int, z: Int): BlockState
 
     fun getBlockData(x: Int, y: Int, z: Int): BlockData = getBlock(x, y, z).let { CraftBlockData.fromData(it) }
+
+    fun setRegion(region: ShapedRegion, block: BlockState) {
+        region.forEach { (x, y, z) -> setBlock(x, y, z, block) }
+    }
 
     /**
      * Pushes all changes to the world. This method returns a future that completes
