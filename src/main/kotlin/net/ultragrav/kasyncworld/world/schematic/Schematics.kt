@@ -142,7 +142,7 @@ object Schematics : SchematicsApi {
         val reader = AW.createReader(bytes)
         var codec: ChunkCodec = AW.compressedCodec
 
-        reader.readInt() // Version
+        reader.readByte() // Version
 
         val codecId = reader.readString()
         val codecVersion = reader.readInt()
