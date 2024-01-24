@@ -374,7 +374,7 @@ class NMSChunkIO : ChunkIO {
                     // Fast algo
                     val bits = section.states.data.storage.bits
                     blocks.palette = blocks.config.createPalette()
-                    blocks.storage = blocks.config.createStorage(bits)
+                    blocks.storage = blocks.config.createStorage(bits.coerceAtLeast(1))
                     blocks.iterationStrategy = blocks.config.createIterationStrategy()
                     blocks.iterationStrategy.setAll()
 
@@ -384,12 +384,14 @@ class NMSChunkIO : ChunkIO {
                     (0..<section.states.data.palette.size)
                         .forEach {
                             val state = section.states.data.palette.valueFor(it)
-                            blocks.palette.getId(state)
+                            check(it == blocks.palette.getId(state)) { "Palette mismatch" }
                         }
 
                     // Transfer longs
-                    val raw = section.states.data.storage.raw.copyOf()
-                    storage.useRaw(raw)
+                    if (bits != 0) {
+                        val raw = section.states.data.storage.raw.copyOf()
+                        storage.useRaw(raw)
+                    }
 
                     // Recount
                     blocks.recount()
