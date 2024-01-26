@@ -157,7 +157,7 @@ object Schematics : SchematicsApi {
         val schematic = SchematicImplV0(Dimensions(dimX, dimY, dimZ))
         while (reader.readByte() == 1.toByte()) {
             val pos = ChunkPos(reader.readLong())
-            val chunk = codec.decode(reader, AW.storageChunkFactory)
+            val chunk = codec.decode(reader, AW.editingChunkFactory)
             schematic.chunks[pos] = chunk
         }
 
