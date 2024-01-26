@@ -39,6 +39,10 @@ internal class SchematicImplV0(override val dimensions: Dimensions) : Schematic 
         require(z in 0..<dimensions.z) { "z out of bounds: $z" }
     }
 
+    private fun checkBoundsBool(x: Int, y: Int, z: Int): Boolean {
+        return x in 0..<dimensions.x && y in 0..<dimensions.y && z in 0..<dimensions.z
+    }
+
     private fun chunkAtNoCreate(x: Int, z: Int): AsyncChunk? {
         return chunks[ChunkPos(x, z)]
     }
@@ -63,7 +67,8 @@ internal class SchematicImplV0(override val dimensions: Dimensions) : Schematic 
                                 PositionedBlock(x, y, z, block)
                             }
                     }
-            }.iterator()
+            }.filter { checkBoundsBool(it.x, it.y, it.z) }
+            .iterator()
     }
 
     override fun setBlock(x: Int, y: Int, z: Int, block: BlockState) {
