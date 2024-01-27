@@ -5,6 +5,7 @@ import io.papermc.paper.chunk.system.poi.PoiChunk
 import io.papermc.paper.chunk.system.scheduling.ChunkProgressionTask
 import io.papermc.paper.chunk.system.scheduling.ChunkTaskScheduler
 import io.papermc.paper.chunk.system.scheduling.NewChunkHolder
+import net.minecraft.core.BlockPos
 import net.minecraft.core.registries.Registries
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.ListTag
@@ -12,6 +13,7 @@ import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.ChunkPos
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.Blocks
+import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.chunk.*
 import net.minecraft.world.level.material.Fluid
 import net.minecraft.world.ticks.ProtoChunkTicks
@@ -120,7 +122,10 @@ class IMChunkLoadTask(
                 copy.putInt("x", pos.x + baseX)
                 copy.putInt("y", pos.y)
                 copy.putInt("z", pos.z + baseZ)
-                protoChunk.setBlockEntityNbt(copy)
+                val state = chunk.getBlock(pos.x, pos.y, pos.z)
+                val blockPos = BlockPos(pos.x + baseX, pos.y, pos.z + baseZ)
+                val blockEntity = BlockEntity.loadStatic(blockPos, state, copy) ?: return@forEach
+                protoChunk.setBlockEntity(blockEntity)
             }
 
         // Write entities to a list tag

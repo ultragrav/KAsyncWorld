@@ -1,4 +1,4 @@
-package net.ultragrav.kasyncworld.world.inmemory.impl.overrides
+package net.ultragrav.kasyncworld.world.inmemory.impl
 
 import net.minecraft.server.level.ServerLevel
 import net.ultragrav.kasyncworld.AW
