@@ -56,7 +56,7 @@ class NMSChunkIO : ChunkIO {
         val cz = nms.locZ
 
         // Sections (Blocks)
-        for (i in 0 until nms.sectionsCount) {
+        for (i in 0..<nms.sectionsCount) {
             val section = chunk.sections[i] ?: continue
             val nmsSection = nms.sections[i] ?: continue
             nms.sections[i] = nmsSection

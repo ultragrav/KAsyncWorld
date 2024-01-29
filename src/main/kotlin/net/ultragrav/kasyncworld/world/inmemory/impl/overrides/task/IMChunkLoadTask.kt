@@ -81,7 +81,10 @@ class IMChunkLoadTask(
                 val nmsBlocks = if (blocks is MinecraftPalettedStorage) blocks.wrapped else {
                     val container = PalettedContainer(Block.BLOCK_STATE_REGISTRY, Blocks.AIR.defaultBlockState(), PalettedContainer.Strategy.SECTION_STATES, null)
                     val wrapper = WrappedPalettedContainer(container)
-                    blocks.applyTo(wrapper)
+                    val types = blocks.types()
+                    if (types != setOf(Blocks.AIR.defaultBlockState()) && types.isNotEmpty()) {
+                        blocks.applyTo(wrapper)
+                    }
                     wrapper.wrapped
                 }
                 val nmsBiomes = if (biomes is MinecraftPalettedStorage) biomes.wrapped else {

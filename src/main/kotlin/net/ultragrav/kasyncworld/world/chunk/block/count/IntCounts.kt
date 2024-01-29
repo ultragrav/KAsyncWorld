@@ -5,7 +5,7 @@ import net.ultragrav.kasyncworld.world.chunk.block.bit.BitStorage
 
 class IntCounts(bits: Int, maxCount: Int) : TypeCounts {
 
-    val data = BitStorage(1 shl bits, ceilLog2(maxCount))
+    val data = BitStorage(1 shl bits, ceilLog2(maxCount) + 1)
     val types = mutableSetOf<Int>()
 
     override fun get(type: Int): Int {
