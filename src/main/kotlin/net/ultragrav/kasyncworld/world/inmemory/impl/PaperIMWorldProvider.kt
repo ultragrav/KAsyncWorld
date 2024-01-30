@@ -1,5 +1,6 @@
 package net.ultragrav.kasyncworld.world.inmemory.impl
 
+import net.minecraft.core.BlockPos
 import net.minecraft.core.registries.Registries
 import net.minecraft.resources.ResourceKey
 import net.minecraft.resources.ResourceLocation
@@ -14,7 +15,9 @@ import net.minecraft.world.level.dimension.LevelStem
 import net.minecraft.world.level.levelgen.WorldOptions
 import net.minecraft.world.level.storage.PrimaryLevelData
 import net.ultragrav.kasyncworld.AW
-import net.ultragrav.kasyncworld.world.inmemory.*
+import net.ultragrav.kasyncworld.world.inmemory.IMWorldProvider
+import net.ultragrav.kasyncworld.world.inmemory.InMemoryWorld
+import net.ultragrav.kasyncworld.world.inmemory.InMemoryWorldOptions
 import net.ultragrav.kasyncworld.world.inmemory.chunk.AsyncChunkProvider
 import net.ultragrav.kasyncworld.world.inmemory.impl.overrides.IMServerLevel
 import net.ultragrav.kasyncworld.world.inmemory.pack.PackedWorld
@@ -22,6 +25,7 @@ import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.World.Environment
 import org.bukkit.event.world.WorldLoadEvent
+import kotlin.time.measureTimedValue
 
 object PaperIMWorldProvider : IMWorldProvider {
     private fun createWorld(
@@ -81,24 +85,30 @@ object PaperIMWorldProvider : IMWorldProvider {
 
         val levelStem = levelStemRegistry.getOrThrow(levelDimension)
 
-        val serverLevel = IMServerLevel(
-            name,
-            chunkProvider,
-            levelData,
-            levelKey,
-            levelDimension,
-            levelStem,
-            seed,
-            environment,
-            null,
-            options
-        )
+        val (serverLevel, time) = measureTimedValue {
+            IMServerLevel(
+                name,
+                chunkProvider,
+                levelData,
+                levelKey,
+                levelDimension,
+                levelStem,
+                seed,
+                environment,
+                null,
+                options
+            )
+        }
+
+        AW.debug("Instantiated world $name in ${time.inWholeMilliseconds}ms")
 
         if (Bukkit.getServer().getWorld(name) == null) {
             throw IllegalStateException("World $name was not loaded by Paper")
         }
 
         mcServer.addLevel(serverLevel)
+        levelData.setSpawn(BlockPos.ZERO.above(80), 0.0f)
+        levelData.isInitialized = true
         mcServer.initWorld(serverLevel, levelData, levelData, worldOptions)
 
         serverLevel.keepSpawnInMemory = false
@@ -144,8 +154,11 @@ object PaperIMWorldProvider : IMWorldProvider {
 
         chunkProvider.setChunks(packed.chunks)
 
-        val serverLevel = createWorld(name, options, 123L, options.environment, chunkProvider)
+        val (serverLevel, time) = measureTimedValue {
+            createWorld(name, options, 123L, options.environment, chunkProvider)
+        }
 
+        AW.debug("World $name created in ${time.inWholeMilliseconds}ms")
 
         return PaperMemoryWorld(serverLevel, name, options, chunkProvider)
 
