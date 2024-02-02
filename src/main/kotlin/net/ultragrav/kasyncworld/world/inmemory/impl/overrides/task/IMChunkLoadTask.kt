@@ -98,11 +98,13 @@ class IMChunkLoadTask(
             .toTypedArray()
 
         val chunkTicksBlock = ProtoChunkTicks<Block>().also {
-            chunk.blockTicks.forEach { tick -> it.schedule(tick) }
+            chunk.blockTicks.map { tick -> NMSChunkIO.offsetTick(tick, chunkX, chunkZ) }
+                .forEach { tick -> it.schedule(tick) }
         }
 
         val chunkTicksFluid = ProtoChunkTicks<Fluid>().also {
-            chunk.fluidTicks.forEach { tick -> it.schedule(tick) }
+            chunk.fluidTicks.map { tick -> NMSChunkIO.offsetTick(tick, chunkX, chunkZ) }
+                .forEach { tick -> it.schedule(tick) }
         }
 
         val protoChunk = ProtoChunk(
