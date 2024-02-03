@@ -21,6 +21,7 @@ import net.minecraft.world.level.chunk.LevelChunkSection
 import net.minecraft.world.level.chunk.PalettedContainer
 import net.minecraft.world.ticks.ProtoChunkTicks
 import net.minecraft.world.ticks.SavedTick
+import net.ultragrav.kasyncworld.entityPosition
 import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
 import net.ultragrav.kasyncworld.world.chunk.block.bit.BitStorage
 import net.ultragrav.kasyncworld.world.chunk.block.position.AWBlockPosition
@@ -257,19 +258,15 @@ class NMSChunkIO : ChunkIO {
             }
 
             // Entities
-            if (options.readEntities) {
-                entityChunk?.chunkEntities
-                    ?.map { it as CraftEntity }
-                    ?.map { it.handle }
-                    ?.filter { it.blockPosition().y shr 4 in options.sectionMask }
-                    ?.filter { it.shouldBeSaved() }
-                    ?.mapNotNull {
-                        val tag = CompoundTag()
-                        if (it.save(tag)) tag
-                        else null
-                    }
-                    ?.map { relativizeEntityTag(it, cx, cz) }
-                    ?.forEach { chunk.addEntity(it) }
+            if (options.readEntities && entityChunk != null) {
+                val save = entityChunk.save()
+                if (save != null) {
+                    val listTag = save.getList("Entities", Tag.TAG_COMPOUND.toInt())
+                    listTag.filterIsInstance<CompoundTag>()
+                        .filter { (it.entityPosition().y.toInt() shr 4) in options.sectionMask }
+                        .map { relativizeEntityTag(it, cx, cz) }
+                        .forEach { chunk.addEntity(it) }
+                }
             }
 
             // Persistent data
@@ -366,7 +363,12 @@ class NMSChunkIO : ChunkIO {
             return tag
         }
 
-        private fun readSection(async: AsyncChunkSection, section: LevelChunkSection, readBlocks: Boolean, readBiomes: Boolean) {
+        private fun readSection(
+            async: AsyncChunkSection,
+            section: LevelChunkSection,
+            readBlocks: Boolean,
+            readBiomes: Boolean
+        ) {
             // Blocks
             if (readBlocks && !section.hasOnlyAir()) {
                 val blocks = async.blocks
