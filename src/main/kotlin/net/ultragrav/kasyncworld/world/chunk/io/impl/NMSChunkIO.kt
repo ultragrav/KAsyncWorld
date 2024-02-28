@@ -41,7 +41,6 @@ import net.ultragrav.kasyncworld.world.chunk.io.HeightmapWriteType
 import org.bukkit.Chunk
 import org.bukkit.World
 import org.bukkit.craftbukkit.v1_20_R2.CraftWorld
-import org.bukkit.craftbukkit.v1_20_R2.entity.CraftEntity
 
 class NMSChunkIO : ChunkIO {
 
@@ -372,32 +371,41 @@ class NMSChunkIO : ChunkIO {
             // Blocks
             if (readBlocks && !section.hasOnlyAir()) {
                 val blocks = async.blocks
-                if (blocks is PalettedStorageImpl<BlockState> && blocks.storage is BitStorage) {
-                    // Fast algo
-                    val bits = section.states.data.storage.bits
-                    blocks.palette = blocks.config.createPalette()
-                    blocks.storage = blocks.config.createStorage(bits.coerceAtLeast(1))
-                    blocks.iterationStrategy = blocks.config.createIterationStrategy()
-                    blocks.iterationStrategy.setAll()
 
-                    val storage = blocks.storage as BitStorage
+                var success = false
+                try {
+                    if (blocks is PalettedStorageImpl<BlockState> && blocks.storage is BitStorage) {
+                        // Fast algo
+                        val bits = section.states.data.storage.bits
+                        blocks.palette = blocks.config.createPalette()
+                        blocks.storage = blocks.config.createStorage(bits.coerceAtLeast(1))
+                        blocks.counts = blocks.config.createCounter(bits.coerceAtLeast(1))
+                        blocks.iterationStrategy = blocks.config.createIterationStrategy()
+                        blocks.iterationStrategy.setAll()
 
-                    // Transfer palette
-                    (0..<section.states.data.palette.size)
-                        .forEach {
-                            val state = section.states.data.palette.valueFor(it)
-                            check(it == blocks.palette.getId(state)) { "Palette mismatch" }
+                        val storage = blocks.storage as BitStorage
+
+                        // Transfer palette
+                        (0..<section.states.data.palette.size)
+                            .forEach {
+                                val state = section.states.data.palette.valueFor(it)
+                                check(it == blocks.palette.getId(state)) { "Palette mismatch" }
+                            }
+
+                        // Transfer longs
+                        if (bits != 0) {
+                            val raw = section.states.data.storage.raw.copyOf()
+                            storage.useRaw(raw)
                         }
 
-                    // Transfer longs
-                    if (bits != 0) {
-                        val raw = section.states.data.storage.raw.copyOf()
-                        storage.useRaw(raw)
+                        // Recount
+                        blocks.recount()
+                        success = true
                     }
+                } catch (_: IllegalStateException) {
+                }
 
-                    // Recount
-                    blocks.recount()
-                } else {
+                if (!success) {
                     // Slower algo
                     val wrappedStates = WrappedPalettedContainer(section.states)
                     wrappedStates.applyTo(async.blocks)

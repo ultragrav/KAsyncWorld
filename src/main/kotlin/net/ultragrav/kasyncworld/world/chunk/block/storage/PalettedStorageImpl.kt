@@ -17,7 +17,7 @@ class PalettedStorageImpl<T>(
 
     override val fastCountsAndTypesSupported = true
 
-    private var counts = config.createCounter(initialBits)
+    var counts = config.createCounter(initialBits)
 
     private val defaultId get() = palette.getId(config.defaultState)
 
