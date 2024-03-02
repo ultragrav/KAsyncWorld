@@ -56,8 +56,16 @@ class IMChunkHolder(
     }
 
     override fun saveEntities(entities: ChunkEntitySlices?, unloading: Boolean): Boolean {
-        // Do absolutely nothing, entities are saved in #saveChunk, and the task is completed
-        // in a different place
+        val asyncChunk = chunkProvider.loadChunk(chunkX, chunkZ)
+        if (asyncChunk != null) {
+            NMSChunkIO.readEntities(entities, asyncChunk, chunkX, chunkZ, ChunkReadOptions())
+            chunkProvider.storeChunk(chunkX, chunkZ, asyncChunk)
+        }
+
+        getUnloadTask(RegionFileIOThread.RegionFileType.ENTITY_DATA)
+            ?.completable
+            ?.complete(null)
+
         return false
     }
 

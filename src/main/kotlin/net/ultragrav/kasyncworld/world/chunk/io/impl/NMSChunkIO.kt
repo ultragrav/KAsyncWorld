@@ -258,14 +258,7 @@ class NMSChunkIO : ChunkIO {
 
             // Entities
             if (options.readEntities && entityChunk != null) {
-                val save = entityChunk.save()
-                if (save != null) {
-                    val listTag = save.getList("Entities", Tag.TAG_COMPOUND.toInt())
-                    listTag.filterIsInstance<CompoundTag>()
-                        .filter { (it.entityPosition().y.toInt() shr 4) in options.sectionMask }
-                        .map { relativizeEntityTag(it, cx, cz) }
-                        .forEach { chunk.addEntity(it) }
-                }
+                readEntities(entityChunk, chunk, cx, cz, options)
             }
 
             // Persistent data
@@ -320,6 +313,21 @@ class NMSChunkIO : ChunkIO {
                     wrapper.overwrite(newHeightMap)
 
                     chunk.setHeightMap(type, newHeightMap)
+                }
+            }
+        }
+
+        fun readEntities(entityChunk: ChunkEntitySlices?, chunk: AsyncChunk, cx: Int, cz: Int, options: ChunkReadOptions) {
+            if (entityChunk != null) {
+                val save = entityChunk.save()
+                if (save != null) {
+                    chunk.clearEntities()
+
+                    val listTag = save.getList("Entities", Tag.TAG_COMPOUND.toInt())
+                    listTag.filterIsInstance<CompoundTag>()
+                        .filter { (it.entityPosition().y.toInt() shr 4) in options.sectionMask }
+                        .map { relativizeEntityTag(it, cx, cz) }
+                        .forEach { chunk.addEntity(it) }
                 }
             }
         }
