@@ -30,7 +30,7 @@ import net.ultragrav.kasyncworld.world.chunk.block.storage.PalettedStorageImplCo
 import net.ultragrav.kasyncworld.world.chunk.heightmap.AsyncHeightMap
 import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.chunk.contract.section.AsyncChunkSection
-import org.bukkit.craftbukkit.v1_20_R2.block.CraftBiome
+import org.bukkit.craftbukkit.v1_20_R3.block.CraftBiome
 
 class StorageAsyncChunk(override val heightOptions: ChunkHeightOptions) : AsyncChunk {
 

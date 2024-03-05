@@ -25,7 +25,7 @@ import net.ultragrav.kasyncworld.world.chunk.heightmap.wrapper.NMSHeightmapStora
 import net.ultragrav.kasyncworld.world.inmemory.chunk.AsyncChunkProvider
 import net.ultragrav.kasyncworld.world.chunk.io.impl.NMSChunkIO
 import net.ultragrav.kasyncworld.world.inmemory.InMemoryWorldOptions
-import org.bukkit.craftbukkit.v1_20_R2.block.CraftBiome
+import org.bukkit.craftbukkit.v1_20_R3.block.CraftBiome
 
 class IMChunkLoadTask(
     scheduler: ChunkTaskScheduler,

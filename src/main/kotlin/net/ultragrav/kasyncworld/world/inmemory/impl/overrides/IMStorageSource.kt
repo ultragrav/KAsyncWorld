@@ -2,6 +2,7 @@ package net.ultragrav.kasyncworld.world.inmemory.impl.overrides
 
 import com.mojang.datafixers.DataFixer
 import com.mojang.datafixers.util.Pair
+import com.mojang.serialization.Dynamic
 import com.mojang.serialization.DynamicOps
 import com.mojang.serialization.Lifecycle
 import net.minecraft.core.Registry
@@ -49,21 +50,14 @@ object IMStorageSource : LevelStorageSource(
         }
 
         override fun deleteLevel() {}
-        override fun getDataConfiguration() = null
+//        override fun getDataConfiguration() = null
         override fun getIconFile(): Optional<Path> = Optional.empty()
         override fun renameLevel(name: String) {}
         override fun makeWorldBackup(): Long = 0L
         override fun saveDataTag(registryManager: RegistryAccess, saveProperties: WorldData) {}
         override fun saveDataTag(registryManager: RegistryAccess, saveProperties: WorldData, nbt: CompoundTag?) {}
-        override fun getSummary(): LevelSummary? = null
-
-        override fun getDataTag(
-            ops: DynamicOps<Tag>,
-            dataConfiguration: WorldDataConfiguration,
-            dimensionOptionsRegistry: Registry<LevelStem>,
-            lifecycle: Lifecycle
-        ): Pair<WorldData, WorldDimensions.Complete>? = null
-
+//        override fun getSummary(dynamic: Dynamic<*>): LevelSummary? = null
+//        override fun getDataTag(): Dynamic<*>? = null
     }
 
     class IMPlayerStorage(session: LevelStorageAccess, dataFixer: DataFixer) : PlayerDataStorage(session, dataFixer) {

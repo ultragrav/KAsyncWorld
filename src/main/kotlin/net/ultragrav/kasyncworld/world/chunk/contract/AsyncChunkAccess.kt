@@ -8,7 +8,7 @@ import net.ultragrav.kasyncworld.world.chunk.heightmap.AsyncHeightMap
 import net.ultragrav.kasyncworld.world.chunk.contract.section.AsyncChunkSection
 import org.bukkit.block.Biome
 import org.bukkit.block.data.BlockData
-import org.bukkit.craftbukkit.v1_20_R2.block.data.CraftBlockData
+import org.bukkit.craftbukkit.v1_20_R3.block.data.CraftBlockData
 
 /**
  * Facilitates some sort of method of accessing and changing the data

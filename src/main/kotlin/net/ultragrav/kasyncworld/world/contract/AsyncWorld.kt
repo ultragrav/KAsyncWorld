@@ -7,7 +7,7 @@ import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
 import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunkFactory
 import org.bukkit.block.data.BlockData
-import org.bukkit.craftbukkit.v1_20_R2.block.data.CraftBlockData
+import org.bukkit.craftbukkit.v1_20_R3.block.data.CraftBlockData
 import java.util.concurrent.CompletableFuture
 
 interface AsyncWorld : AsyncChunkFactory {

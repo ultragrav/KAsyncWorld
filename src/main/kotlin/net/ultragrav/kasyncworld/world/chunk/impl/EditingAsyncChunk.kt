@@ -32,7 +32,7 @@ import net.ultragrav.kasyncworld.world.chunk.heightmap.AsyncHeightMap
 import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.contract.AsyncWorld
 import net.ultragrav.kasyncworld.world.chunk.contract.section.AsyncChunkSection
-import org.bukkit.craftbukkit.v1_20_R2.block.CraftBiome
+import org.bukkit.craftbukkit.v1_20_R3.block.CraftBiome
 
 class EditingAsyncChunk(
     override val heightOptions: ChunkHeightOptions,

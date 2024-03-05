@@ -1,5 +1,6 @@
 package net.ultragrav.kasyncworld.world.block.block
 
+import org.bukkit.Color
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.SoundGroup
@@ -8,6 +9,7 @@ import org.bukkit.block.data.BlockData
 import org.bukkit.block.structure.Mirror
 import org.bukkit.block.structure.StructureRotation
 import org.bukkit.inventory.ItemStack
+import org.bukkit.util.VoxelShape
 
 class EmptyBlockData(@JvmField val material: Material) : BlockData {
 
@@ -69,6 +71,14 @@ class EmptyBlockData(@JvmField val material: Material) : BlockData {
         throw UnsupportedOperationException()
     }
 
+    override fun getCollisionShape(p0: Location): VoxelShape {
+        TODO("Not yet implemented")
+    }
+
+    override fun getMapColor(): Color {
+        TODO("Not yet implemented")
+    }
+
     override fun getPlacementMaterial(): Material {
         throw UnsupportedOperationException()
     }
@@ -79,6 +89,10 @@ class EmptyBlockData(@JvmField val material: Material) : BlockData {
 
     override fun mirror(mirror: Mirror) {
         throw UnsupportedOperationException()
+    }
+
+    override fun copyTo(p0: BlockData) {
+        TODO("Not yet implemented")
     }
 
     override fun createBlockState(): BlockState {

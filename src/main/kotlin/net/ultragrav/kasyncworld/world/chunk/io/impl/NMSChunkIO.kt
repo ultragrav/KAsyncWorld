@@ -40,7 +40,7 @@ import net.ultragrav.kasyncworld.world.chunk.io.ChunkWriteOptions
 import net.ultragrav.kasyncworld.world.chunk.io.HeightmapWriteType
 import org.bukkit.Chunk
 import org.bukkit.World
-import org.bukkit.craftbukkit.v1_20_R2.CraftWorld
+import org.bukkit.craftbukkit.v1_20_R3.CraftWorld
 
 class NMSChunkIO : ChunkIO {
 
