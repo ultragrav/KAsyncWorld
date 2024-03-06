@@ -1,6 +1,7 @@
 package net.ultragrav.kasyncworld.world.schematic
 
 import net.minecraft.world.level.ChunkPos
+import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.phys.Vec3
 import net.ultragrav.kasyncworld.AW
 import net.ultragrav.kasyncworld.entityPosition
@@ -16,7 +17,7 @@ import net.ultragrav.kasyncworld.world.schematic.impl.SchematicImplV0
 import org.bukkit.World
 
 object Schematics : SchematicsApi {
-    override fun paste(schematic: Schematic, world: AsyncWorld, x: Int, y: Int, z: Int) {
+    override fun paste(schematic: Schematic, world: AsyncWorld, x: Int, y: Int, z: Int, pasteOptions: SchematicPasteOptions) {
 
         fun convertToChunkRelative(vec: Vec3): Pair<AsyncChunk, Vec3> {
             val gp = vec.add(x.toDouble(), y.toDouble(), z.toDouble())
@@ -55,6 +56,8 @@ object Schematics : SchematicsApi {
 
         // Write blocks
         schematic.iterator().forEach { (bx, by, bz, state) ->
+            if (state.isAir && pasteOptions.ignoreAir) return@forEach
+
             world.setBlock(
                 bx + x,
                 by + y,

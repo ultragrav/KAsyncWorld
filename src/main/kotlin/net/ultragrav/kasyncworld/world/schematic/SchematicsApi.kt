@@ -7,7 +7,7 @@ import net.ultragrav.kasyncworld.world.contract.AsyncWorld
 import org.bukkit.World
 
 interface SchematicsApi {
-    fun paste(schematic: Schematic, world: AsyncWorld, x: Int, y: Int, z: Int)
+    fun paste(schematic: Schematic, world: AsyncWorld, x: Int, y: Int, z: Int, pasteOptions: SchematicPasteOptions)
     fun save(world: World, region: ShapedRegion): Schematic
     fun importBlocks(world: World, region: CuboidRegion, readOptions: ChunkReadOptions): AsyncWorld
     fun serialize(schematic: Schematic): ByteArray
