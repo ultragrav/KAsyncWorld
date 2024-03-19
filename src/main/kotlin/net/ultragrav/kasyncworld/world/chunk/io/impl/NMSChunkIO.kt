@@ -384,9 +384,9 @@ class NMSChunkIO : ChunkIO {
 
                     // Transfer palette
                     (0..<section.states.data.palette.size)
-                        .forEach {
-                            val state = section.states.data.palette.valueFor(it)
-                            check(it == blocks.palette.getId(state)) { "Palette mismatch" }
+                        .forEach { id ->
+                            val state = section.states.data.palette.valueFor(id)
+                            check(id == blocks.palette.getId(state)) { "Palette mismatch" }
                         }
 
                     // Transfer longs

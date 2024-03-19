@@ -26,7 +26,7 @@ interface AsyncChunkSection {
     }
 
     fun setBlock(x: Int, y: Int, z: Int, block: BlockState) {
-        blocks.set(getBlockIndex(x, y, z), block)
+        blocks[getBlockIndex(x, y, z)] = block
     }
 
     fun getBlock(x: Int, y: Int, z: Int): BlockState {

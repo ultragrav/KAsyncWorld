@@ -49,8 +49,12 @@ class StorageAsyncChunk(override val heightOptions: ChunkHeightOptions) : AsyncC
 
     override fun setBlock(x: Int, y: Int, z: Int, block: BlockState) {
         val section = getOrMakeSection(y shr 4)
+        val before = section.getBlock(x, y and 15, z)
         section.setBlock(x, y and 15, z, block)
         heightMaps.values.forEach { it.update(x, y, z, block) }
+        if (before.hasBlockEntity()) {
+            removeBlockEntity(x, y, z)
+        }
         if (block.hasBlockEntity()) {
             val tag = (block.block as EntityBlock).newBlockEntity(BlockPos(0, 0, 0), block)
                 ?.saveWithId() ?: return
@@ -61,6 +65,7 @@ class StorageAsyncChunk(override val heightOptions: ChunkHeightOptions) : AsyncC
     override fun unsetBlock(x: Int, y: Int, z: Int) {
         val section = getOrMakeSection(y shr 4)
         section.unsetBlock(x, y and 15, z)
+        removeBlockEntity(x, y, z)
     }
 
     override fun getBlock(x: Int, y: Int, z: Int): BlockState {

@@ -22,9 +22,9 @@ import net.ultragrav.kasyncworld.world.chunk.block.storage.wrapped.WrappedPalett
 import net.ultragrav.kasyncworld.world.chunk.heightmap.AsyncHeightMap
 import net.ultragrav.kasyncworld.world.chunk.heightmap.wrapper.NMSHeightmapStateProvider
 import net.ultragrav.kasyncworld.world.chunk.heightmap.wrapper.NMSHeightmapStorageWrapper
-import net.ultragrav.kasyncworld.world.inmemory.chunk.AsyncChunkProvider
 import net.ultragrav.kasyncworld.world.chunk.io.impl.NMSChunkIO
 import net.ultragrav.kasyncworld.world.inmemory.InMemoryWorldOptions
+import net.ultragrav.kasyncworld.world.inmemory.chunk.AsyncChunkProvider
 import org.bukkit.craftbukkit.v1_20_R2.block.CraftBiome
 
 class IMChunkLoadTask(
@@ -35,7 +35,8 @@ class IMChunkLoadTask(
     chunkZ: Int,
     val worldOptions: InMemoryWorldOptions,
     private val chunkProvider: AsyncChunkProvider
-) : ChunkProgressionTask(scheduler, world,
+) : ChunkProgressionTask(
+    scheduler, world,
     chunkX,
     chunkZ
 ) {
@@ -79,7 +80,12 @@ class IMChunkLoadTask(
                 val blocks = it.blocks
                 val biomes = it.biomes
                 val nmsBlocks = if (blocks is MinecraftPalettedStorage) blocks.wrapped else {
-                    val container = PalettedContainer(Block.BLOCK_STATE_REGISTRY, Blocks.AIR.defaultBlockState(), PalettedContainer.Strategy.SECTION_STATES, null)
+                    val container = PalettedContainer(
+                        Block.BLOCK_STATE_REGISTRY,
+                        Blocks.AIR.defaultBlockState(),
+                        PalettedContainer.Strategy.SECTION_STATES,
+                        null
+                    )
                     val wrapper = WrappedPalettedContainer(container)
                     val types = blocks.types()
                     if (types != setOf(Blocks.AIR.defaultBlockState()) && types.isNotEmpty()) {
@@ -88,7 +94,12 @@ class IMChunkLoadTask(
                     wrapper.wrapped
                 }
                 val nmsBiomes = if (biomes is MinecraftPalettedStorage) biomes.wrapped else {
-                    val container = PalettedContainer(biomesRegistry.asHolderIdMap(), defaultBiomeHolder, PalettedContainer.Strategy.SECTION_BIOMES, null)
+                    val container = PalettedContainer(
+                        biomesRegistry.asHolderIdMap(),
+                        defaultBiomeHolder,
+                        PalettedContainer.Strategy.SECTION_BIOMES,
+                        null
+                    )
                     val wrapper = WrappedPalettedContainer(container)
                     biomes.applyTo(wrapper)
                     wrapper.wrapped
