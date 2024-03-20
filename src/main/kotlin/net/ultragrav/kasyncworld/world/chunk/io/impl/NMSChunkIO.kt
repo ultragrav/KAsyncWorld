@@ -87,13 +87,22 @@ class NMSChunkIO : ChunkIO {
                     val isTileSet =
                         AWBlockPosition(pos.x, pos.y, pos.z) in chunk.blockEntities
                     if (!wasBlockSet && !isTileSet) return@forEach
-                    nms.removeBlockEntity(
-                        BlockPos(
-                            pos.x + (cx shl 4),
-                            pos.y,
-                            pos.z + (cz shl 4)
-                        )
+                    val bpos = BlockPos(
+                        pos.x + (cx shl 4),
+                        pos.y,
+                        pos.z + (cz shl 4)
                     )
+
+                    try {
+                        nms.removeBlockEntity(bpos)
+                    } catch (e: java.lang.IllegalStateException) {
+                        if (e.message?.contains("triggered") == true) {
+                            // async event call
+                            // ignore
+                        } else {
+                            throw e
+                        }
+                    }
                 }
 
             // Add new ones
