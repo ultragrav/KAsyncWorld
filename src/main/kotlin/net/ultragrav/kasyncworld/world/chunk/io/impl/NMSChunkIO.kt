@@ -14,7 +14,6 @@ import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.level.ChunkPos
 import net.minecraft.world.level.biome.Biome
-import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.chunk.ChunkAccess
@@ -42,7 +41,6 @@ import net.ultragrav.kasyncworld.world.chunk.io.HeightmapWriteType
 import org.bukkit.Chunk
 import org.bukkit.World
 import org.bukkit.craftbukkit.v1_20_R2.CraftWorld
-import org.bukkit.craftbukkit.v1_20_R2.entity.CraftEntity
 
 class NMSChunkIO : ChunkIO {
 
@@ -88,21 +86,21 @@ class NMSChunkIO : ChunkIO {
                     val isTileSet =
                         AWBlockPosition(pos.x, pos.y, pos.z) in chunk.blockEntities
                     if (!wasBlockSet && !isTileSet) return@forEach
-                    val bpos = BlockPos(
+
+                    val blockPos = BlockPos(
                         pos.x + (cx shl 4),
                         pos.y,
                         pos.z + (cz shl 4)
                     )
 
-                    val bent = nms.getBlockEntity(bpos)
                     try {
-                        nms.removeBlockEntity(bpos)
+                        nms.removeBlockEntity(blockPos)
                     } catch (e: java.lang.IllegalStateException) {
                         if (e.message?.contains("triggered") == true) {
                             // async event call
                             // ignore
                             // We do need to retry, this time it will succeed
-                            nms.removeBlockEntity(bpos)
+                            nms.removeBlockEntity(blockPos)
                         } else {
                             throw e
                         }
