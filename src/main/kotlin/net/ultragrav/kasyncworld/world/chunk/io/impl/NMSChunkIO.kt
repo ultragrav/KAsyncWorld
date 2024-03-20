@@ -95,7 +95,7 @@ class NMSChunkIO : ChunkIO {
 
                     try {
                         nms.removeBlockEntity(blockPos)
-                    } catch (e: java.lang.IllegalStateException) {
+                    } catch (e: IllegalStateException) {
                         if (e.message?.contains("triggered") == true) {
                             // async event call
                             // ignore
