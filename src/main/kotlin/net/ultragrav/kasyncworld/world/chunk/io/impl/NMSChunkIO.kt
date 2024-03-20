@@ -14,6 +14,7 @@ import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.level.ChunkPos
 import net.minecraft.world.level.biome.Biome
+import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.chunk.ChunkAccess
@@ -93,12 +94,15 @@ class NMSChunkIO : ChunkIO {
                         pos.z + (cz shl 4)
                     )
 
+                    val bent = nms.getBlockEntity(bpos)
                     try {
                         nms.removeBlockEntity(bpos)
                     } catch (e: java.lang.IllegalStateException) {
                         if (e.message?.contains("triggered") == true) {
                             // async event call
                             // ignore
+                            // We do need to retry, this time it will succeed
+                            nms.removeBlockEntity(bpos)
                         } else {
                             throw e
                         }
