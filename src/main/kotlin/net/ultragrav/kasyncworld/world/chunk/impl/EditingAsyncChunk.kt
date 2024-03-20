@@ -169,7 +169,7 @@ class EditingAsyncChunk(
         copy.persistentData = persistentData.copy()
         copy.blockEntities.putAll(blockEntities)
         copy.heightMaps.putAll(heightMaps)
-        copy.sections.forEachIndexed { index, section ->
+        sections.forEachIndexed { index, section ->
             copy.sections[index] = section?.clone()
         }
         return copy

@@ -13,7 +13,7 @@ class NormalIteration(override val size: Int) : IterationStrategy {
     override fun contains(index: Int) = true
 
     override fun iterator(): Iterator<Int> {
-        return (0 until size).iterator()
+        return (0..<size).iterator()
     }
 
     override fun clone() = NormalIteration(size)
