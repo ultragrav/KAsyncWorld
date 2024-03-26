@@ -186,17 +186,43 @@ class NMSChunkIO : ChunkIO {
                 HeightmapWriteType.MERGE -> wrapper.editWith(hm)
             }
         }
+
+        var dontSendExtraPackets = false
+
         if (options.relight) {
-            nms.isLightCorrect = false
-            val emptySections = StarLightEngine.getEmptySectionsForChunk(nms)
-            nms.level.chunkSource.lightEngine.theLightEngine.lightChunk(nms, emptySections)
-            nms.isLightCorrect = true
+
+            val numEdited = chunk.sections.filterNotNull().sumOf { it.blocks.iterationStrategy.count }
+
+            if (numEdited > 4096 * 2) { // Relight whole chunk
+                nms.isLightCorrect = false
+                val emptySections = StarLightEngine.getEmptySectionsForChunk(nms)
+                nms.level.chunkSource.lightEngine.theLightEngine.lightChunk(nms, emptySections)
+                nms.isLightCorrect = true
+            } else { // Relight individual blocks
+                dontSendExtraPackets = true
+                chunk.sections.withIndex().forEach { (index, section) ->
+                    if (section == null) return@forEach
+                    val strategy = section.blocks.iterationStrategy
+                    val by = chunk.heightOptions.getSectionIndexMB(index) shl 4
+                    val bx = cx shl 4
+                    val bz = cz shl 4
+                    strategy.forEach { position ->
+                        val x = AsyncChunkSection.getBlockX(position) + bx
+                        val y = AsyncChunkSection.getBlockY(position) + by
+                        val z = AsyncChunkSection.getBlockZ(position) + bz
+                        val pos = BlockPos(x, y, z)
+                        val cs = nms.level.chunkSource
+                        cs.lightEngine.checkBlock(pos)
+                        if (options.sendPackets) cs.blockChanged(pos)
+                    }
+                }
+            }
+
         }
 
-        if (options.sendPackets) {
-            sendPackets(nms.level.world, nms.locX, nms.locZ)
+        if (options.sendPackets && !dontSendExtraPackets) {
+            sendPackets(bukkitChunk.world, cx, cz)
         }
-
 
     }
 

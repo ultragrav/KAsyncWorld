@@ -23,7 +23,7 @@ class WrappedPalettedContainer<T>(
         get() = wrapped.size()
 
     override fun types(): Set<T> {
-        return (0 until wrapped.data.palette.size)
+        return (0..<wrapped.data.palette.size)
             .map { wrapped.data.palette.valueFor(it) }
             .toSet()
     }
@@ -47,7 +47,7 @@ class WrappedPalettedContainer<T>(
 
     override fun write(output: DataWriter) {
         output.writeInt(size)
-        for (i in 0 until size) {
+        for (i in 0..<size) {
             val id = wrapped.registry.getId(get(i))
             output.writeInt(id)
         }
@@ -58,7 +58,7 @@ class WrappedPalettedContainer<T>(
         if (inputSize != size) {
             throw IllegalArgumentException("Size mismatch, expected $size but got $inputSize")
         }
-        for (i in 0 until size) {
+        for (i in 0..<size) {
             val id = input.readInt()
             set(i, wrapped.registry.byIdOrThrow(id))
         }
@@ -75,7 +75,7 @@ class WrappedPalettedContainer<T>(
 
     override fun count(type: T): Int {
         val id = wrapped.data.palette.idFor(type)
-        return (0 until wrapped.data.storage.size)
+        return (0..<wrapped.data.storage.size)
             .count { wrapped.data.storage[it] == id }
     }
 

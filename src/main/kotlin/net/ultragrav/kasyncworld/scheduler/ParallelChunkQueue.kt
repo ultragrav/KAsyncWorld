@@ -15,6 +15,7 @@ import org.bukkit.plugin.Plugin
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 import kotlin.system.measureTimeMillis
+import kotlin.time.measureTimedValue
 
 
 class ParallelChunkQueue(val plugin: Plugin, val io: ChunkIO) : ChunkQueue {
@@ -52,13 +53,13 @@ class ParallelChunkQueue(val plugin: Plugin, val io: ChunkIO) : ChunkQueue {
         fun isNotEmpty() = synchronized(this) { queue.isNotEmpty() }
         if (!isNotEmpty()) return
 
-        while (elapsed() < 30 && isNotEmpty()) {
+        while (elapsed() < 35 && isNotEmpty()) {
 
-            val timingMillis = measureTimeMillis {
+            val (processedCount, timingMillis) = measureTimedValue {
                 processNextBatch()
             }
 
-            AW.debug("Processed batch of $batchSize chunks in ${timingMillis}ms")
+            AW.debug("Processed batch of $processedCount chunks in $timingMillis")
         }
         AW.debug("Finished processing for this tick in ${elapsed()}ms")
     }
@@ -95,9 +96,9 @@ class ParallelChunkQueue(val plugin: Plugin, val io: ChunkIO) : ChunkQueue {
     /**
      * Processes the next batch of chunks.
      */
-    private fun processNextBatch() {
+    private fun processNextBatch(): Int {
         val batch = nextBatch()
-        if (batch.isEmpty()) return
+        if (batch.isEmpty()) return 0
 
         runBlocking {
             batch.forEach { job ->
@@ -105,22 +106,14 @@ class ParallelChunkQueue(val plugin: Plugin, val io: ChunkIO) : ChunkQueue {
                 val chunk = job.chunk
                 launch {
                     withContext(dispatcher) {
-                        io.writeChunk(
-                            bukkitChunk, chunk, job.writeOptions.copy(sendPackets = false)
-                        )
+                        io.writeChunk(bukkitChunk, chunk, job.writeOptions)
                     }
                 }
             }
         }
 
-        runBlocking {
-            batch.forEach { job ->
-                launch(dispatcher) {
-                    io.sendPackets(job.world, job.x, job.z)
-                }
-            }
-        }
-
         batch.forEach { it.future.complete(null) }
+
+        return batch.size
     }
 }

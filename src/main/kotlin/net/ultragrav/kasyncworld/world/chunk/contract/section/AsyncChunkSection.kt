@@ -13,17 +13,11 @@ interface AsyncChunkSection {
         return y and 15 shl 8 or (z and 15 shl 4) or (x and 15)
     }
 
-    fun getBlockX(index: Int): Int {
-        return index and 15
-    }
+    fun getBlockX(index: Int) = Companion.getBlockX(index)
 
-    fun getBlockY(index: Int): Int {
-        return index shr 8 and 15
-    }
+    fun getBlockY(index: Int) = Companion.getBlockY(index)
 
-    fun getBlockZ(index: Int): Int {
-        return index shr 4 and 15
-    }
+    fun getBlockZ(index: Int) = Companion.getBlockZ(index)
 
     fun setBlock(x: Int, y: Int, z: Int, block: BlockState) {
         blocks[getBlockIndex(x, y, z)] = block
@@ -62,4 +56,16 @@ interface AsyncChunkSection {
     }
 
     fun clone(): AsyncChunkSection
+
+    companion object {
+        fun getBlockX(index: Int): Int {
+            return index and 15
+        }
+        fun getBlockY(index: Int): Int {
+            return index shr 8 and 15
+        }
+        fun getBlockZ(index: Int): Int {
+            return index shr 4 and 15
+        }
+    }
 }
