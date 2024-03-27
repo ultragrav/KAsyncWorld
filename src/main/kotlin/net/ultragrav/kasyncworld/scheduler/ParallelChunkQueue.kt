@@ -1,9 +1,6 @@
 package net.ultragrav.kasyncworld.scheduler
 
-import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import net.ultragrav.kasyncworld.AW
 import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.chunk.io.ChunkIO
@@ -14,15 +11,14 @@ import org.bukkit.World
 import org.bukkit.plugin.Plugin
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
-import kotlin.system.measureTimeMillis
 import kotlin.time.measureTimedValue
 
 
-class ParallelChunkQueue(val plugin: Plugin, val io: ChunkIO) : ChunkQueue {
+class ParallelChunkQueue(val plugin: Plugin, val io: ChunkIO, dispatcher: CoroutineDispatcher? = null) : ChunkQueue {
 
     private val processors = Runtime.getRuntime().availableProcessors()
-    private val dispatcher = Executors.newFixedThreadPool(processors).asCoroutineDispatcher()
     private val batchSize = processors * 2
+    val dispatcher = dispatcher ?: Executors.newFixedThreadPool(processors).asCoroutineDispatcher()
 
     private data class EnqueuedChunk(
         val x: Int,
@@ -44,10 +40,18 @@ class ParallelChunkQueue(val plugin: Plugin, val io: ChunkIO) : ChunkQueue {
     override fun close() {
         if (taskId == -1) return
         Bukkit.getScheduler().cancelTask(taskId)
-        dispatcher.close()
+        (dispatcher as? ExecutorCoroutineDispatcher)?.close()
     }
 
-    private fun process() {
+    fun isEmpty(): Boolean {
+        return synchronized(this) { queue.isEmpty() }
+    }
+
+    fun isNotEmpty(): Boolean {
+        return synchronized(this) { queue.isNotEmpty() }
+    }
+
+    fun process() {
         val time = System.currentTimeMillis()
         fun elapsed() = System.currentTimeMillis() - time
         fun isNotEmpty() = synchronized(this) { queue.isNotEmpty() }

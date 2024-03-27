@@ -7,6 +7,7 @@ import net.ultragrav.kasyncworld.AW
 import net.ultragrav.kasyncworld.getChunkKey
 import net.ultragrav.kasyncworld.getChunkX
 import net.ultragrav.kasyncworld.getChunkZ
+import net.ultragrav.kasyncworld.scheduler.ParallelChunkQueue
 import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
 import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.chunk.impl.EditingAsyncChunk
@@ -114,11 +115,25 @@ internal class SpigotAsyncWorld internal constructor(val world: World, val editT
             writePersistentContainer = false
         )
 
-        chunks.forEach { (key, chunk) ->
-            val cx = getChunkX(key)
-            val cz = getChunkZ(key)
-            val bukkitChunk = world.getChunkAt(cx, cz)
-            io.writeChunk(bukkitChunk, chunk, writeOptions)
+        val queue = AW.chunkQueue
+
+        if (queue is ParallelChunkQueue) {
+            val dispatcher = queue.dispatcher
+            val newQueue = ParallelChunkQueue(queue.plugin, queue.io, dispatcher)
+            chunks.forEach { (key, chunk) ->
+                val cx = getChunkX(key)
+                val cz = getChunkZ(key)
+                newQueue.enqueue(cx, cz, world, chunk, writeOptions)
+            }
+            while (newQueue.isNotEmpty()) newQueue.process()
+            // Do not close as the dispatcher is tied to another queue
+        } else {
+            chunks.forEach { (key, chunk) ->
+                val cx = getChunkX(key)
+                val cz = getChunkZ(key)
+                val bukkitChunk = world.getChunkAt(cx, cz)
+                io.writeChunk(bukkitChunk, chunk, writeOptions)
+            }
         }
     }
 
