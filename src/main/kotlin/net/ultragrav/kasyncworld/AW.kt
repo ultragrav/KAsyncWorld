@@ -45,6 +45,7 @@ object AW : AWApi {
     override val chunkIO: ChunkIO = NMSChunkIO()
 
     override lateinit var chunkQueue: ChunkQueue
+    lateinit var plugin: Plugin
 
     override val codec: ChunkCodec = AWChunkCodecV1
 
@@ -62,6 +63,7 @@ object AW : AWApi {
         )
 
     override fun initialize(plugin: Plugin) {
+        this.plugin = plugin
         chunkQueue = ParallelChunkQueue(plugin, chunkIO)
         chunkQueue.start()
     }

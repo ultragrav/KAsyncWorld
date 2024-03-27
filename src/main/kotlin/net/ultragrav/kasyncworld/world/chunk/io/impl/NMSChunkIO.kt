@@ -21,6 +21,7 @@ import net.minecraft.world.level.chunk.LevelChunkSection
 import net.minecraft.world.level.chunk.PalettedContainer
 import net.minecraft.world.ticks.ProtoChunkTicks
 import net.minecraft.world.ticks.SavedTick
+import net.ultragrav.kasyncworld.AW
 import net.ultragrav.kasyncworld.entityPosition
 import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
 import net.ultragrav.kasyncworld.world.chunk.block.bit.BitStorage
@@ -38,6 +39,7 @@ import net.ultragrav.kasyncworld.world.chunk.io.ChunkIO
 import net.ultragrav.kasyncworld.world.chunk.io.ChunkReadOptions
 import net.ultragrav.kasyncworld.world.chunk.io.ChunkWriteOptions
 import net.ultragrav.kasyncworld.world.chunk.io.HeightmapWriteType
+import org.bukkit.Bukkit
 import org.bukkit.Chunk
 import org.bukkit.World
 import org.bukkit.craftbukkit.v1_20_R2.CraftWorld
@@ -202,11 +204,11 @@ class NMSChunkIO : ChunkIO {
                 dontSendExtraPackets = true
                 chunk.sections.withIndex().forEach { (index, section) ->
                     if (section == null) return@forEach
-                    val strategy = section.blocks.iterationStrategy
+                    val strategy = section.blocks.iterationStrategy.clone()
                     val by = chunk.heightOptions.getSectionIndexMB(index) shl 4
                     val bx = cx shl 4
                     val bz = cz shl 4
-                    synchronized(this) { // Synchronized because of blockChanged() call
+                    Bukkit.getScheduler().runTask(AW.plugin) { ->
                         strategy.forEach { position ->
                             val x = AsyncChunkSection.getBlockX(position) + bx
                             val y = AsyncChunkSection.getBlockY(position) + by
