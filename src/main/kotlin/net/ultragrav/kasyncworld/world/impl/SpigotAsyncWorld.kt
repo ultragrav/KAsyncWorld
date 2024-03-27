@@ -117,7 +117,7 @@ internal class SpigotAsyncWorld internal constructor(val world: World, val editT
 
         val queue = AW.chunkQueue
 
-        if (queue is ParallelChunkQueue) {
+        if (queue is ParallelChunkQueue && chunks.size > 8) {
             val dispatcher = queue.dispatcher
             val newQueue = ParallelChunkQueue(queue.plugin, queue.io, dispatcher)
             chunks.forEach { (key, chunk) ->
