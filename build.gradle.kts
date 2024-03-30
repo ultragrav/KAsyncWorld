@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "net.ultragrav"
-version = "1.0.16"
+version = "1.0.17"
 
 repositories {
     mavenCentral()
@@ -27,7 +27,6 @@ dependencies {
     testImplementation(kotlin("test"))
     implementation("net.ultragrav:KSerializer:1.1.2")
     implementation("org.lz4:lz4-java:1.8.0")
-
 }
 
 tasks.test {

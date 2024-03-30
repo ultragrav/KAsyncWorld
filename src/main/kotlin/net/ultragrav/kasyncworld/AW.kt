@@ -54,10 +54,10 @@ object AW : AWApi {
     override val editingChunkFactory: AsyncChunkFactory = EditingChunkFactory()
     override val storageChunkFactory: AsyncChunkFactory = StorageChunkFactory()
 
-    internal val globalBlockPalette: Palette<BlockState> =
+    val globalBlockPalette: Palette<BlockState> =
         WrappedGlobalPalette(Block.BLOCK_STATE_REGISTRY)
 
-    internal val globalBiomePalette: Palette<Holder<Biome>> =
+    val globalBiomePalette: Palette<Holder<Biome>> =
         WrappedGlobalPalette(
             MinecraftServer.getServer().registryAccess().registryOrThrow(Registries.BIOME).asHolderIdMap()
         )
