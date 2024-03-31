@@ -31,6 +31,7 @@ import net.ultragrav.kasyncworld.world.chunk.heightmap.AsyncHeightMap
 import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.chunk.contract.section.AsyncChunkSection
 import org.bukkit.craftbukkit.v1_20_R2.block.CraftBiome
+import java.util.*
 
 class StorageAsyncChunk(override val heightOptions: ChunkHeightOptions) : AsyncChunk {
 
@@ -169,6 +170,19 @@ class StorageAsyncChunk(override val heightOptions: ChunkHeightOptions) : AsyncC
             copy.sections[index] = section?.clone()
         }
         return copy
+    }
+
+    override fun hash(): Int {
+        val blockTickHash = blockTicks.map { SavedTick.UNIQUE_TICK_HASH.hashCode(it) }
+            .hashCode()
+        val fluidTickHash = fluidTicks.map { SavedTick.UNIQUE_TICK_HASH.hashCode(it) }
+            .hashCode()
+        val entityHash = entities.hashCode()
+        val persistentDataHash = persistentData.hashCode()
+        val blockEntityHash = blockEntities.hashCode()
+        val heightMapHash = heightMaps.mapValues { it.value.hash() }.hashCode()
+        val sectionHash = sections.map { it?.hash() ?: 0 }.hashCode()
+        return Objects.hash(blockTickHash, fluidTickHash, entityHash, persistentDataHash, blockEntityHash, heightMapHash, sectionHash)
     }
 
     override fun createSection(): AsyncChunkSection {

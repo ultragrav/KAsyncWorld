@@ -1,5 +1,7 @@
 package net.ultragrav.kasyncworld.world.schematic
 
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import net.minecraft.world.level.ChunkPos
 import net.minecraft.world.phys.Vec3
 import net.ultragrav.kasyncworld.AW
@@ -96,27 +98,31 @@ object Schematics : SchematicsApi {
             )
         }
 
-        // TODO entities and block entities
-
         return schematic
     }
 
     override fun importBlocks(world: World, region: CuboidRegion, readOptions: ChunkReadOptions): AsyncWorld {
         // DENSE doesn't matter as we will be making our own chunks
         val aw = AW.createAsyncWorld(world, AsyncWorld.EditType.DENSE)
+
         val factory = AW.storageChunkFactory
         val chunkRangeX = (region.min.x shr 4)..(region.max.x shr 4)
         val chunkRangeZ = (region.min.z shr 4)..(region.max.z shr 4)
         val sectionRangeY = (region.min.y shr 4)..(region.max.y shr 4)
-        for (cx in chunkRangeX) {
-            for (cz in chunkRangeZ) {
-                val bukkitChunk = world.getChunkAt(cx, cz)
-                val chunk = AW.chunkIO.readChunk(
-                    bukkitChunk,
-                    factory,
-                    readOptions.copy(sectionMask = sectionRangeY)
-                )
-                aw.setChunk(cx, cz, chunk)
+
+        runBlocking(AW.parallelDispatcher) {
+            for (cx in chunkRangeX) {
+                for (cz in chunkRangeZ) {
+                    launch {
+                        val bukkitChunk = world.getChunkAt(cx, cz)
+                        val chunk = AW.chunkIO.readChunk(
+                            bukkitChunk,
+                            factory,
+                            readOptions.copy(sectionMask = sectionRangeY)
+                        )
+                        aw.setChunk(cx, cz, chunk)
+                    }
+                }
             }
         }
 

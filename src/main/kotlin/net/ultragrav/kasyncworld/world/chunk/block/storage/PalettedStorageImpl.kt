@@ -216,4 +216,12 @@ class PalettedStorageImpl<T>(
             counts.increment(storage.get(i))
         }
     }
+
+    override fun hash(): Int {
+        var result = palette.hash()
+        result = 31 * result + storage.hash()
+        result = 31 * result + counts.hash()
+        result = 31 * result + iterationStrategy.hash()
+        return result
+    }
 }

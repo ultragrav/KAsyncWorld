@@ -29,6 +29,10 @@ class IntCounts(bits: Int, maxCount: Int) : TypeCounts {
         return types
     }
 
+    override fun hash(): Int {
+        return data.hash()
+    }
+
     override fun clone(): TypeCounts {
         val counts = IntCounts(data.bits, data.size)
         System.arraycopy(data.raw(), 0, counts.data.raw(), 0, data.raw().size)

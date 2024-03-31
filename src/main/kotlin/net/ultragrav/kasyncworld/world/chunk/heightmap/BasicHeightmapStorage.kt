@@ -25,4 +25,8 @@ class BasicHeightmapStorage(val chunk: AsyncChunk) : HeightmapStorage {
         storage.data = data.clone()
         return storage
     }
+
+    override fun hash(): Int {
+        return data.hashCode()
+    }
 }

@@ -13,4 +13,8 @@ class BasicAsyncChunkSection(
     override fun clone(): AsyncChunkSection {
         return BasicAsyncChunkSection(blocks.clone(), biomes.clone())
     }
+
+    override fun hash(): Int {
+        return blocks.hash() * 31 + biomes.hash()
+    }
 }

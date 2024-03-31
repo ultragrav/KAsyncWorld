@@ -33,4 +33,8 @@ class WrappedGlobalPalette<T>(val idList: IdMap<T>) : Palette<T> {
     override fun getId(type: T): Int {
         return idList.getId(type)
     }
+
+    override fun hash(): Int {
+        return idList.hashCode()
+    }
 }

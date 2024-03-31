@@ -32,6 +32,8 @@ interface PalettedStorage<T> : Iterable<Indexed<T>> {
     fun write(output: DataWriter)
     fun read(input: DataReader)
 
+    fun hash(): Int
+
     fun applyTo(other: PalettedStorage<T>) {
         for (i in indexIterator()) {
             other[i] = this[i]

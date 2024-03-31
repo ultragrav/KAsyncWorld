@@ -7,4 +7,5 @@ interface HeightmapStorage {
     fun getHeight(x: Int, z: Int): Int
     fun setHeight(x: Int, z: Int, height: Int)
     fun clone(): HeightmapStorage
+    fun hash(): Int
 }

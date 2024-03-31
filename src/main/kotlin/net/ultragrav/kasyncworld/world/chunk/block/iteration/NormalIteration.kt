@@ -18,4 +18,7 @@ class NormalIteration(override val size: Int) : IterationStrategy {
 
     override fun clone() = NormalIteration(size)
 
+    override fun hash(): Int {
+        return size
+    }
 }

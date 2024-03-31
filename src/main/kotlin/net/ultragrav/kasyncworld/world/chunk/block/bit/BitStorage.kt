@@ -44,4 +44,8 @@ class BitStorage(
         System.arraycopy(data, 0, storage.data, 0, data.size)
         return storage
     }
+
+    override fun hash(): Int {
+        return data.contentHashCode()
+    }
 }

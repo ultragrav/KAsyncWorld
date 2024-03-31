@@ -14,11 +14,11 @@ import java.util.concurrent.Executors
 import kotlin.time.measureTimedValue
 
 
-class ParallelChunkQueue(val plugin: Plugin, val io: ChunkIO, dispatcher: CoroutineDispatcher? = null) : ChunkQueue {
+class ParallelChunkQueue(val plugin: Plugin, val io: ChunkIO) : ChunkQueue {
 
     private val processors = Runtime.getRuntime().availableProcessors()
     private val batchSize = processors * 2
-    val dispatcher = dispatcher ?: Executors.newFixedThreadPool(processors).asCoroutineDispatcher()
+    private val dispatcher = AW.parallelDispatcher
 
     private data class EnqueuedChunk(
         val x: Int,

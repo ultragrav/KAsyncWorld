@@ -14,4 +14,5 @@ interface Palette<T> {
     fun listIds(): Set<Int>
     fun globalPalette(): Palette<T>
     fun clone(): Palette<T>
+    fun hash(): Int
 }

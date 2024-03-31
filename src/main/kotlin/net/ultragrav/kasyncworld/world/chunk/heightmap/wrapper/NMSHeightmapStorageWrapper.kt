@@ -23,4 +23,8 @@ class NMSHeightmapStorageWrapper(val heightmap: Heightmap, val chunk: ChunkAcces
     override fun clone(): HeightmapStorage {
         return NMSHeightmapStorageWrapper(heightmap, chunk)
     }
+
+    override fun hash(): Int {
+        return heightmap.hashCode()
+    }
 }

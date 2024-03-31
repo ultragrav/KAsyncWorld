@@ -117,4 +117,8 @@ class AsyncHeightMap(
         }
     }
 
+    fun hash(): Int {
+        return data.hash() + type.hashCode()
+    }
+
 }

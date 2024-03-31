@@ -78,4 +78,8 @@ class FlagChangeIteration(override val size: Int) : IterationStrategy {
             }
         }
     }
+
+    override fun hash(): Int {
+        return flags.hash()
+    }
 }

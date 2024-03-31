@@ -51,4 +51,8 @@ class SimplePalette<T>(private val globalPalette: Palette<T>? = null) : Palette<
         }
         currentId = localToGlobal.size
     }
+
+    override fun hash(): Int {
+        return blockDataToIdMap.hashCode()
+    }
 }

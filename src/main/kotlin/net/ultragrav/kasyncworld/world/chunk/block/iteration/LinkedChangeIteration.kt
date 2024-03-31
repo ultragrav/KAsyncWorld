@@ -96,4 +96,14 @@ class LinkedChangeIteration(override val size: Int) : IterationStrategy {
             }
         }
     }
+
+    override fun hash(): Int {
+        var hash = 0
+        var curr = forwards.get(0)
+        while (curr != 0) {
+            hash = 31 * hash + curr
+            curr = forwards.get(curr)
+        }
+        return hash
+    }
 }

@@ -2,6 +2,7 @@ package net.ultragrav.kasyncworld
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
 import net.minecraft.core.Holder
 import net.minecraft.core.registries.Registries
@@ -37,6 +38,7 @@ import org.bukkit.Bukkit
 import org.bukkit.World
 import org.bukkit.plugin.Plugin
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.Executors
 
 object AW : AWApi {
 
@@ -53,6 +55,9 @@ object AW : AWApi {
 
     override val editingChunkFactory: AsyncChunkFactory = EditingChunkFactory()
     override val storageChunkFactory: AsyncChunkFactory = StorageChunkFactory()
+
+    private val processors = Runtime.getRuntime().availableProcessors()
+    internal val parallelDispatcher = Executors.newFixedThreadPool(processors).asCoroutineDispatcher()
 
     val globalBlockPalette: Palette<BlockState> =
         WrappedGlobalPalette(Block.BLOCK_STATE_REGISTRY)

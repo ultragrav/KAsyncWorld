@@ -8,4 +8,5 @@ interface TypeCounts {
     fun decrement(type: Int) = add(type, -1)
     fun types(): Set<Int>
     fun clone(): TypeCounts
+    fun hash(): Int
 }

@@ -27,4 +27,5 @@ interface AsyncChunk : AsyncChunkAccess, AsyncChunkSectionFactory {
     var persistentData: CompoundTag
 
     fun clone(): AsyncChunk
+    fun hash(): Int
 }

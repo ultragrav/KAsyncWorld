@@ -23,4 +23,5 @@ interface NumberStorage {
     }
 
     fun clone(): NumberStorage
+    fun hash(): Int
 }

@@ -56,6 +56,7 @@ interface AsyncChunkSection {
     }
 
     fun clone(): AsyncChunkSection
+    fun hash(): Int
 
     companion object {
         fun getBlockX(index: Int): Int {

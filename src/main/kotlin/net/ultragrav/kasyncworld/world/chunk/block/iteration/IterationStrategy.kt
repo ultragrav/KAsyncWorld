@@ -21,5 +21,6 @@ interface IterationStrategy : Iterable<Int> {
     operator fun contains(index: Int): Boolean
 
     fun clone(): IterationStrategy
+    fun hash(): Int
 
 }
