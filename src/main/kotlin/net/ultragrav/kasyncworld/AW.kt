@@ -57,7 +57,7 @@ object AW : AWApi {
     override val storageChunkFactory: AsyncChunkFactory = StorageChunkFactory()
 
     private val processors = Runtime.getRuntime().availableProcessors()
-    internal val parallelDispatcher = Executors.newFixedThreadPool(processors).asCoroutineDispatcher()
+    val parallelDispatcher = Executors.newFixedThreadPool(processors).asCoroutineDispatcher()
 
     val globalBlockPalette: Palette<BlockState> =
         WrappedGlobalPalette(Block.BLOCK_STATE_REGISTRY)
