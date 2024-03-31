@@ -18,6 +18,10 @@ import net.ultragrav.kasyncworld.world.schematic.impl.SchematicImplV0
 import org.bukkit.World
 
 object Schematics : SchematicsApi {
+    override fun create(dimensions: Dimensions): Schematic {
+        return SchematicImplV0(dimensions)
+    }
+
     override fun paste(schematic: Schematic, world: AsyncWorld, x: Int, y: Int, z: Int) {
 
         fun convertToChunkRelative(vec: Vec3): Pair<AsyncChunk, Vec3> {

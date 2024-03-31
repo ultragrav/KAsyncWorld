@@ -7,6 +7,7 @@ import net.ultragrav.kasyncworld.world.contract.AsyncWorld
 import org.bukkit.World
 
 interface SchematicsApi {
+    fun create(dimensions: Dimensions): Schematic
     fun paste(schematic: Schematic, world: AsyncWorld, x: Int, y: Int, z: Int)
     fun save(world: World, region: ShapedRegion): Schematic
     fun save(aw: AsyncWorld, region: ShapedRegion): Schematic
