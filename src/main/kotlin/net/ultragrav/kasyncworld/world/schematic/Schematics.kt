@@ -1,7 +1,7 @@
 package net.ultragrav.kasyncworld.world.schematic
 
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
+import kotlinx.coroutines.Runnable
 import net.minecraft.world.level.ChunkPos
 import net.minecraft.world.phys.Vec3
 import net.ultragrav.kasyncworld.AW
@@ -122,19 +122,28 @@ object Schematics : SchematicsApi {
         val sectionRangeY = (region.min.y shr 4)..(region.max.y shr 4)
 
         runBlocking(AW.parallelDispatcher) {
+
+            val waitFor = mutableListOf<Deferred<Runnable>>()
             for (cx in chunkRangeX) {
                 for (cz in chunkRangeZ) {
-                    launch {
+                    val runnable: Deferred<Runnable> = async {
                         val bukkitChunk = world.getChunkAt(cx, cz)
                         val chunk = AW.chunkIO.readChunk(
                             bukkitChunk,
                             factory,
                             readOptions.copy(sectionMask = sectionRangeY)
                         )
-                        aw.setChunk(cx, cz, chunk)
+
+                        Runnable {
+                            aw.setChunk(cx, cz, chunk)
+                        }
                     }
+                    waitFor.add(runnable)
                 }
             }
+
+            waitFor.awaitAll().forEach { it.run() }
+
         }
 
         return aw
