@@ -29,6 +29,8 @@ interface AsyncWorld : AsyncChunkFactory {
      */
     fun setBlockEntity(x: Int, y: Int, z: Int, tile: CompoundTag)
 
+    fun getBlockEntity(x: Int, y: Int, z: Int): CompoundTag?
+
     /**
      * Unset the block at the given coordinates. If the block at the given
      * coordinates is a tile entity, the tile entity will be unset as well.

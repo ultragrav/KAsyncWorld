@@ -87,6 +87,13 @@ object Schematics : SchematicsApi {
                 z - bz,
                 block
             )
+            val be = aw.getBlockEntity(x, y, z) ?: return@forEach
+            schematic.setBlockEntity(
+                x - bx,
+                y - by,
+                z - bz,
+                be
+            )
         }
 
         // TODO entities and block entities

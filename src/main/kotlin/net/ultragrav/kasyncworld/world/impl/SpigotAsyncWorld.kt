@@ -47,6 +47,14 @@ internal class SpigotAsyncWorld internal constructor(val world: World, val editT
         chunk.setBlockEntity(x and 15, y, z and 15, tile)
     }
 
+    override fun getBlockEntity(x: Int, y: Int, z: Int): CompoundTag? {
+        if (y !in heightOptions.buildableYRange) return null
+        val chunkX = x shr 4
+        val chunkZ = z shr 4
+        val chunk = getChunk(chunkX, chunkZ)
+        return chunk.getBlockEntity(x and 15, y, z and 15)
+    }
+
     override fun unsetBlock(x: Int, y: Int, z: Int) {
         if (y !in heightOptions.buildableYRange) return
         val chunkX = x shr 4
