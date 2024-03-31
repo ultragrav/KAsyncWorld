@@ -18,6 +18,7 @@ import net.ultragrav.kasyncworld.world.schematic.impl.SchematicImplV0
 import org.bukkit.World
 
 object Schematics : SchematicsApi {
+
     override fun create(dimensions: Dimensions): Schematic {
         return SchematicImplV0(dimensions)
     }

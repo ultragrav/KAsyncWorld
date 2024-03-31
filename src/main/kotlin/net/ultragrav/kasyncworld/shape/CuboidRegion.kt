@@ -62,6 +62,20 @@ class CuboidRegion(p1: AWBlockPosition, p2: AWBlockPosition) : ShapedRegion {
         return chunks
     }
 
+    fun intersection(other: CuboidRegion): CuboidRegion {
+        val minX = maxOf(min.x, other.min.x)
+        val minY = maxOf(min.y, other.min.y)
+        val minZ = maxOf(min.z, other.min.z)
+        val maxX = minOf(max.x, other.max.x)
+        val maxY = minOf(max.y, other.max.y)
+        val maxZ = minOf(max.z, other.max.z)
+        return if (minX <= maxX && minY <= maxY && minZ <= maxZ) {
+            CuboidRegion(AWBlockPosition(minX, minY, minZ), AWBlockPosition(maxX, maxY, maxZ))
+        } else {
+            CuboidRegion(AWBlockPosition(0, 0, 0), AWBlockPosition(-1, -1, -1))
+        }
+    }
+
     override fun iterator(): Iterator<AWBlockPosition> {
         return object : Iterator<AWBlockPosition> {
             var x = min.x
