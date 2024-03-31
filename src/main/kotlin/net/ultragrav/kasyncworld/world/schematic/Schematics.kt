@@ -68,7 +68,6 @@ object Schematics : SchematicsApi {
 
 
     override fun save(world: World, region: ShapedRegion): Schematic {
-        val schematic = SchematicImplV0(region.boundingBox.dimensions)
         val opts = ChunkReadOptions(
             readBiomes = false,
             readPersistentContainer = false,
@@ -77,6 +76,13 @@ object Schematics : SchematicsApi {
             readTicks = false,
         )
         val aw = importBlocks(world, region.boundingBox, opts)
+
+        return save(aw, region)
+    }
+
+    override fun save(aw: AsyncWorld, region: ShapedRegion): Schematic {
+        val schematic = SchematicImplV0(region.boundingBox.dimensions)
+
         val bx = region.boundingBox.min.x
         val by = region.boundingBox.min.y
         val bz = region.boundingBox.min.z

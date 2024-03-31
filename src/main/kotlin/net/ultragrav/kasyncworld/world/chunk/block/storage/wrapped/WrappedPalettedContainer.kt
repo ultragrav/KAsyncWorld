@@ -64,6 +64,10 @@ class WrappedPalettedContainer<T>(
         }
     }
 
+    override fun hash(): Int {
+        return wrapped.hashCode()
+    }
+
     override fun contains(type: T): Boolean {
         return wrapped.data.palette.maybeHas { it == type }
     }

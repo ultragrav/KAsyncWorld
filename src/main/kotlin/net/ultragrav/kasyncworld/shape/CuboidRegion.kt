@@ -48,6 +48,20 @@ class CuboidRegion(p1: AWBlockPosition, p2: AWBlockPosition) : ShapedRegion {
         )
     }
 
+    fun chunks(): List<Pair<Int, Int>> {
+        val minChunkX = min.x shr 4
+        val minChunkZ = min.z shr 4
+        val maxChunkX = max.x shr 4
+        val maxChunkZ = max.z shr 4
+        val chunks = mutableListOf<Pair<Int, Int>>()
+        for (x in minChunkX..maxChunkX) {
+            for (z in minChunkZ..maxChunkZ) {
+                chunks.add(x to z)
+            }
+        }
+        return chunks
+    }
+
     override fun iterator(): Iterator<AWBlockPosition> {
         return object : Iterator<AWBlockPosition> {
             var x = min.x
