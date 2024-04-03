@@ -31,6 +31,10 @@ internal class SpigotAsyncWorld internal constructor(val world: World, val editT
         require(world.maxHeight % 16 == 0) { "World max height must be a multiple of 16" }
     }
 
+    override fun chunks(): Set<AsyncChunk> {
+        return chunkMap.values.toSet()
+    }
+
     override fun setBlock(x: Int, y: Int, z: Int, block: BlockState) {
         if (y !in heightOptions.buildableYRange) return
         val chunkX = x shr 4

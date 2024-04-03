@@ -22,6 +22,8 @@ interface AsyncWorld : AsyncChunkFactory {
 
     fun setBlockData(x: Int, y: Int, z: Int, blockData: BlockData) = setBlock(x, y, z, (blockData as CraftBlockData).state)
 
+    fun chunks(): Set<AsyncChunk>
+
     /**
      * Set the tile entity at the given coordinates. If the block at the given
      * coordinates is not a tile entity, this method will throw an exception.

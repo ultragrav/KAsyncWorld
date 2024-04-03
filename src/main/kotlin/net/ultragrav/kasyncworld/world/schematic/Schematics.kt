@@ -121,13 +121,13 @@ object Schematics : SchematicsApi {
         val chunkRangeZ = (region.min.z shr 4)..(region.max.z shr 4)
         val sectionRangeY = (region.min.y shr 4)..(region.max.y shr 4)
 
-        runBlocking(AW.parallelDispatcher) {
+        runBlocking {
 
             val waitFor = mutableListOf<Deferred<Runnable>>()
             for (cx in chunkRangeX) {
                 for (cz in chunkRangeZ) {
                     val bukkitChunk = world.getChunkAt(cx, cz)
-                    val runnable: Deferred<Runnable> = async {
+                    val runnable: Deferred<Runnable> = async(AW.parallelDispatcher) {
                         val chunk = AW.chunkIO.readChunk(
                             bukkitChunk,
                             factory,

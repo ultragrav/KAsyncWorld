@@ -88,11 +88,11 @@ class CuboidRegion(p1: AWBlockPosition, p2: AWBlockPosition) : ShapedRegion {
 
             override fun next(): AWBlockPosition {
                 val pos = AWBlockPosition(x, y, z)
-                if (++x > max.x) {
-                    x = min.x
-                    if (++y > max.y) {
-                        y = min.y
-                        ++z
+                if (++y > max.y) {
+                    y = min.y
+                    if (++z > max.z) {
+                        z = min.z
+                        x++
                     }
                 }
                 return pos
