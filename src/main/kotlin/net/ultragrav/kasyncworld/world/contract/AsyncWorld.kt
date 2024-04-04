@@ -83,6 +83,8 @@ interface AsyncWorld : AsyncChunkFactory {
 
     fun createChunk() = createChunk(heightOptions)
 
+    fun clone(): AsyncWorld
+
     enum class EditType {
         DENSE, SPARSE, MIXED
     }

@@ -3,6 +3,7 @@ package net.ultragrav.kasyncworld
 import com.mojang.serialization.Compressable
 import net.ultragrav.kasyncworld.data.DataReader
 import net.ultragrav.kasyncworld.data.DataWriter
+import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
 import net.ultragrav.kasyncworld.world.chunk.queue.ChunkQueue
 import net.ultragrav.kasyncworld.world.chunk.codec.ChunkCodec
 import net.ultragrav.kasyncworld.world.chunk.codec.LZ4WrappingCodec
@@ -27,6 +28,7 @@ interface AWApi {
     val storageChunkFactory: AsyncChunkFactory
 
     fun createAsyncWorld(world: World, editType: AsyncWorld.EditType): AsyncWorld
+    fun createAsyncWorld(heightOptions: ChunkHeightOptions, editType: AsyncWorld.EditType): AsyncWorld
 
     fun createReader(bytes: ByteArray): DataReader
     fun createWriter(): DataWriter

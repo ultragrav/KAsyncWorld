@@ -17,18 +17,22 @@ import net.ultragrav.kasyncworld.world.chunk.io.HeightmapWriteType
 import org.bukkit.World
 import java.util.concurrent.CompletableFuture
 
-internal class SpigotAsyncWorld internal constructor(val world: World, val editType: AsyncWorld.EditType) : AsyncWorld {
+internal class SpigotAsyncWorld private constructor(val world: World?, override val heightOptions: ChunkHeightOptions, val editType: AsyncWorld.EditType) : AsyncWorld {
 
     private val chunkMap = mutableMapOf<Long, AsyncChunk>()
 
-    override val heightOptions = ChunkHeightOptions(
+    constructor(world: World, editType: AsyncWorld.EditType) : this(world, ChunkHeightOptions(
         (world.maxHeight - world.minHeight) shr 4,
         world.minHeight shr 4,
-    )
+    ), editType)
+
+    constructor(heightOptions: ChunkHeightOptions, editType: AsyncWorld.EditType) : this(null, heightOptions, editType)
 
     init {
-        require(world.minHeight % 16 == 0) { "World min height must be a multiple of 16" }
-        require(world.maxHeight % 16 == 0) { "World max height must be a multiple of 16" }
+        if (world != null) {
+            require(world.minHeight % 16 == 0) { "World min height must be a multiple of 16" }
+            require(world.maxHeight % 16 == 0) { "World max height must be a multiple of 16" }
+        }
     }
 
     override fun chunks(): Set<AsyncChunk> {
@@ -97,6 +101,9 @@ internal class SpigotAsyncWorld internal constructor(val world: World, val editT
     }
 
     override fun flush(): CompletableFuture<Void> {
+
+        require(world != null) { "Cannot flush a world without a Bukkit world" }
+
         val chunks = chunkMap.toMap()
         chunkMap.clear()
 
@@ -116,6 +123,9 @@ internal class SpigotAsyncWorld internal constructor(val world: World, val editT
     }
 
     override fun syncFlush() {
+
+        require(world != null) { "Cannot flush a world without a Bukkit world" }
+
         val io = AW.chunkIO
 
         val chunks = chunkMap.toMap()
@@ -146,6 +156,16 @@ internal class SpigotAsyncWorld internal constructor(val world: World, val editT
                 io.writeChunk(bukkitChunk, chunk, writeOptions)
             }
         }
+    }
+
+    override fun clone(): AsyncWorld {
+        val newWorld = SpigotAsyncWorld(world, heightOptions, editType)
+        chunkMap.forEach { (key, chunk) ->
+            val cx = getChunkX(key)
+            val cz = getChunkZ(key)
+            newWorld.setChunk(cx, cz, chunk.clone())
+        }
+        return newWorld
     }
 
     override fun createChunk(heightOptions: ChunkHeightOptions): AsyncChunk {
