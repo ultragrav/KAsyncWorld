@@ -14,4 +14,5 @@ data class InMemoryWorldOptions(
     val defaultBiome: Biome = Biome.PLAINS,
     val codec: ChunkCodec = AW.codec,
     val generator: ChunkGenerator? = null,
+    val seed: Long = 0,
 )

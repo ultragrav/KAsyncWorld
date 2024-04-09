@@ -31,11 +31,10 @@ object PaperIMWorldProvider : IMWorldProvider {
     private fun createWorld(
         name: String,
         options: InMemoryWorldOptions,
-        seed: Long,
         environment: Environment,
         chunkProvider: AsyncChunkProvider
     ): ServerLevel {
-        val worldOptions = WorldOptions(seed, true, false)
+        val worldOptions = WorldOptions(options.seed, true, false)
 
         val mcServer = MinecraftServer.getServer() as DedicatedServer
 
@@ -93,7 +92,7 @@ object PaperIMWorldProvider : IMWorldProvider {
                 levelKey,
                 levelDimension,
                 levelStem,
-                seed,
+                options.seed,
                 environment,
                 null,
                 options
@@ -134,7 +133,7 @@ object PaperIMWorldProvider : IMWorldProvider {
             options.chunkBoundsZ
         )
 
-        val serverLevel = createWorld(name, options, 123L, options.environment, chunkProvider)
+        val serverLevel = createWorld(name, options, options.environment, chunkProvider)
 
         return PaperMemoryWorld(serverLevel, name, options, chunkProvider)
     }
@@ -155,7 +154,7 @@ object PaperIMWorldProvider : IMWorldProvider {
         chunkProvider.setChunks(packed.chunks)
 
         val (serverLevel, time) = measureTimedValue {
-            createWorld(name, options, 123L, options.environment, chunkProvider)
+            createWorld(name, options, options.environment, chunkProvider)
         }
 
         AW.debug("World $name created in ${time.inWholeMilliseconds}ms")
