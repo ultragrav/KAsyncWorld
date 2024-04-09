@@ -15,6 +15,7 @@ import net.ultragrav.kasyncworld.data.DataWriter
 import net.ultragrav.kasyncworld.data.GravSerializerRead
 import net.ultragrav.kasyncworld.data.GravSerializerWrite
 import net.ultragrav.kasyncworld.scheduler.ParallelChunkQueue
+import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
 import net.ultragrav.kasyncworld.world.chunk.block.palette.Palette
 import net.ultragrav.kasyncworld.world.chunk.block.palette.WrappedGlobalPalette
 import net.ultragrav.kasyncworld.world.chunk.codec.ChunkCodec
@@ -75,6 +76,10 @@ object AW : AWApi {
 
     override fun createAsyncWorld(world: World, editType: AsyncWorld.EditType): AsyncWorld {
         return SpigotAsyncWorld(world, editType)
+    }
+
+    override fun createAsyncWorld(heightOptions: ChunkHeightOptions, editType: AsyncWorld.EditType): AsyncWorld {
+        return SpigotAsyncWorld(heightOptions, editType)
     }
 
     override fun createReader(bytes: ByteArray): DataReader {

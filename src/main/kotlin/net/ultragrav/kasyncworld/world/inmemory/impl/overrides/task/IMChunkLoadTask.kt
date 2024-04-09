@@ -65,7 +65,9 @@ class IMChunkLoadTask(
                 null
             )
 
-            protoChunk.status = ChunkStatus.INITIALIZE_LIGHT.parent
+            if (worldOptions.generator == null) {
+                protoChunk.status = ChunkStatus.INITIALIZE_LIGHT.parent
+            }
 
             complete(protoChunk, null)
         }
