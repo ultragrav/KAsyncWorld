@@ -57,6 +57,7 @@ class IMChunkLoadTask(
         holder.poiChunk = PoiChunk(world, holder.chunkX, holder.chunkZ, world.minSection, world.maxSection)
 
         val chunk = chunkProvider.loadChunk(chunkX, chunkZ) ?: return run {
+
             val protoChunk = ProtoChunk(
                 ChunkPos(chunkX, chunkZ),
                 UpgradeData.EMPTY,
@@ -65,7 +66,9 @@ class IMChunkLoadTask(
                 null
             )
 
-            if (worldOptions.generator == null) {
+            val inBounds = chunkX in worldOptions.chunkBoundsX && chunkZ in worldOptions.chunkBoundsZ
+
+            if (worldOptions.generator == null || !inBounds) {
                 protoChunk.status = ChunkStatus.INITIALIZE_LIGHT.parent
             }
 
