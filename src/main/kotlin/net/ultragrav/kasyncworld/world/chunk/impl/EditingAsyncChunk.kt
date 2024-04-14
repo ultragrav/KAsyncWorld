@@ -72,6 +72,11 @@ class EditingAsyncChunk(
         section.unsetBlock(x, y and 15, z)
     }
 
+    override fun isBlockSet(x: Int, y: Int, z: Int): Boolean {
+        val section = getSection(y shr 4) ?: return false
+        return section.isBlockSet(x, y and 15, z)
+    }
+
     override fun getBlock(x: Int, y: Int, z: Int): BlockState {
         val section = getSection((y shr 4))
             ?: return Blocks.AIR.defaultBlockState()

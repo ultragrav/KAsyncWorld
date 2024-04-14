@@ -83,6 +83,12 @@ internal class SchematicImplV0(override val dimensions: Dimensions) : Schematic 
         chunk.setBlockData(x and 15, y, z and 15, block)
     }
 
+    override fun isBlockSet(x: Int, y: Int, z: Int): Boolean {
+        checkBounds(x, y, z)
+        val chunk = chunkAtNoCreate(x shr 4, z shr 4) ?: return false
+        return chunk.isBlockSet(x and 15, y, z and 15)
+    }
+
     override fun getBlock(x: Int, y: Int, z: Int): BlockState {
         checkBounds(x, y, z)
         val chunk = chunkAtNoCreate(x shr 4, z shr 4) ?: return Blocks.AIR.defaultBlockState()

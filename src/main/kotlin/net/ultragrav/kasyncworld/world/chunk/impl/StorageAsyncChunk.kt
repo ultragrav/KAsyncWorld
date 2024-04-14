@@ -63,6 +63,11 @@ class StorageAsyncChunk(override val heightOptions: ChunkHeightOptions) : AsyncC
         }
     }
 
+    override fun isBlockSet(x: Int, y: Int, z: Int): Boolean {
+        val section = getSection(y shr 4) ?: return false
+        return section.isBlockSet(x, y and 15, z)
+    }
+
     override fun unsetBlock(x: Int, y: Int, z: Int) {
         val section = getOrMakeSection(y shr 4)
         section.unsetBlock(x, y and 15, z)

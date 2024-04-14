@@ -34,6 +34,8 @@ interface AsyncChunkAccess {
      */
     fun unsetBlock(x: Int, y: Int, z: Int)
 
+    fun isBlockSet(x: Int, y: Int, z: Int): Boolean
+
     /**
      * Gets the block at the given coordinates.
      * Valid ranges for x, z are 0-15

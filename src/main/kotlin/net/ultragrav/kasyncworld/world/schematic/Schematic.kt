@@ -12,6 +12,7 @@ interface Schematic : Iterable<PositionedBlock> {
     val dimensions: Dimensions
     fun setBlock(x: Int, y: Int, z: Int, block: BlockState)
     fun setBlockData(x: Int, y: Int, z: Int, block: BlockData)
+    fun isBlockSet(x: Int, y: Int, z: Int): Boolean
     fun getBlock(x: Int, y: Int, z: Int): BlockState
     fun getBlockData(x: Int, y: Int, z: Int): BlockData
     fun unsetBlock(x: Int, y: Int, z: Int)

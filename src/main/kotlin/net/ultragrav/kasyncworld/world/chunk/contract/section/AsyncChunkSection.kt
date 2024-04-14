@@ -24,7 +24,11 @@ interface AsyncChunkSection {
     }
 
     fun getBlock(x: Int, y: Int, z: Int): BlockState {
-        return blocks.get(getBlockIndex(x, y, z))
+        return blocks[getBlockIndex(x, y, z)]
+    }
+
+    fun isBlockSet(x: Int, y: Int, z: Int): Boolean {
+        return blocks.iterationStrategy.contains(getBlockIndex(x, y, z))
     }
 
     fun unsetBlock(x: Int, y: Int, z: Int) {
