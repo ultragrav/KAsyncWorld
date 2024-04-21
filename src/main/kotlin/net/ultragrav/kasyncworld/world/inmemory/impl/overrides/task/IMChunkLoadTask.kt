@@ -134,6 +134,8 @@ class IMChunkLoadTask(
             null
         )
 
+        protoChunk.setLightEngine(world.lightEngine)
+
         val baseX = chunkX shl 4
         val baseZ = chunkZ shl 4
 
