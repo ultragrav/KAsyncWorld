@@ -267,6 +267,21 @@ class NMSChunkIO : ChunkIO {
         return chunk
     }
 
+    override fun readChunk(bukkitChunk: Chunk, ac: AsyncChunk, options: ChunkReadOptions) {
+        val nms = (bukkitChunk.world as CraftWorld)
+            .handle
+            .chunkSource
+            .getChunkAtIfLoadedImmediately(bukkitChunk.x, bukkitChunk.z)
+            ?: throw IllegalStateException("Chunk is not loaded")
+        val height = ChunkHeightOptions(nms.sectionsCount, nms.minSection)
+
+        val entityChunk = synchronized(this) {
+            nms.level.entityLookup.getChunk(nms.locX, nms.locZ)
+        }
+
+        readChunk(nms.level, nms, entityChunk, ac, options)
+    }
+
     companion object {
         fun readChunk(
             level: ServerLevel,

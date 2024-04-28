@@ -11,4 +11,5 @@ interface ChunkIO {
     fun sendPackets(world: World, cx: Int, cz: Int)
     // May be run chunk-wise parallel
     fun readChunk(bukkitChunk: Chunk, factory: AsyncChunkFactory, options: ChunkReadOptions): AsyncChunk
+    fun readChunk(bukkitChunk: Chunk, ac: AsyncChunk, options: ChunkReadOptions)
 }
