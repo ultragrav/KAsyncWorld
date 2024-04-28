@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "net.ultragrav"
-version = "1.0.20"
+version = "1.0.21"
 
 repositories {
     mavenCentral()
