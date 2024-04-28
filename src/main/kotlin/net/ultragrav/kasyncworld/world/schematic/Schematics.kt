@@ -15,6 +15,7 @@ import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.chunk.io.ChunkReadOptions
 import net.ultragrav.kasyncworld.world.contract.AsyncWorld
 import net.ultragrav.kasyncworld.world.schematic.impl.SchematicImplV0
+import net.ultragrav.kasyncworld.world.schematic.mask.Mask
 import org.bukkit.World
 
 object Schematics : SchematicsApi {
@@ -23,7 +24,7 @@ object Schematics : SchematicsApi {
         return SchematicImplV0(dimensions)
     }
 
-    override fun paste(schematic: Schematic, world: AsyncWorld, x: Int, y: Int, z: Int) {
+    override fun paste(schematic: Schematic, world: AsyncWorld, x: Int, y: Int, z: Int, mask: Mask?) {
 
         fun convertToChunkRelative(vec: Vec3): Pair<AsyncChunk, Vec3> {
             val gp = vec.add(x.toDouble(), y.toDouble(), z.toDouble())
@@ -54,20 +55,26 @@ object Schematics : SchematicsApi {
             chunk.addEntity(it)
         }
 
-        // Write block entities
-        schematic.blockEntities().forEach { (pos, ent) ->
-            val (chunk, rp) = convertToChunkRelative(pos)
-            chunk.setBlockEntity(rp.x, rp.y, rp.z, ent)
-        }
-
         // Write blocks
         schematic.iterator().forEach { (bx, by, bz, state) ->
+
+            if (mask != null && !mask.shouldPlace(bx, by, bz, world.getBlock(bx + x, by + y, bz + z), state)) return@forEach
+
             world.setBlock(
                 bx + x,
                 by + y,
                 bz + z,
                 state
             )
+
+            schematic.getBlockEntity(bx, by, bz)?.let { be ->
+                world.setBlockEntity(
+                    bx + x,
+                    by + y,
+                    bz + z,
+                    be
+                )
+            }
         }
     }
 
@@ -112,10 +119,7 @@ object Schematics : SchematicsApi {
         return schematic
     }
 
-    override fun importBlocks(world: World, region: CuboidRegion, readOptions: ChunkReadOptions): AsyncWorld {
-        // DENSE doesn't matter as we will be making our own chunks
-        val aw = AW.createAsyncWorld(world, AsyncWorld.EditType.DENSE)
-
+    private fun importBlocks(world: World, aw: AsyncWorld, region: CuboidRegion, readOptions: ChunkReadOptions) {
         val factory = AW.storageChunkFactory
         val chunkRangeX = (region.min.x shr 4)..(region.max.x shr 4)
         val chunkRangeZ = (region.min.z shr 4)..(region.max.z shr 4)
@@ -145,7 +149,12 @@ object Schematics : SchematicsApi {
             waitFor.awaitAll().forEach { it.run() }
 
         }
+    }
 
+    override fun importBlocks(world: World, region: CuboidRegion, readOptions: ChunkReadOptions): AsyncWorld {
+        // DENSE doesn't matter as we will be making our own chunks
+        val aw = AW.createAsyncWorld(world, AsyncWorld.EditType.DENSE)
+        importBlocks(world, aw, region, readOptions)
         return aw
     }
 
