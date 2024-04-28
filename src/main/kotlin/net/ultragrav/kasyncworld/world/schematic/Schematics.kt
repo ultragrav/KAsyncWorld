@@ -119,34 +119,26 @@ object Schematics : SchematicsApi {
         return schematic
     }
 
-    private fun importBlocks(world: World, aw: AsyncWorld, region: CuboidRegion, readOptions: ChunkReadOptions) {
-        val factory = AW.storageChunkFactory
+    override fun importBlocks(world: World, aw: AsyncWorld, region: CuboidRegion, readOptions: ChunkReadOptions) {
         val chunkRangeX = (region.min.x shr 4)..(region.max.x shr 4)
         val chunkRangeZ = (region.min.z shr 4)..(region.max.z shr 4)
         val sectionRangeY = (region.min.y shr 4)..(region.max.y shr 4)
 
         runBlocking {
 
-            val waitFor = mutableListOf<Deferred<Runnable>>()
             for (cx in chunkRangeX) {
                 for (cz in chunkRangeZ) {
                     val bukkitChunk = world.getChunkAt(cx, cz)
-                    val runnable: Deferred<Runnable> = async(AW.parallelDispatcher) {
-                        val chunk = AW.chunkIO.readChunk(
+                    val awChunk = aw.getChunk(cx, cz)
+                    launch(AW.parallelDispatcher) {
+                        AW.chunkIO.readChunk(
                             bukkitChunk,
-                            factory,
+                            awChunk,
                             readOptions.copy(sectionMask = sectionRangeY)
                         )
-
-                        Runnable {
-                            aw.setChunk(cx, cz, chunk)
-                        }
                     }
-                    waitFor.add(runnable)
                 }
             }
-
-            waitFor.awaitAll().forEach { it.run() }
 
         }
     }

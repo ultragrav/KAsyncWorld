@@ -13,6 +13,7 @@ interface SchematicsApi {
     fun save(world: World, region: ShapedRegion): Schematic
     fun save(aw: AsyncWorld, region: ShapedRegion): Schematic
     fun importBlocks(world: World, region: CuboidRegion, readOptions: ChunkReadOptions): AsyncWorld
+    fun importBlocks(world: World, aw: AsyncWorld, region: CuboidRegion, readOptions: ChunkReadOptions)
     fun serialize(schematic: Schematic): ByteArray
     fun deserialize(bytes: ByteArray): Schematic
 }
