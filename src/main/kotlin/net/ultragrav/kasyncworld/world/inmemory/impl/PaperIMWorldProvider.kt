@@ -34,7 +34,7 @@ object PaperIMWorldProvider : IMWorldProvider {
         environment: Environment,
         chunkProvider: AsyncChunkProvider
     ): ServerLevel {
-        val worldOptions = WorldOptions(options.seed, true, false)
+        val worldOptions = WorldOptions(options.seed, options.generateStructures, false)
 
         val mcServer = MinecraftServer.getServer() as DedicatedServer
 
