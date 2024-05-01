@@ -12,7 +12,7 @@ data class InMemoryWorldOptions(
     val chunkBoundsZ: IntRange,
     val environment: Environment,
     val defaultBiome: Biome = Biome.PLAINS,
-    val codec: ChunkCodec = AW.codec,
+    val codec: ChunkCodec = AW.compressedCodec,
     val generator: ChunkGenerator? = null,
     val generateStructures: Boolean = true,
     val seed: Long = 0,
