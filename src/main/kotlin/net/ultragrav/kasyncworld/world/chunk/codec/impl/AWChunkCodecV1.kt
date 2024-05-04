@@ -89,7 +89,8 @@ object AWChunkCodecV1 : ChunkCodec {
 
         // Height maps
         writer.writeInt(chunk.heightMaps.size)
-        chunk.heightMaps.forEach { (type, ahm) ->
+        chunk.heightMaps.entries.sortedBy { it.key }
+            .forEach { (type, ahm) ->
             writer.writeInt(type.ordinal)
             for (x in 0..15) {
                 for (z in 0..15) {
