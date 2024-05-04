@@ -55,13 +55,13 @@ internal fun deserializeNBTOrdered(arr: ByteArray): CompoundTag {
 }
 
 private fun serializeNBTOrderedWriter(tag: Tag, writer: DataOutput) {
+    writer.writeByte(tag.id.toInt())
     when (tag) {
         is CompoundTag -> {
             val tags = tag.tags
             writer.writeShort(tags.size)
             tags.entries.sortedBy { it.key }
                 .forEach {
-                    writer.writeByte(it.value.id.toInt())
                     writer.writeUTF(it.key)
                     serializeNBTOrderedWriter(it.value, writer)
                 }
