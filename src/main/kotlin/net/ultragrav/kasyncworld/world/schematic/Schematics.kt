@@ -150,11 +150,10 @@ object Schematics : SchematicsApi {
         return aw
     }
 
-    override fun serialize(schematic: Schematic): ByteArray {
+    override fun serialize(schematic: Schematic, codec: ChunkCodec): ByteArray {
         require(schematic is SchematicImplV0) { "Only schematics of type SchematicImplV0 can be serialized" }
 
         val writer = AW.createWriter()
-        val codec = AW.compressedCodec
         writer.writeByte(0)
         writer.writeString(codec.id)
         writer.writeInt(codec.version)
@@ -172,15 +171,14 @@ object Schematics : SchematicsApi {
         return writer.toByteArray()
     }
 
-    override fun deserialize(bytes: ByteArray): Schematic {
+    override fun deserialize(bytes: ByteArray, codecProvider: (String) -> ChunkCodec): Schematic {
         val reader = AW.createReader(bytes)
-        var codec: ChunkCodec = AW.compressedCodec
 
         reader.readByte() // Version
 
         val codecId = reader.readString()
         val codecVersion = reader.readInt()
-        require(codecId == codec.id) { "Unsupported codec $codecId" }
+        var codec = codecProvider(codecId)
         while (codec.version != codecVersion) codec =
             codec.earlierVersion() ?: error("Unsupported codec version $codecVersion")
 

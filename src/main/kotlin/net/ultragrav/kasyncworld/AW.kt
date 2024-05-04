@@ -19,6 +19,7 @@ import net.ultragrav.kasyncworld.world.chunk.ChunkHeightOptions
 import net.ultragrav.kasyncworld.world.chunk.block.palette.Palette
 import net.ultragrav.kasyncworld.world.chunk.block.palette.WrappedGlobalPalette
 import net.ultragrav.kasyncworld.world.chunk.codec.ChunkCodec
+import net.ultragrav.kasyncworld.world.chunk.codec.impl.AWChunkCodecOrderedV1
 import net.ultragrav.kasyncworld.world.chunk.codec.impl.AWChunkCodecV1
 import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunkFactory
 import net.ultragrav.kasyncworld.world.chunk.impl.EditingChunkFactory
@@ -51,6 +52,7 @@ object AW : AWApi {
     lateinit var plugin: Plugin
 
     override val codec: ChunkCodec = AWChunkCodecV1
+    override val orderedCodec: ChunkCodec = AWChunkCodecOrderedV1
 
     override val inMemoryWorldProvider: IMWorldProvider = PaperIMWorldProvider
 

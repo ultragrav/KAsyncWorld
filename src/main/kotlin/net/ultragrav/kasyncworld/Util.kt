@@ -1,17 +1,14 @@
 package net.ultragrav.kasyncworld
 
 import net.minecraft.core.Vec3i
-import net.minecraft.nbt.CompoundTag
-import net.minecraft.nbt.DoubleTag
-import net.minecraft.nbt.NbtIo
-import net.minecraft.nbt.Tag
+import net.minecraft.nbt.*
 import net.minecraft.world.phys.Vec3
 import net.ultragrav.kasyncworld.world.chunk.block.position.AWBlockPosition
-import net.ultragrav.serializer.compressors.StandardCompressor
 import java.io.ByteArrayOutputStream
+import java.io.DataInput
 import java.io.DataInputStream
+import java.io.DataOutput
 import java.io.DataOutputStream
-import java.util.zip.Deflater
 
 fun getChunkKey(x: Int, z: Int): Long {
     return (x.toLong() and 0xFFFFFFFFL) or ((z.toLong() and 0xFFFFFFFFL) shl 32)
@@ -41,6 +38,65 @@ internal fun deserializeNBT(arr: ByteArray): CompoundTag {
     val bis = arr.inputStream()
     val dis = DataInputStream(bis)
     return NbtIo.read(dis)
+}
+
+internal fun serializeNBTOrdered(tag: CompoundTag): ByteArray {
+    val bos = ByteArrayOutputStream()
+    val dos = DataOutputStream(bos)
+    serializeNBTOrderedWriter(tag, dos)
+    dos.close()
+    return bos.toByteArray()
+}
+
+internal fun deserializeNBTOrdered(arr: ByteArray): CompoundTag {
+    val bis = arr.inputStream()
+    val dis = DataInputStream(bis)
+    return deserializeNBTOrderedReader(dis, NbtAccounter.unlimitedHeap()) as CompoundTag
+}
+
+private fun serializeNBTOrderedWriter(tag: Tag, writer: DataOutput) {
+    when (tag) {
+        is CompoundTag -> {
+            val tags = tag.tags
+            writer.writeShort(tags.size)
+            tags.entries.sortedBy { it.key }
+                .forEach {
+                    writer.writeByte(it.value.id.toInt())
+                    writer.writeUTF(it.key)
+                    serializeNBTOrderedWriter(it.value, writer)
+                }
+        }
+        is ListTag -> {
+            val list = tag.toList()
+            writer.writeInt(list.size)
+            list.forEach { serializeNBTOrderedWriter(it, writer) }
+        }
+        else -> tag.write(writer)
+    }
+}
+
+private fun deserializeNBTOrderedReader(reader: DataInput, accounting: NbtAccounter): Tag {
+    return when (val id = reader.readByte()) {
+        Tag.TAG_COMPOUND -> {
+            val comp = CompoundTag()
+            val size = reader.readShort()
+            for (i in 0..<size) {
+                val key = reader.readUTF()
+                val tag = deserializeNBTOrderedReader(reader, accounting)
+                comp.put(key, tag)
+            }
+            comp
+        }
+        Tag.TAG_LIST -> {
+            val size = reader.readInt()
+            val list = ListTag()
+            for (i in 0..<size) {
+                list.add(deserializeNBTOrderedReader(reader, accounting))
+            }
+            list
+        }
+        else -> TagTypes.getType(id.toInt()).load(reader, accounting)
+    }
 }
 
 fun CompoundTag.entityPosition(): Vec3 {

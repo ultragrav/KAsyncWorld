@@ -21,11 +21,24 @@ interface AWApi {
     val chunkQueue: ChunkQueue
     val chunkIO: ChunkIO
     val codec: ChunkCodec
+    val orderedCodec: ChunkCodec // Equal chunks -> Equal bytes
     val compressedCodec get() = LZ4WrappingCodec(codec)
+    val compressedOrderedCodec get() = LZ4WrappingCodec(orderedCodec)
     val inMemoryWorldProvider: IMWorldProvider
 
     val editingChunkFactory: AsyncChunkFactory
     val storageChunkFactory: AsyncChunkFactory
+
+    val defaultCodecResolver: (String) -> ChunkCodec
+        get() = {
+            when (it) {
+                codec.id -> codec
+                compressedCodec.id -> compressedCodec
+                orderedCodec.id -> orderedCodec
+                compressedOrderedCodec.id -> compressedOrderedCodec
+                else -> throw IllegalArgumentException("Unknown codec id: $it")
+            }
+        }
 
     fun createAsyncWorld(world: World, editType: AsyncWorld.EditType): AsyncWorld
     fun createAsyncWorld(heightOptions: ChunkHeightOptions, editType: AsyncWorld.EditType): AsyncWorld
@@ -34,11 +47,5 @@ interface AWApi {
     fun createWriter(): DataWriter
 
     fun serializePackedWorld(packedWorld: PackedWorld): ByteArray
-    fun deserializePackedWorld(data: ByteArray, codecProvider: (String) -> ChunkCodec = {
-        when (it) {
-            codec.id -> codec
-            compressedCodec.id -> compressedCodec
-            else -> throw IllegalArgumentException("Unknown codec id: $it")
-        }
-    }): PackedWorld
+    fun deserializePackedWorld(data: ByteArray, codecProvider: (String) -> ChunkCodec = defaultCodecResolver): PackedWorld
 }
