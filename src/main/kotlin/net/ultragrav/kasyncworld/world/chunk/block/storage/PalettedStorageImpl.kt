@@ -120,7 +120,7 @@ class PalettedStorageImpl<T>(
         val globalPalette = palette.globalPalette()
         val ids = palette.listIds()
         output.writeInt(ids.size)
-        ids.forEach { localId ->
+        ids.sorted().forEach { localId ->
             val globalId = globalPalette.getId(palette.getState(localId))
             output.writeInt(localId)
             output.writeInt(globalId)
