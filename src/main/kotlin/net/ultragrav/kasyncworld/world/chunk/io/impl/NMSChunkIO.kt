@@ -137,7 +137,10 @@ class NMSChunkIO : ChunkIO {
 
             val entities = chunk.entities.map { offsetEntityTag(it.copy(), cx, cz) }
             val decodedEntities = EntityType.loadEntitiesRecursive(entities, nms.level).toList()
-            nms.level.entityLookup.addEntityChunkEntities(decodedEntities, ChunkPos(nms.locX, nms.locZ))
+
+            Bukkit.getScheduler().runTask(AW.plugin) { ->
+                nms.level.entityLookup.addEntityChunkEntities(decodedEntities, ChunkPos(nms.locX, nms.locZ))
+            }
 
         }
 
