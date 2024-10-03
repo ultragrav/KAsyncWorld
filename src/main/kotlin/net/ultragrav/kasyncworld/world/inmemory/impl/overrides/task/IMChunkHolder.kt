@@ -1,11 +1,11 @@
 package net.ultragrav.kasyncworld.world.inmemory.impl.overrides.task
 
-import io.papermc.paper.chunk.system.io.RegionFileIOThread
-import io.papermc.paper.chunk.system.poi.PoiChunk
-import io.papermc.paper.chunk.system.scheduling.ChunkTaskScheduler
-import io.papermc.paper.chunk.system.scheduling.GenericDataLoadTask
-import io.papermc.paper.chunk.system.scheduling.NewChunkHolder
-import io.papermc.paper.world.ChunkEntitySlices
+import ca.spottedleaf.moonrise.patches.chunk_system.io.RegionFileIOThread
+import ca.spottedleaf.moonrise.patches.chunk_system.level.entity.ChunkEntitySlices
+import ca.spottedleaf.moonrise.patches.chunk_system.level.poi.PoiChunk
+import ca.spottedleaf.moonrise.patches.chunk_system.scheduling.ChunkTaskScheduler
+import ca.spottedleaf.moonrise.patches.chunk_system.scheduling.NewChunkHolder
+import ca.spottedleaf.moonrise.patches.chunk_system.scheduling.task.GenericDataLoadTask
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.chunk.ChunkAccess

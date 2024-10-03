@@ -1,10 +1,10 @@
 package net.ultragrav.kasyncworld.world.inmemory.impl.overrides.task
 
 import ca.spottedleaf.concurrentutil.executor.standard.PrioritisedExecutor
-import io.papermc.paper.chunk.system.poi.PoiChunk
-import io.papermc.paper.chunk.system.scheduling.ChunkProgressionTask
-import io.papermc.paper.chunk.system.scheduling.ChunkTaskScheduler
-import io.papermc.paper.chunk.system.scheduling.NewChunkHolder
+import ca.spottedleaf.moonrise.patches.chunk_system.level.poi.PoiChunk
+import ca.spottedleaf.moonrise.patches.chunk_system.scheduling.ChunkTaskScheduler
+import ca.spottedleaf.moonrise.patches.chunk_system.scheduling.NewChunkHolder
+import ca.spottedleaf.moonrise.patches.chunk_system.scheduling.task.ChunkProgressionTask
 import net.minecraft.core.BlockPos
 import net.minecraft.core.registries.Registries
 import net.minecraft.nbt.CompoundTag
@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.chunk.*
+import net.minecraft.world.level.chunk.status.ChunkStatus
 import net.minecraft.world.level.material.Fluid
 import net.minecraft.world.ticks.ProtoChunkTicks
 import net.ultragrav.kasyncworld.world.chunk.block.storage.wrapped.MinecraftPalettedStorage
@@ -25,7 +26,7 @@ import net.ultragrav.kasyncworld.world.chunk.heightmap.wrapper.NMSHeightmapStora
 import net.ultragrav.kasyncworld.world.chunk.io.impl.NMSChunkIO
 import net.ultragrav.kasyncworld.world.inmemory.InMemoryWorldOptions
 import net.ultragrav.kasyncworld.world.inmemory.chunk.AsyncChunkProvider
-import org.bukkit.craftbukkit.v1_20_R2.block.CraftBiome
+import org.bukkit.craftbukkit.block.CraftBiome
 
 class IMChunkLoadTask(
     scheduler: ChunkTaskScheduler,
@@ -69,7 +70,7 @@ class IMChunkLoadTask(
             val inBounds = chunkX in worldOptions.chunkBoundsX && chunkZ in worldOptions.chunkBoundsZ
 
             if (worldOptions.generator == null || !inBounds) {
-                protoChunk.status = ChunkStatus.INITIALIZE_LIGHT.parent
+                protoChunk.persistedStatus = ChunkStatus.INITIALIZE_LIGHT.parent
             }
 
             complete(protoChunk, null)
@@ -147,7 +148,7 @@ class IMChunkLoadTask(
                 copy.putInt("z", pos.z + baseZ)
                 val state = chunk.getBlock(pos.x, pos.y, pos.z)
                 val blockPos = BlockPos(pos.x + baseX, pos.y, pos.z + baseZ)
-                val blockEntity = BlockEntity.loadStatic(blockPos, state, copy) ?: return@forEach
+                val blockEntity = BlockEntity.loadStatic(blockPos, state, copy, world.registryAccess()) ?: return@forEach
                 protoChunk.setBlockEntity(blockEntity)
             }
 
@@ -176,7 +177,7 @@ class IMChunkLoadTask(
         // Persistent data
         protoChunk.persistentDataContainer.putAll(chunk.persistentData)
 
-        protoChunk.status = ChunkStatus.FULL
+        protoChunk.persistedStatus = ChunkStatus.FULL
         complete(protoChunk, null)
     }
 

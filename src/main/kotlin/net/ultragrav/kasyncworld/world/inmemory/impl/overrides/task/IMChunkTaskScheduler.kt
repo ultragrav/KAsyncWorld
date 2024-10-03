@@ -2,15 +2,17 @@ package net.ultragrav.kasyncworld.world.inmemory.impl.overrides.task
 
 import ca.spottedleaf.concurrentutil.executor.standard.PrioritisedExecutor
 import ca.spottedleaf.concurrentutil.executor.standard.PrioritisedThreadPool
-import io.papermc.paper.chunk.system.ChunkSystem
-import io.papermc.paper.chunk.system.scheduling.ChunkHolderManager
-import io.papermc.paper.chunk.system.scheduling.ChunkProgressionTask
-import io.papermc.paper.chunk.system.scheduling.ChunkTaskScheduler
-import io.papermc.paper.chunk.system.scheduling.NewChunkHolder
-import io.papermc.paper.util.CoordinateUtils
+import ca.spottedleaf.moonrise.common.util.ChunkSystem
+import ca.spottedleaf.moonrise.common.util.CoordinateUtils
+import ca.spottedleaf.moonrise.patches.chunk_system.scheduling.ChunkHolderManager
+import ca.spottedleaf.moonrise.patches.chunk_system.scheduling.ChunkTaskScheduler
+import ca.spottedleaf.moonrise.patches.chunk_system.scheduling.NewChunkHolder
+import ca.spottedleaf.moonrise.patches.chunk_system.scheduling.task.ChunkProgressionTask
+import net.minecraft.server.level.GenerationChunkHolder
 import net.minecraft.server.level.ServerLevel
+import net.minecraft.util.StaticCache2D
 import net.minecraft.world.level.chunk.ChunkAccess
-import net.minecraft.world.level.chunk.ChunkStatus
+import net.minecraft.world.level.chunk.status.ChunkStatus
 import net.ultragrav.kasyncworld.world.inmemory.chunk.AsyncChunkProvider
 import net.ultragrav.kasyncworld.world.inmemory.InMemoryWorldOptions
 
@@ -35,17 +37,20 @@ class IMChunkTaskScheduler(world: ServerLevel, workers: PrioritisedThreadPool?) 
                 )
 
                 ChunkSystem.onChunkHolderCreate(world, holder.vanillaChunkHolder)
-                holder.vanillaChunkHolder.onChunkAdd()
                 return holder
             }
         }
     }
 
     override fun createTask(
-        chunkX: Int, chunkZ: Int, chunk: ChunkAccess?,
-        chunkHolder: NewChunkHolder, neighbours: List<ChunkAccess?>?,
-        toStatus: ChunkStatus, initialPriority: PrioritisedExecutor.Priority?
-    ): ChunkProgressionTask {
+        chunkX: Int,
+        chunkZ: Int,
+        chunk: ChunkAccess,
+        chunkHolder: NewChunkHolder,
+        neighbours: StaticCache2D<GenerationChunkHolder>?,
+        toStatus: ChunkStatus?,
+        initialPriority: PrioritisedExecutor.Priority?
+    ): ChunkProgressionTask? {
         if (toStatus === ChunkStatus.EMPTY) {
             return IMChunkLoadTask(this, world, chunkHolder, chunkX, chunkZ, worldOptions, chunkProvider)
         }

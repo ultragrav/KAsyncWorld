@@ -58,13 +58,11 @@ private fun serializeNBTOrderedWriter(tag: Tag, writer: DataOutput) {
     writer.writeByte(tag.id.toInt())
     when (tag) {
         is CompoundTag -> {
-            val tags = tag.tags
-            writer.writeShort(tags.size)
-            tags.entries.sortedBy { it.key }
-                .forEach {
-                    writer.writeUTF(it.key)
-                    serializeNBTOrderedWriter(it.value, writer)
-                }
+            writer.writeShort(tag.size())
+            tag.allKeys.sorted().forEach { key ->
+                writer.writeUTF(key)
+                serializeNBTOrderedWriter(tag.get(key)!!, writer)
+            }
         }
         is ListTag -> {
             val list = tag.toList()

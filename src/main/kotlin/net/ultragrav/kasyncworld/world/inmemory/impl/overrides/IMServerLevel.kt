@@ -1,6 +1,7 @@
 package net.ultragrav.kasyncworld.world.inmemory.impl.overrides
 
-import io.papermc.paper.chunk.system.scheduling.ChunkTaskScheduler
+import ca.spottedleaf.moonrise.common.util.MoonriseCommon
+import ca.spottedleaf.moonrise.patches.chunk_system.scheduling.ChunkTaskScheduler
 import net.minecraft.resources.ResourceKey
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerLevel
@@ -62,7 +63,7 @@ class IMServerLevel(
     }
 
     override fun createChunkTaskScheduler(): ChunkTaskScheduler {
-        cachedTaskScheduler = IMChunkTaskScheduler(this, ChunkTaskScheduler.workerThreads)
+        cachedTaskScheduler = IMChunkTaskScheduler(this, MoonriseCommon.WORKER_POOL)
         return cachedTaskScheduler
     }
 

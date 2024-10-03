@@ -32,7 +32,7 @@ import net.ultragrav.kasyncworld.world.chunk.heightmap.AsyncHeightMap
 import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.contract.AsyncWorld
 import net.ultragrav.kasyncworld.world.chunk.contract.section.AsyncChunkSection
-import org.bukkit.craftbukkit.v1_20_R2.block.CraftBiome
+import org.bukkit.craftbukkit.block.CraftBiome
 import java.util.*
 
 class EditingAsyncChunk(
@@ -62,7 +62,7 @@ class EditingAsyncChunk(
         }
         if (block.hasBlockEntity()) {
             val tag = (block.block as EntityBlock).newBlockEntity(BlockPos(0, 0, 0), block)
-                ?.saveWithId() ?: return
+                ?.saveWithId(MinecraftServer.getServer().registryAccess()) ?: return
             setBlockEntity(x, y, z, tag)
         }
     }

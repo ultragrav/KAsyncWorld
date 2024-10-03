@@ -40,7 +40,7 @@ object PaperIMWorldProvider : IMWorldProvider {
 
         val levelKey = ResourceKey.create(
             Registries.DIMENSION,
-            ResourceLocation(
+            ResourceLocation.fromNamespaceAndPath(
                 "midnightsky",
                 name.lowercase().replace(" ", "_")
             )
@@ -110,8 +110,7 @@ object PaperIMWorldProvider : IMWorldProvider {
         levelData.isInitialized = true
         mcServer.initWorld(serverLevel, levelData, levelData, worldOptions)
 
-        serverLevel.keepSpawnInMemory = false
-        serverLevel.kasyncDebug = false
+        serverLevel.gameRules.getRule(GameRules.RULE_SPAWN_CHUNK_RADIUS).set(0, serverLevel)
         serverLevel.setSpawnSettings(true, true)
         mcServer.prepareLevels(serverLevel.chunkSource.chunkMap.progressListener, serverLevel)
 

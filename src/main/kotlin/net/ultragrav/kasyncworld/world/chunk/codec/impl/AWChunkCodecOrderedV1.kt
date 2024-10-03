@@ -16,7 +16,7 @@ import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunk
 import net.ultragrav.kasyncworld.world.chunk.contract.AsyncChunkFactory
 import net.ultragrav.kasyncworld.world.chunk.getSectionIndexMB
 import org.bukkit.block.Biome
-import org.bukkit.craftbukkit.v1_20_R2.block.CraftBiome
+import org.bukkit.craftbukkit.block.CraftBiome
 
 /**
  * This codec improves on the previous version by adding flags

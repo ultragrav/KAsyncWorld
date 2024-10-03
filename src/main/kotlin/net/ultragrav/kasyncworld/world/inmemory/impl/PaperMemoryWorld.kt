@@ -22,7 +22,7 @@ class PaperMemoryWorld(
         get() = world.world
 
     init {
-        AW.debug("World has dimension id: ${world.dimensionTypeId()} ${world.dimensionType()}")
+        AW.debug("World has dimension id: ${world.dimensionTypeRegistration().unwrapKey().get()} ${world.dimensionType()}")
     }
 
     override fun unload(save: Boolean) {

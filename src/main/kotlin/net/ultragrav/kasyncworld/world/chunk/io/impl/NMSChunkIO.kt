@@ -1,7 +1,7 @@
 package net.ultragrav.kasyncworld.world.chunk.io.impl
 
-import ca.spottedleaf.starlight.common.light.StarLightEngine
-import io.papermc.paper.world.ChunkEntitySlices
+import ca.spottedleaf.moonrise.patches.chunk_system.level.entity.ChunkEntitySlices
+import ca.spottedleaf.moonrise.patches.starlight.light.StarLightEngine
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Holder
 import net.minecraft.core.registries.BuiltInRegistries
@@ -10,6 +10,7 @@ import net.minecraft.nbt.DoubleTag
 import net.minecraft.nbt.ListTag
 import net.minecraft.nbt.Tag
 import net.minecraft.resources.ResourceLocation
+import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.level.ChunkPos
@@ -42,15 +43,14 @@ import net.ultragrav.kasyncworld.world.chunk.io.HeightmapWriteType
 import org.bukkit.Bukkit
 import org.bukkit.Chunk
 import org.bukkit.World
-import org.bukkit.craftbukkit.v1_20_R2.CraftWorld
+import org.bukkit.craftbukkit.CraftWorld
 
 class NMSChunkIO : ChunkIO {
 
     override fun writeChunk(bukkitChunk: Chunk, chunk: AsyncChunk, options: ChunkWriteOptions) {
+        val nmsWorld = (bukkitChunk.world as CraftWorld).handle
 
-        val nms = (bukkitChunk.world as CraftWorld)
-            .handle
-            .chunkSource
+        val nms = nmsWorld.chunkSource
             .getChunkAtIfLoadedImmediately(bukkitChunk.x, bukkitChunk.z)
             ?: throw IllegalStateException("Chunk not loaded")
 
@@ -117,7 +117,8 @@ class NMSChunkIO : ChunkIO {
                 val nmsBlockEntity = BlockEntity.loadStatic(
                     nmsPos,
                     chunk.getBlock(pos.x, pos.y, pos.z),
-                    tag
+                    tag,
+                    nmsWorld.registryAccess()
                 ) ?: return@forEach
                 nmsBlockEntity.level = nms.level
                 nms.addAndRegisterBlockEntity(nmsBlockEntity)
@@ -125,7 +126,7 @@ class NMSChunkIO : ChunkIO {
 
             // Entities
             if (!options.appendEntities) {
-                nms.level.entityLookup.getOrCreateChunk(cx, cz)
+                nms.level.`moonrise$getEntityLookup`().getOrCreateChunk(cx, cz)
                     .chunkEntities
                     .toList()
                     .forEach {
@@ -139,7 +140,7 @@ class NMSChunkIO : ChunkIO {
             val decodedEntities = EntityType.loadEntitiesRecursive(entities, nms.level).toList()
 
             Bukkit.getScheduler().runTask(AW.plugin) { ->
-                nms.level.entityLookup.addEntityChunkEntities(decodedEntities, ChunkPos(nms.locX, nms.locZ))
+                nms.level.`moonrise$getEntityLookup`().addEntityChunkEntities(decodedEntities, ChunkPos(nms.locX, nms.locZ))
             }
 
         }
@@ -200,9 +201,10 @@ class NMSChunkIO : ChunkIO {
 
             if (numEdited > 4096 * 2) { // Relight whole chunk
                 nms.isLightCorrect = false
-                val emptySections = StarLightEngine.getEmptySectionsForChunk(nms)
-                nms.level.chunkSource.lightEngine.theLightEngine.lightChunk(nms, emptySections)
-                nms.isLightCorrect = true
+                // TODO: Ensure this automatically relights, otherwise find how paper's threaded light engine can be called
+//                val emptySections = StarLightEngine.getEmptySectionsForChunk(nms)
+//                nms.level.chunkSource.lightEngine.theLightEngine.lightChunk(nms, emptySections)
+//                nms.isLightCorrect = true
             } else { // Relight individual blocks
                 dontSendExtraPackets = true
                 chunk.sections.withIndex().forEach { (index, section) ->
@@ -262,7 +264,7 @@ class NMSChunkIO : ChunkIO {
         // Chunk-wise parallelism is not possible here as we are
         // using EntityLookup, which is a shared resource.
         val entityChunk = synchronized(this) {
-            nms.level.entityLookup.getChunk(cx, cz)
+            nms.level.`moonrise$getEntityLookup`().getChunk(cx, cz)
         }
 
         readChunk(nms.level, nms, entityChunk, chunk, options)
@@ -279,7 +281,7 @@ class NMSChunkIO : ChunkIO {
         val height = ChunkHeightOptions(nms.sectionsCount, nms.minSection)
 
         val entityChunk = synchronized(this) {
-            nms.level.entityLookup.getChunk(nms.locX, nms.locZ)
+            nms.level.`moonrise$getEntityLookup`().getChunk(nms.locX, nms.locZ)
         }
 
         readChunk(nms.level, nms, entityChunk, ac, options)
@@ -311,7 +313,7 @@ class NMSChunkIO : ChunkIO {
 
             // Block Entities
             if (options.readBlockEntities) {
-                nms.blockEntities.mapValues { it.value.saveWithFullMetadata() }
+                nms.blockEntities.mapValues { it.value.saveWithFullMetadata(level.registryAccess()) }
                     .filterKeys { it.y shr 4 in options.sectionMask }
                     .forEach { (pos, ent) -> chunk.setBlockEntity(pos.x and 0xF, pos.y, pos.z and 0xF, ent) }
             }
