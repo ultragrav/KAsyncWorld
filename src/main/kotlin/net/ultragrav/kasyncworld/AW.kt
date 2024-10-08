@@ -44,7 +44,7 @@ import java.util.concurrent.Executors
 
 object AW : AWApi {
 
-    val debug = true
+    private const val DEBUG = false
 
     override val chunkIO: ChunkIO = NMSChunkIO()
 
@@ -167,7 +167,7 @@ object AW : AWApi {
     }
 
     internal fun debug(msg: String) {
-        if (!debug) return
+        if (!DEBUG) return
         Bukkit.getLogger().info("[AW Debug] $msg")
     }
 }

@@ -45,7 +45,7 @@ class IMChunkTaskScheduler(world: ServerLevel, workers: PrioritisedThreadPool?) 
     override fun createTask(
         chunkX: Int,
         chunkZ: Int,
-        chunk: ChunkAccess,
+        chunk: ChunkAccess?,
         chunkHolder: NewChunkHolder,
         neighbours: StaticCache2D<GenerationChunkHolder>?,
         toStatus: ChunkStatus?,

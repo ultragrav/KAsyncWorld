@@ -40,7 +40,12 @@ tasks.named<ShadowJar>("shadowJar") {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "17"
+    kotlinOptions.jvmTarget = "20"
+}
+
+java {
+    sourceCompatibility = JavaVersion.toVersion("21")
+    targetCompatibility = JavaVersion.toVersion("21")
 }
 
 publishing {
