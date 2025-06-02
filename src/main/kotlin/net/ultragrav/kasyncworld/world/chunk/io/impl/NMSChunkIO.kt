@@ -140,7 +140,8 @@ class NMSChunkIO : ChunkIO {
             val decodedEntities = EntityType.loadEntitiesRecursive(entities, nms.level).toList()
 
             Bukkit.getScheduler().runTask(AW.plugin) { ->
-                nms.level.`moonrise$getEntityLookup`().addEntityChunkEntities(decodedEntities, ChunkPos(nms.locX, nms.locZ))
+                nms.level.`moonrise$getEntityLookup`()
+                    .addEntityChunkEntities(decodedEntities, ChunkPos(nms.locX, nms.locZ))
             }
 
         }
@@ -304,10 +305,14 @@ class NMSChunkIO : ChunkIO {
                 for (i in 0..<nms.sectionsCount) {
                     val sectionIndexMB = chunk.heightOptions.getSectionIndexMB(i)
                     if (sectionIndexMB !in options.sectionMask) continue
-                    val nmsSection = nms.sections[i] ?: continue
+                    val nmsSection = nms.sections[i]
+                    if (nmsSection == null && !options.readEmptySections) continue
                     val section = chunk.createSection()
-                    readSection(section, nmsSection, options.readBlocks, options.readBiomes)
                     chunk.setSection(chunk.heightOptions.getSectionIndexMB(i), section)
+                    if (options.readBlocks && options.readEmptySections) section.blocks.iterationStrategy.setAll()
+                    if (nmsSection != null){
+                        readSection(section, nmsSection, options.readBlocks, options.readBiomes)
+                    }
                 }
             }
 

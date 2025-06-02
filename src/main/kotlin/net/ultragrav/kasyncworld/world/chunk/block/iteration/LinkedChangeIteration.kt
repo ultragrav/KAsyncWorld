@@ -50,15 +50,24 @@ class LinkedChangeIteration(override val size: Int) : IterationStrategy {
     }
 
     override fun setAll() {
-        for (i in 0 until size) {
-            set(i)
+        val allSet = ALL_SET[size]
+        if (allSet == null) {
+            for (i in 0 until size) {
+                set(i)
+            }
+        } else {
+            count = allSet.count
+            current = allSet.current
+            forwards.useRaw(allSet.forwards.raw().copyOf())
+            backwards.useRaw(allSet.backwards.raw().copyOf())
         }
     }
 
     override fun unsetAll() {
-        for (i in 0 until size) {
-            unset(i)
-        }
+        count = 0
+        current = 0
+        forwards.raw().fill(0)
+        backwards.raw().fill(0)
     }
 
     override fun contains(index: Int): Boolean {
@@ -105,5 +114,17 @@ class LinkedChangeIteration(override val size: Int) : IterationStrategy {
             curr = forwards.get(curr)
         }
         return hash
+    }
+
+    companion object {
+        private val ALL_SET = mutableMapOf<Int, LinkedChangeIteration>()
+
+        init {
+            LinkedChangeIteration(4096).apply {
+                setAll()
+            }.also {
+                ALL_SET[4096] = it
+            }
+        }
     }
 }

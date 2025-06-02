@@ -22,5 +22,6 @@ data class ChunkReadOptions(
     val readHeightmaps: Boolean = true,
     val readLight: Boolean = true,
     val readTicks: Boolean = true,
+    val readEmptySections: Boolean = false,
     val sectionMask: IntRange = Integer.MIN_VALUE..Integer.MAX_VALUE,
 )

@@ -2,7 +2,9 @@ package net.ultragrav.kasyncworld.world.chunk.block.storage
 
 import net.ultragrav.kasyncworld.data.DataReader
 import net.ultragrav.kasyncworld.data.DataWriter
+import net.ultragrav.kasyncworld.world.chunk.block.bit.BitStorage
 import net.ultragrav.kasyncworld.world.chunk.block.bit.NumberStorage
+import net.ultragrav.kasyncworld.world.chunk.block.count.TypeCounts
 import net.ultragrav.kasyncworld.world.chunk.block.iteration.IterationStrategy
 import net.ultragrav.kasyncworld.world.chunk.block.palette.Palette
 import java.io.DataInput
@@ -20,6 +22,12 @@ interface PalettedStorage<T> : Iterable<Indexed<T>> {
     val size: Int
     val iterationStrategy: IterationStrategy
     val fastCountsAndTypesSupported: Boolean
+    fun setRaw(storage: NumberStorage, palette: Palette<T>, counts: TypeCounts) {
+        require(storage.size == size) { "Storage sizes must match" }
+        for (i in 0..<size) {
+            set(i, palette.getState(storage.get(i)))
+        }
+    }
     fun count(type: T): Int
     fun types(): Set<T>
     operator fun contains(type: T): Boolean
@@ -35,8 +43,8 @@ interface PalettedStorage<T> : Iterable<Indexed<T>> {
     fun hash(): Int
 
     fun applyTo(other: PalettedStorage<T>) {
-        for (i in indexIterator()) {
-            other[i] = this[i]
+        indexIterator().forEachRemaining {
+            other[it] = this[it]
         }
     }
 

@@ -8,6 +8,7 @@ interface NumberStorage {
     fun get(index: Int): Int
     fun set(index: Int, value: Int)
 
+    fun useRaw(raw: LongArray)
     fun raw(): LongArray
 
     fun toIntArray(): IntArray {

@@ -16,7 +16,7 @@ class BitStorage(
     override fun get(index: Int): Int {
         if (index < 0 || index >= size) throw IndexOutOfBoundsException("index: $index, size: $size")
         val longIndex = index / elementsPerLong
-        val bitIndex = index % elementsPerLong
+        val bitIndex = index - longIndex * elementsPerLong
         val shift = bitIndex * bits
         return ((data[longIndex] ushr shift) and mask).toInt()
     }
@@ -24,7 +24,7 @@ class BitStorage(
     override fun set(index: Int, value: Int) {
         if (index < 0 || index >= size) throw IndexOutOfBoundsException("index: $index, size: $size")
         val longIndex = index / elementsPerLong
-        val bitIndex = index % elementsPerLong
+        val bitIndex = index - longIndex * elementsPerLong
         val shift = bitIndex * bits
         data[longIndex] = data[longIndex] and (mask shl shift).inv() or
                 (value.toLong() and mask shl shift)
@@ -34,7 +34,7 @@ class BitStorage(
         return data
     }
 
-    fun useRaw(raw: LongArray) {
+    override fun useRaw(raw: LongArray) {
         require(raw.size == data.size) { "raw array must be same size as data array" }
         this.data = raw
     }

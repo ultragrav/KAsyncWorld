@@ -1,8 +1,12 @@
 package net.ultragrav.kasyncworld.world.chunk.block.storage
 
+import net.ultragrav.kasyncworld.AW
 import net.ultragrav.kasyncworld.data.DataReader
 import net.ultragrav.kasyncworld.data.DataWriter
 import net.ultragrav.kasyncworld.world.chunk.block.bit.BitStorage
+import net.ultragrav.kasyncworld.world.chunk.block.bit.NumberStorage
+import net.ultragrav.kasyncworld.world.chunk.block.count.TypeCounts
+import net.ultragrav.kasyncworld.world.chunk.block.palette.Palette
 
 class PalettedStorageImpl<T>(
     val config: PalettedStorageImplConfig<T>,
@@ -16,7 +20,6 @@ class PalettedStorageImpl<T>(
     override var iterationStrategy = config.createIterationStrategy()
 
     override val fastCountsAndTypesSupported = true
-
     private var counts = config.createCounter(initialBits)
 
     private val defaultId get() = palette.getId(config.defaultState)
@@ -26,6 +29,15 @@ class PalettedStorageImpl<T>(
         if (defaultId != 0) {
             (0..<config.size).forEach { storage.set(it, defaultId) }
         }
+    }
+
+    override fun setRaw(storage: NumberStorage, palette: Palette<T>, counts: TypeCounts) {
+        require(storage.size == size) { "Storage sizes must match" }
+        resize(storage.bits, false)
+        storage.useRaw(storage.raw().copyOf())
+        this.palette = palette.clone()
+        this.counts = counts.clone()
+        iterationStrategy.setAll()
     }
 
     override fun count(type: T): Int {
@@ -208,6 +220,12 @@ class PalettedStorageImpl<T>(
                 }
             }
         }
+    }
+
+    override fun applyTo(other: PalettedStorage<T>) {
+        val fullyEdited = iterationStrategy.count == iterationStrategy.size
+        if (!fullyEdited) return super.applyTo(other)
+        other.setRaw(storage, palette, counts)
     }
 
     fun recount() {
