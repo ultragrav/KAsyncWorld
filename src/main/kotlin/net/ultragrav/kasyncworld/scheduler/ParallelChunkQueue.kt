@@ -91,7 +91,10 @@ class ParallelChunkQueue(val plugin: Plugin, val io: ChunkIO) : ChunkQueue {
      */
     private fun nextBatch(): List<EnqueuedChunk> {
         return synchronized(this) {
-            val batch = queue.distinctBy { it.x to it.z }.take(batchSize)
+            val batch = queue.asSequence()
+                .distinctBy { it.x to it.z }
+                .take(batchSize)
+                .toList()
             queue.removeAll(batch)
             batch
         }

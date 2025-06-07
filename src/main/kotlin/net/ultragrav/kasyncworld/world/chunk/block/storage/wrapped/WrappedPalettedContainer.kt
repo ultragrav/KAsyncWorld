@@ -15,6 +15,7 @@ import net.ultragrav.kasyncworld.world.chunk.block.palette.Palette
 import net.ultragrav.kasyncworld.world.chunk.block.storage.Indexed
 import net.ultragrav.kasyncworld.world.chunk.block.storage.PalettedStorage
 import org.bukkit.block.BlockState
+import java.lang.reflect.Modifier
 
 // This class did not turn out to be doing what I originally intended :/
 
@@ -32,14 +33,32 @@ class WrappedPalettedContainer<T : Any>(
     override fun setRaw(storage: NumberStorage, palette: Palette<T>, counts: TypeCounts) {
         require(storage.size == size) { "Storage sizes must match" }
 
+        val strategy = strategyField.get(wrapped)
+        val strategyConf = getConfigurationMethod.invoke(strategy, wrapped.registry, storage.bits)
+        val strategyFactory = configurationFactoryField.get(strategyConf)
+        val strategyBits = configurationBitsField.getInt(strategyConf)
+
+        val valid = listOf(
+            PalettedContainer.Strategy.LINEAR_PALETTE_FACTORY,
+            PalettedContainer.Strategy.HASHMAP_PALETTE_FACTORY
+        )
+
+        if (strategyBits != storage.bits || strategyFactory !in valid) {
+            // Cannot set raw so set normally
+            for (i in 0..<size) {
+                set(i, palette.getState(storage.get(i)))
+            }
+            return
+        }
+
         var conf = wrapped.data.configuration
         val constructor = conf::class.java.declaredConstructors.first()
         if (!constructor.trySetAccessible()) error("Failed to access constructor of ${conf::class.java.name}")
-        val newConf = constructor.newInstance(PalettedContainer.Strategy.LINEAR_PALETTE_FACTORY, storage.bits)
+        val newConf = constructor.newInstance(strategyFactory, strategyBits)
 
         val method = net.minecraft.world.level.chunk.Palette.Factory::class.java.methods.first()
         val lst = (0..<palette.size).map { palette.getState(it) }
-        val newPalette = method.invoke(PalettedContainer.Strategy.LINEAR_PALETTE_FACTORY, storage.bits, wrapped.registry, wrapped, lst) as net.minecraft.world.level.chunk.Palette<T>
+        val newPalette = method.invoke(strategyFactory, storage.bits, wrapped.registry, wrapped, lst) as net.minecraft.world.level.chunk.Palette<T>
         val newStorage = SimpleBitStorage(storage.bits, storage.size, storage.raw().copyOf())
         val newData = PalettedContainer.Data::class.java.constructors.first().newInstance(newConf, newStorage, newPalette)
         wrapped.data = newData as PalettedContainer.Data<T>
@@ -110,6 +129,30 @@ class WrappedPalettedContainer<T : Any>(
         return indexIterator().asSequence()
             .map { Indexed(it, get(it)) }
             .iterator()
+    }
+
+    companion object {
+        private val strategyField = PalettedContainer::class.java
+            .declaredFields
+            .find { it.type == PalettedContainer.Strategy::class.java }
+            ?.also { it.trySetAccessible() }
+            ?: error("No strategy field found in PalettedContainer")
+        private val getConfigurationMethod = PalettedContainer.Strategy::class.java
+            .methods
+            .find { it.modifiers and Modifier.ABSTRACT != 0 }
+            ?: error("No getConfiguration method found in PalettedContainer.Strategy")
+
+        private val configurationFactoryField = getConfigurationMethod.returnType
+            .declaredFields
+            .find { !it.type.isPrimitive }
+            ?.also { it.trySetAccessible() }
+            ?: error("No configuration factory field found in PalettedContainer.Configuration")
+
+        private val configurationBitsField = getConfigurationMethod.returnType
+            .declaredFields
+            .find { it.type.isPrimitive }
+            ?.also { it.trySetAccessible() }
+            ?: error("No configuration bits field found in PalettedContainer.Configuration")
     }
 
 }
