@@ -38,29 +38,16 @@ class WrappedPalettedContainer<T : Any>(
         val strategyFactory = configurationFactoryField.get(strategyConf)
         val strategyBits = configurationBitsField.getInt(strategyConf)
 
-        val valid = listOf(
-            PalettedContainer.Strategy.LINEAR_PALETTE_FACTORY,
-            PalettedContainer.Strategy.HASHMAP_PALETTE_FACTORY
-        )
-
-        if (strategyBits != storage.bits || strategyFactory !in valid) {
-            // Cannot set raw so set normally
-            for (i in 0..<size) {
-                set(i, palette.getState(storage.get(i)))
-            }
-            return
+        if (strategyBits != storage.bits || strategyFactory !in validFactories) {
+            return super.setRaw(storage, palette, counts)
         }
 
-        var conf = wrapped.data.configuration
-        val constructor = conf::class.java.declaredConstructors.first()
-        if (!constructor.trySetAccessible()) error("Failed to access constructor of ${conf::class.java.name}")
-        val newConf = constructor.newInstance(strategyFactory, strategyBits)
-
-        val method = net.minecraft.world.level.chunk.Palette.Factory::class.java.methods.first()
+        val newConf = configurationConstructor.newInstance(strategyFactory, strategyBits)
         val lst = (0..<palette.size).map { palette.getState(it) }
-        val newPalette = method.invoke(strategyFactory, storage.bits, wrapped.registry, wrapped, lst) as net.minecraft.world.level.chunk.Palette<T>
+        val newPalette = factoryMethod.invoke(strategyFactory, storage.bits, wrapped.registry, wrapped, lst) as net.minecraft.world.level.chunk.Palette<T>
         val newStorage = SimpleBitStorage(storage.bits, storage.size, storage.raw().copyOf())
-        val newData = PalettedContainer.Data::class.java.constructors.first().newInstance(newConf, newStorage, newPalette)
+        val newData = dataConstructor.newInstance(newConf, newStorage, newPalette)
+        @Suppress("UNCHECKED_CAST")
         wrapped.data = newData as PalettedContainer.Data<T>
     }
 
@@ -153,6 +140,25 @@ class WrappedPalettedContainer<T : Any>(
             .find { it.type.isPrimitive }
             ?.also { it.trySetAccessible() }
             ?: error("No configuration bits field found in PalettedContainer.Configuration")
+
+        private val configurationConstructor = getConfigurationMethod.returnType
+            .declaredConstructors
+            .first()
+            .also { it.trySetAccessible() }
+
+        private val factoryMethod = net.minecraft.world.level.chunk.Palette.Factory::class.java
+            .methods
+            .first()
+
+        private val dataConstructor = PalettedContainer.Data::class.java
+            .constructors
+            .first()
+            .also { it.trySetAccessible() }
+
+        private val validFactories = setOf(
+            PalettedContainer.Strategy.LINEAR_PALETTE_FACTORY,
+            PalettedContainer.Strategy.HASHMAP_PALETTE_FACTORY
+        )
     }
 
 }

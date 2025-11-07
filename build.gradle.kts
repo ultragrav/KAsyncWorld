@@ -1,4 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import io.papermc.paperweight.tasks.RemapJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -7,6 +8,10 @@ plugins {
     id("com.github.johnrengelman.shadow") version "7.1.2"
     `maven-publish`
 }
+configurations.all {
+    exclude(group = "me.lucko", module = "spark-paper")
+}
+
 
 group = "net.ultragrav"
 version = "1.21.1-1.0.25"
@@ -25,18 +30,12 @@ dependencies {
     implementation("net.ultragrav:Commands:1.5.3")
 
     testImplementation(kotlin("test"))
-    implementation("net.ultragrav:KSerializer:1.1.2")
+    compileOnly("net.ultragrav:KSerializer:1.1.8")
     implementation("org.lz4:lz4-java:1.8.0")
 }
 
 tasks.test {
     useJUnitPlatform()
-}
-
-tasks.named<ShadowJar>("shadowJar") {
-    archiveBaseName.set("KAsyncWorld")
-    archiveClassifier.set("SNAPSHOT")
-    archiveVersion.set("1.0")
 }
 
 tasks.withType<KotlinCompile> {
@@ -48,10 +47,9 @@ java {
     targetCompatibility = JavaVersion.toVersion("21")
 }
 
+val reobfJar = tasks.named<RemapJar>("reobfJar")
 publishing {
-    publications {
-        register("mavenJava", MavenPublication::class) {
-            from(components["java"])
-        }
+    publications.register<MavenPublication>("mavenJava") {
+        setArtifacts(listOf(artifact(reobfJar) { builtBy(reobfJar) }))
     }
 }

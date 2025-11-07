@@ -29,7 +29,7 @@ class PaperMemoryWorld(
         require(Bukkit.getWorld(world.uuid) != null) {
             "World $name is not loaded"
         }
-        Bukkit.unloadWorld(bukkitWorld, save)
+        if (!Bukkit.unloadWorld(bukkitWorld, save)) error("Failed to unload world $name (there are ${bukkitWorld.playerCount} players in the world)")
     }
 
     override fun saveAndPack(): PackedWorld {
