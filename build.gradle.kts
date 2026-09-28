@@ -14,7 +14,7 @@ configurations.all {
 
 
 group = "net.ultragrav"
-version = "1.21.1-1.0.26"
+version = "1.21.1-1.0.27"
 
 repositories {
     mavenCentral()
@@ -49,9 +49,13 @@ java {
 }
 
 val reobfJar = tasks.named<RemapJar>("reobfJar")
+// Consumers compile against Mojang names but must bundle the server-mapped jar.
+configurations.named("runtimeElements") {
+    outgoing.artifacts.clear()
+    outgoing.artifact(reobfJar)
+}
 publishing {
     publications.register<MavenPublication>("mavenJava") {
         from(components["java"])
-        artifact(reobfJar) { builtBy(reobfJar) }
     }
 }
