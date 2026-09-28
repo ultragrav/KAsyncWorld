@@ -309,9 +309,17 @@ class NMSChunkIO : ChunkIO {
                     if (nmsSection == null && !options.readEmptySections) continue
                     val section = chunk.createSection()
                     chunk.setSection(chunk.heightOptions.getSectionIndexMB(i), section)
-                    if (options.readBlocks && options.readEmptySections) section.blocks.iterationStrategy.setAll()
+                    if (options.readBlocks && options.readEmptySections && options.markBlocksChanged) section.blocks.iterationStrategy.setAll()
                     if (nmsSection != null){
-                        readSection(section, nmsSection, options.readBlocks, options.readBiomes)
+                        readSection(section, nmsSection, options.readBlocks, options.readBiomes, options.markBlocksChanged)
+                    }
+                    if (options.readBlocks && !options.markBlocksChanged && section.blocks.iterationStrategy.count != 0) {
+                        val blocks = section.blocks
+                        if (blocks is PalettedStorageImpl<*>) blocks.resetReadTracking(false)
+                        else {
+                            blocks.iterationStrategy.unsetAll()
+                            check(blocks.iterationStrategy.count == 0) { "Chunk factory does not support unmarked block reads" }
+                        }
                     }
                 }
             }
@@ -433,7 +441,8 @@ class NMSChunkIO : ChunkIO {
             async: AsyncChunkSection,
             section: LevelChunkSection,
             readBlocks: Boolean,
-            readBiomes: Boolean
+            readBiomes: Boolean,
+            markBlocksChanged: Boolean
         ) {
             // Blocks
             if (readBlocks && !section.hasOnlyAir()) {
@@ -443,8 +452,6 @@ class NMSChunkIO : ChunkIO {
                     val bits = section.states.data.storage.bits
                     blocks.palette = blocks.config.createPalette()
                     blocks.storage = blocks.config.createStorage(bits.coerceAtLeast(1))
-                    blocks.iterationStrategy = blocks.config.createIterationStrategy()
-                    blocks.iterationStrategy.setAll()
 
                     val storage = blocks.storage as BitStorage
 
@@ -461,8 +468,7 @@ class NMSChunkIO : ChunkIO {
                         storage.useRaw(raw)
                     }
 
-                    // Recount
-                    blocks.recount()
+                    blocks.resetReadTracking(markBlocksChanged)
                 } else {
                     // Slower algo
                     val wrappedStates = WrappedPalettedContainer(section.states)

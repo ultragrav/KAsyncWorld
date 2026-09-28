@@ -1,5 +1,6 @@
 package net.ultragrav.kasyncworld.world.chunk.block.storage
 
+import net.ultragrav.kasyncworld.world.chunk.block.iteration.FlagChangeIteration
 import net.ultragrav.kasyncworld.AW
 import net.ultragrav.kasyncworld.data.DataReader
 import net.ultragrav.kasyncworld.data.DataWriter
@@ -228,8 +229,22 @@ class PalettedStorageImpl<T>(
         other.setRaw(storage, palette, counts)
     }
 
+    /** Finalize a raw snapshot read without changing its copied states. */
+    internal fun resetReadTracking(markChanged: Boolean) {
+        if (markChanged) {
+            iterationStrategy = config.createIterationStrategy()
+            iterationStrategy.setAll()
+        } else {
+            iterationStrategy.unsetAll()
+            // Storage-only factories normally use immutable all-position iteration.
+            if (iterationStrategy.count != 0) iterationStrategy = FlagChangeIteration(size)
+        }
+        recount()
+    }
+
     fun recount() {
         counts = config.createCounter(storage.bits)
+        if (iterationStrategy.count == 0) return
         for (i in iterationStrategy.iterator()) {
             counts.increment(storage.get(i))
         }
