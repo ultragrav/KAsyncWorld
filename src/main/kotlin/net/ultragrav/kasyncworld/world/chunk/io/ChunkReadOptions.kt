@@ -10,6 +10,9 @@ package net.ultragrav.kasyncworld.world.chunk.io
  * @param readHeightmaps Whether to read heightmaps
  * @param readLight Whether to read light
  * @param readTicks Whether to read block ticks
+ * @param markBlocksChanged Whether copied block positions are marked for application. When false,
+ * block data remains readable but block change iteration and changed-type counts are empty.
+ * This does not suppress copying block entities or other independently enabled data.
  * @param sectionMask A mask specifying which sections to read from. The mask applies to
  * blocks, biomes, ticks, light, block entities, and entities.
  */
@@ -24,4 +27,5 @@ data class ChunkReadOptions(
     val readTicks: Boolean = true,
     val readEmptySections: Boolean = false,
     val sectionMask: IntRange = Integer.MIN_VALUE..Integer.MAX_VALUE,
+    val markBlocksChanged: Boolean = true,
 )

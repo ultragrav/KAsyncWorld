@@ -14,7 +14,7 @@ configurations.all {
 
 
 group = "net.ultragrav"
-version = "1.21.1-1.0.25"
+version = "1.21.1-1.0.27"
 
 repositories {
     mavenCentral()
@@ -31,6 +31,7 @@ dependencies {
 
     testImplementation(kotlin("test"))
     compileOnly("net.ultragrav:KSerializer:1.1.8")
+    testImplementation("net.ultragrav:KSerializer:1.1.8")
     implementation("org.lz4:lz4-java:1.8.0")
 }
 
@@ -48,8 +49,13 @@ java {
 }
 
 val reobfJar = tasks.named<RemapJar>("reobfJar")
+// Consumers compile against Mojang names but must bundle the server-mapped jar.
+configurations.named("runtimeElements") {
+    outgoing.artifacts.clear()
+    outgoing.artifact(reobfJar)
+}
 publishing {
     publications.register<MavenPublication>("mavenJava") {
-        setArtifacts(listOf(artifact(reobfJar) { builtBy(reobfJar) }))
+        from(components["java"])
     }
 }
